@@ -1,0 +1,143 @@
+.section {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px 60px;
+  box-sizing: border-box;
+  background: var(--section-alt-bg);
+}
+
+.container {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text-h);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--text);
+  font-size: 17px;
+  margin: 0 0 32px;
+}
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-h);
+  font-size: 15px;
+  font-weight: 500;
+  background: var(--card-bg);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.link:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.formWrapper {
+  text-align: left;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.field input,
+.field textarea {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 15px;
+  font-family: var(--sans);
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+}
+
+.error {
+  font-size: 13px;
+  color: #ef4444;
+}
+
+.submit {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-family: var(--sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  align-self: flex-start;
+}
+
+.submit:hover {
+  opacity: 0.88;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.success {
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 600;
+  text-align: center;
+  padding: 32px;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  background: var(--accent-bg);
+}

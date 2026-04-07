@@ -1,0 +1,92 @@
+.section {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px 40px;
+  box-sizing: border-box;
+  animation: fadeIn 0.8s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.content {
+  max-width: 640px;
+  text-align: center;
+}
+
+.greeting {
+  font-size: 18px;
+  color: var(--accent);
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+
+.name {
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  margin: 0 0 12px;
+  color: var(--text-h);
+  line-height: 1.05;
+}
+
+.role {
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--text);
+  margin: 0 0 20px;
+  line-height: 1.5;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.intro {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 28px;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 36px;
+}
+
+.skillTag {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cta {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-family: var(--sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.cta:hover {
+  opacity: 0.88;
+  transform: translateY(-2px);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}

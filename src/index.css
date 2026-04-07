@@ -1,0 +1,91 @@
+/* ── Tema claro (default) ── */
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #ffffff;
+  --border: #e5e4e7;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.08);
+  --accent-border: rgba(170, 59, 255, 0.35);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --card-bg: #ffffff;
+  --section-alt-bg: #f9f8fc;
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/1.5 var(--sans);
+  letter-spacing: 0.15px;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Tema oscuro via data-theme ── */
+[data-theme='dark'] {
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #0f1117;
+  --border: #2a2d3a;
+  --accent: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.12);
+  --accent-border: rgba(192, 132, 252, 0.4);
+  --nav-bg: rgba(15, 17, 23, 0.88);
+  --card-bg: #16171d;
+  --section-alt-bg: #13141a;
+  --shadow:
+    rgba(0, 0, 0, 0.5) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.3) 0 4px 6px -2px;
+}
+
+/* ── Fallback: respetar preferencia del sistema si no hay data-theme ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #0f1117;
+    --border: #2a2d3a;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.12);
+    --accent-border: rgba(192, 132, 252, 0.4);
+    --nav-bg: rgba(15, 17, 23, 0.88);
+    --card-bg: #16171d;
+    --section-alt-bg: #13141a;
+    --shadow:
+      rgba(0, 0, 0, 0.5) 0 10px 15px -3px,
+      rgba(0, 0, 0, 0.3) 0 4px 6px -2px;
+  }
+}
+
+/* ── Reset y base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+h1, h2, h3 {
+  font-family: var(--heading);
+  color: var(--text-h);
+  line-height: 1.1;
+}
+
+p {
+  margin: 0;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+}

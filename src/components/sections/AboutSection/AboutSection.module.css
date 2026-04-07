@@ -1,0 +1,103 @@
+.section {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px 60px;
+  box-sizing: border-box;
+  background: var(--section-alt-bg);
+}
+
+.container {
+  max-width: 720px;
+  width: 100%;
+  text-align: left;
+  animation: slideIn 0.6s ease both;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text-h);
+  margin: 0 0 28px;
+}
+
+.bio {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.block {
+  margin-bottom: 32px;
+}
+
+.subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+.sector {
+  font-size: 17px;
+  color: var(--text);
+  font-style: italic;
+}
+
+.skillGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skillGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.groupLabel {
+  min-width: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  padding-top: 4px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .skillGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .groupLabel {
+    min-width: unset;
+  }
+}

@@ -1,0 +1,107 @@
+.card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--card-bg);
+  transition: transform 0.25s, box-shadow 0.25s;
+  outline: none;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.imageWrapper {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--accent-bg);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover .image,
+.card:focus-visible .image {
+  transform: scale(1.08);
+}
+
+.placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-bg);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover .overlay,
+.card:focus-visible .overlay {
+  opacity: 1;
+}
+
+.overlayText {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.info {
+  padding: 16px;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0 0 6px;
+}
+
+.description {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+.techs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tech {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}

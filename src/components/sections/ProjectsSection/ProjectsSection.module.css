@@ -1,0 +1,41 @@
+.section {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px 60px;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 960px;
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text-h);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--text);
+  font-size: 17px;
+  margin: 0 0 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  text-align: left;
+}
+
+.empty {
+  color: var(--text);
+  font-size: 18px;
+  margin-top: 40px;
+}
