@@ -5,6 +5,7 @@ export const skillGroups: SkillGroup[] = [
     category: 'Frontend',
     skills: [
       { name: 'React', category: 'frontend' },
+      { name: 'TypeScript', category: 'frontend' },
       { name: 'JavaScript', category: 'frontend' },
       { name: 'HTML5', category: 'frontend' },
       { name: 'CSS3', category: 'frontend' },
@@ -16,8 +17,6 @@ export const skillGroups: SkillGroup[] = [
       { name: 'Python', category: 'backend' },
       { name: 'Node.js', category: 'backend' },
       { name: 'Express.js', category: 'backend' },
-      { name: 'Django', category: 'backend' },
-      { name: 'MongoDB', category: 'backend' },
       { name: 'PostgreSQL', category: 'backend' },
     ],
   },
@@ -32,4 +31,10 @@ export const skillGroups: SkillGroup[] = [
   },
 ];
 
-export const heroSkills = skillGroups.flatMap((g) => g.skills).slice(0, 5);
+export const heroSkills = [
+  { name: 'React', category: 'frontend' as const },
+  { name: 'TypeScript', category: 'frontend' as const },
+  { name: 'Python', category: 'backend' as const },
+  { name: 'PostgreSQL', category: 'backend' as const },
+  { name: 'APIs REST', category: 'herramientas' as const },
+];

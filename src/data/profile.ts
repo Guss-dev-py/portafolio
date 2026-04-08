@@ -1,7 +1,7 @@
 export const profile = {
   name: 'Augusto Joaquín',
   lastName: 'Freire',
-  role: 'FullStack Developer | Python · MongoDB · Express.js · React · Node.js · Django · PostgreSQL · Linux · APIs',
+  role: 'FullStack Developer | Python · Express.js · React · Node.js · PostgreSQL · Linux · APIs',
   intro: 'Apasionado por construir soluciones digitales limpias, escalables y con buena experiencia de usuario.',
   biography: `¡Hola! Soy apasionado y entusiasta en todo lo que hago. Siempre estoy buscando nuevos desafíos y herramientas para perfeccionarme en mi carrera profesional y proyectos personales.
 
