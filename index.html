@@ -1,13 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>portafolio</title>
+    <title>Augusto Freire — Portafolio</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!--
+      Formulario oculto para que Netlify lo detecte durante el build.
+      Netlify escanea el HTML estático, no el JS renderizado.
+      Los nombres de los campos deben coincidir exactamente con el formulario en React.
+    -->
+    <form name="contacto" data-netlify="true" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+    </form>
   </body>
 </html>
