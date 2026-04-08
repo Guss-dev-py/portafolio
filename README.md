@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# Augusto Joaquín Freire — Portafolio Personal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Soy **FullStack Developer** con foco en Python, React, Node.js y proyectos orientados a APIs seguras y cloud. Actualmente curso **Ingeniería Informática en UNPAZ** y busco seguir creciendo en entornos dinámicos, con especial interés en **ciberseguridad** y **FinTech**.
 
-Currently, two official plugins are available:
+Este repositorio es mi portafolio personal: un espacio donde presento quién soy, mis habilidades técnicas, los proyectos en los que trabajé y mis canales de contacto.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Sobre el portafolio
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+La aplicación está construida como una **Single Page Application (SPA)** con cuatro secciones navegables mediante scroll suave:
 
-## Expanding the ESLint configuration
+| Sección | Contenido |
+|---|---|
+| **Inicio** | Nombre, rol, tecnologías principales y acceso rápido a proyectos |
+| **Sobre mí** | Biografía, metas profesionales y habilidades agrupadas por categoría |
+| **Proyectos** | Galería interactiva con hover expandible y acceso directo a cada proyecto |
+| **Contacto** | Links de LinkedIn, GitHub, email y formulario de contacto |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Incluye **modo oscuro/claro** con detección automática de la preferencia del sistema y persistencia en `localStorage`.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tecnologías utilizadas
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
+![CSS Modules](https://img.shields.io/badge/CSS_Modules-000000?style=flat&logo=cssmodules&logoColor=white)
+
+- **React 19** + **TypeScript** — componentes tipados y hooks personalizados
+- **Vite** — bundler y dev server
+- **CSS Modules** + **CSS custom properties** — sistema de diseño con variables para temas
+- **Intersection Observer API** — detección de sección activa sin librerías externas
+
+---
+
+## Estructura del proyecto
+
+```
+src/
+├── components/
+│   ├── NavigationBar/       # Barra fija con toggle de tema
+│   ├── ProjectCard/         # Tarjeta de proyecto con hover interactivo
+│   └── sections/
+│       ├── HeroSection/
+│       ├── AboutSection/
+│       ├── ProjectsSection/
+│       └── ContactSection/
+├── data/                    # Contenido estático (perfil, proyectos, contacto)
+├── hooks/                   # useTheme, useActiveSection
+└── types/                   # Interfaces TypeScript compartidas
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Cómo correrlo localmente
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
+
+---
+
+## Contacto
+
+- LinkedIn: [linkedin.com/in/augusto-freire-web](https://www.linkedin.com/in/augusto-freire-web)
+- GitHub: [github.com/Guss-dev-py](https://github.com/Guss-dev-py)
+- Email: augustofreire02@gmail.com
+
+---
+
+> Este portafolio está en desarrollo activo. Se irán agregando proyectos reales y nuevas secciones conforme avance.
