@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# Kiro specs (optional — remove if you want to track them)
+.kiro/

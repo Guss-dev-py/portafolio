@@ -38,7 +38,8 @@
   justify-content: center;
 }
 
-.link {
+.link,
+button.link {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -51,9 +52,12 @@
   font-weight: 500;
   background: var(--card-bg);
   transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  font-family: var(--sans);
 }
 
-.link:hover {
+.link:hover,
+button.link:hover {
   border-color: var(--accent);
   box-shadow: var(--shadow);
 }
@@ -67,6 +71,8 @@
   flex-direction: column;
   gap: 20px;
 }
+
+/* gap is handled by .fieldsContainer; .form gap covers fieldsContainer + submit button spacing */
 
 .field {
   display: flex;
@@ -97,6 +103,8 @@
 .field textarea:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-border);
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .inputError {
@@ -140,4 +148,58 @@
   border: 1px solid var(--accent-border);
   border-radius: 12px;
   background: var(--accent-bg);
+}
+
+.fieldsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Toast de email copiado ─────────────────────────────────────── */
+.copyToast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-h);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 100px;
+  white-space: nowrap;
+  z-index: 200;
+  pointer-events: none;
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+             toastOut 0.3s cubic-bezier(0.4, 0, 0.6, 1) 2.1s forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(8px); }
+}
+
+.adminShortcut {
+  margin-top: 48px;
+  text-align: center;
+}
+
+.adminLink {
+  font-size: 20px;
+  color: var(--text);
+  opacity: 0.3;
+  text-decoration: none;
+  transition: opacity 0.2s, color 0.2s;
+  line-height: 1;
+}
+
+.adminLink:hover {
+  opacity: 0.65;
+  color: var(--accent);
 }

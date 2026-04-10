@@ -1,26 +1,81 @@
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import type { Project } from '../../../types';
+import { getProjects } from '../../../api/projects';
 import { ProjectCard } from '../../ProjectCard/ProjectCard';
+import { fadeUp, staggerContainer } from '../../../motion/variants';
+import { stagger } from '../../../motion/tokens';
+import { useInView } from '../../../motion/hooks/useInView';
+import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import styles from './ProjectsSection.module.css';
 
-interface ProjectsSectionProps {
-  projects: Project[];
-}
+const noOp = { hidden: {}, visible: {} };
 
-export function ProjectsSection({ projects }: ProjectsSectionProps) {
+export function ProjectsSection() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const prefersReduced = useReducedMotion();
+  const { ref, isInView } = useInView();
+
+  const headingVariant = prefersReduced ? noOp : fadeUp;
+  const gridVariant = prefersReduced ? noOp : staggerContainer(stagger.relaxed);
+  const cardVariant = prefersReduced ? noOp : fadeUp;
+
+  useEffect(() => {
+    getProjects()
+      .then((data) => setProjects(data))
+      .catch(() => setError('No se pudieron cargar los proyectos. Intentá de nuevo más tarde.'))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <section id="proyectos" className={styles.section} aria-label="Proyectos">
+    <section
+      id="proyectos"
+      className={styles.section}
+      aria-label="Proyectos"
+      ref={ref as React.RefObject<HTMLElement>}
+    >
       <div className={styles.container}>
-        <h2 className={styles.title}>Proyectos</h2>
-        <p className={styles.subtitle}>Algunos de los proyectos en los que trabajé</p>
+        <motion.h2
+          className={styles.title}
+          variants={headingVariant}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          Proyectos
+        </motion.h2>
+        <motion.p
+          className={styles.subtitle}
+          variants={headingVariant}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          Algunos de los proyectos en los que trabajé
+        </motion.p>
 
-        {projects.length === 0 ? (
+        {loading && <p className={styles.empty}>Cargando proyectos...</p>}
+
+        {!loading && error && <p className={styles.empty}>{error}</p>}
+
+        {!loading && !error && projects.length === 0 && (
           <p className={styles.empty}>Próximamente...</p>
-        ) : (
-          <div className={styles.grid}>
+        )}
+
+        {!loading && !error && projects.length > 0 && (
+          <motion.div
+            className={styles.grid}
+            variants={gridVariant}
+            initial="hidden"
+            animate={isInView ? 'visible' : 'hidden'}
+          >
             {projects.map((p) => (
-              <ProjectCard key={p.id} project={p} />
+              <motion.div key={p.id} variants={cardVariant}>
+                <ProjectCard project={p} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </section>

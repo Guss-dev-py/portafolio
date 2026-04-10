@@ -1,0 +1,144 @@
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  box-shadow: var(--shadow);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  letter-spacing: 0.3px;
+}
+
+.field input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 15px;
+  font-family: var(--sans);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-border);
+}
+
+.submit {
+  margin-top: 4px;
+  padding: 11px 0;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: var(--sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.submit:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.alert {
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.alertWarning {
+  background: rgba(234, 179, 8, 0.12);
+  color: #ca8a04;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.alertError {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.backLink {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--accent);
+}

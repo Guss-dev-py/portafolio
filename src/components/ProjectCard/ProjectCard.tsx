@@ -1,13 +1,21 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Project } from '../../types';
+import { overlayReveal } from '../../motion/variants';
+import { spring } from '../../motion/tokens';
+import { useReducedMotion } from '../../motion/hooks/useReducedMotion';
 import styles from './ProjectCard.module.css';
 
 interface ProjectCardProps {
   project: Project;
 }
 
+const noOp = { hidden: {}, visible: {} };
+
 export function ProjectCard({ project }: ProjectCardProps) {
   const [imgError, setImgError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const prefersReduced = useReducedMotion();
 
   const handleActivate = () => {
     if (project.url) window.open(project.url, '_blank', 'noopener,noreferrer');
@@ -17,14 +25,28 @@ export function ProjectCard({ project }: ProjectCardProps) {
     if (e.key === 'Enter') handleActivate();
   };
 
+  const hoverProps = prefersReduced
+    ? {}
+    : {
+        whileHover: {
+          y: -6,
+          scale: 1.015,
+          transition: spring.card,
+        },
+      };
+
   return (
-    <div
+    <motion.div
       className={styles.card}
       role="button"
       tabIndex={0}
       onClick={handleActivate}
       onKeyDown={handleKeyDown}
       aria-label={`Ver proyecto: ${project.name}`}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      style={{ willChange: isHovered && !prefersReduced ? 'transform' : 'auto' }}
+      {...hoverProps}
     >
       <div className={styles.imageWrapper}>
         {project.imageUrl && !imgError ? (
@@ -40,7 +62,19 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
         )}
         <div className={styles.overlay}>
-          <span className={styles.overlayText}>Ver proyecto →</span>
+          <AnimatePresence>
+            {isHovered && (
+              <motion.span
+                className={styles.overlayText}
+                variants={prefersReduced ? noOp : overlayReveal}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+              >
+                Ver proyecto →
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       <div className={styles.info}>
@@ -52,6 +86,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -11,6 +11,7 @@
   padding: 0 24px;
   height: 60px;
   background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -42,7 +43,27 @@
 
 .link.active {
   color: var(--accent);
-  font-weight: 600;
+}
+
+.activeIndicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: var(--accent-bg);
+  z-index: -1;
+}
+
+.linkRelative {
+  position: relative;
+}
+
+.linkLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.themeIcon {
+  display: inline-block;
 }
 
 .themeToggle {
@@ -69,4 +90,9 @@
     font-size: 13px;
     padding: 5px 8px;
   }
+}
+
+.nav.scrolled {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.3s ease;
 }
