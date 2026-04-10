@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { ContactLink, ContactFormData, FieldError } from '../../../types';
 import { apiClient } from '../../../api/client';
@@ -13,14 +13,14 @@ interface ContactSectionProps {
   links: ContactLink[];
 }
 
+const NOOP: Variants = { hidden: {}, visible: {} };
+
 const PLATFORM_ICONS: Record<string, string> = {
   linkedin: '💼',
   github: '🐙',
   email: '✉️',
   website: '🌐',
 };
-
-const noop = { hidden: {}, visible: {} };
 
 function validate(data: ContactFormData): FieldError[] {
   const errors: FieldError[] = [];
@@ -45,9 +45,9 @@ export function ContactSection({ links }: ContactSectionProps) {
   const prefersReduced = useReducedMotion();
   const { ref: sectionRef, isInView } = useInView();
 
-  const resolvedFadeUp = prefersReduced ? noop : fadeUp;
-  const resolvedScaleIn = prefersReduced ? noop : scaleIn;
-  const resolvedStagger = prefersReduced ? noop : staggerContainer(stagger.base);
+  const resolvedFadeUp = prefersReduced ? NOOP : fadeUp;
+  const resolvedScaleIn = prefersReduced ? NOOP : scaleIn;
+  const resolvedStagger = prefersReduced ? NOOP : staggerContainer(stagger.base);
 
   const animateState = isInView ? 'visible' : 'hidden';
 

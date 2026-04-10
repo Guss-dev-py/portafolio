@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import type { SectionId, Theme } from '../../types';
 import { duration, ease, spring, stagger } from '../../motion/tokens';
 import { fadeUp, staggerContainer } from '../../motion/variants';
 import { useReducedMotion } from '../../motion/hooks/useReducedMotion';
 import styles from './NavigationBar.module.css';
+
+const NOOP: Variants = { hidden: {}, visible: {} };
 
 const NAV_LINKS: { id: SectionId; label: string }[] = [
   { id: 'inicio', label: 'Inicio' },
@@ -23,10 +25,9 @@ export function NavigationBar({ activeSection, theme, onToggleTheme }: Navigatio
   const navRef = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
 
-  // Reduced motion no-ops
-  const resolvedFadeUp = prefersReduced ? { hidden: {}, visible: {} } : fadeUp;
+  const resolvedFadeUp = prefersReduced ? NOOP : fadeUp;
   const resolvedStaggerContainer = prefersReduced
-    ? { hidden: {}, visible: {} }
+    ? NOOP
     : staggerContainer(stagger.tight, 0.2);
 
   // Scroll listener — toggles .scrolled class

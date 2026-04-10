@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import type { SkillTag } from '../../../types';
 import { spring, stagger } from '../../../motion/tokens';
 import { fadeUp, cinematicFadeUp, scaleIn, staggerContainer } from '../../../motion/variants';
@@ -14,16 +14,16 @@ interface HeroSectionProps {
   onCtaClick: () => void;
 }
 
-const noop = { hidden: {}, visible: {} };
+const NOOP: Variants = { hidden: {}, visible: {} };
 
 export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }: HeroSectionProps) {
   const prefersReduced = useReducedMotion();
 
-  const resolvedFadeUp = prefersReduced ? noop : fadeUp;
-  const resolvedCinematicFadeUp = prefersReduced ? noop : cinematicFadeUp;
-  const resolvedScaleIn = prefersReduced ? noop : scaleIn;
-  const resolvedStaggerAll = prefersReduced ? noop : staggerContainer();
-  const resolvedStaggerSkills = prefersReduced ? noop : staggerContainer(stagger.tight, 0.55);
+  const resolvedFadeUp = prefersReduced ? NOOP : fadeUp;
+  const resolvedCinematicFadeUp = prefersReduced ? NOOP : cinematicFadeUp;
+  const resolvedScaleIn = prefersReduced ? NOOP : scaleIn;
+  const resolvedStaggerAll = prefersReduced ? NOOP : staggerContainer();
+  const resolvedStaggerSkills = prefersReduced ? NOOP : staggerContainer(stagger.tight, 0.55);
 
   return (
     <section id="inicio" className={styles.section} aria-label="Inicio">

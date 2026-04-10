@@ -4,7 +4,7 @@ import { useInView as useFramerInView } from 'framer-motion';
 interface UseInViewOptions {
   once?: boolean;
   amount?: number;
-  margin?: string;
+  margin?: `${number}px ${number}px ${number}px ${number}px` | `${number}px ${number}px ${number}px` | `${number}px ${number}px` | `${number}px`;
 }
 
 export function useInView(options: UseInViewOptions = {}) {
@@ -12,7 +12,7 @@ export function useInView(options: UseInViewOptions = {}) {
   const isInView = useFramerInView(ref, {
     once: options.once ?? true,
     amount: options.amount ?? 0.15,
-    margin: options.margin ?? '0px 0px -60px 0px',
+    margin: (options.margin ?? '0px 0px -60px 0px') as `${number}px ${number}px ${number}px ${number}px`,
   });
   return { ref, isInView };
 }

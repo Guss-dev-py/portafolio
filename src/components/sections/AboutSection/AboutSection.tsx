@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import type { SkillGroup } from '../../../types';
 import { stagger } from '../../../motion/tokens';
 import { fadeUp, slideInLeft, scaleIn, staggerContainer } from '../../../motion/variants';
@@ -13,7 +13,7 @@ interface AboutSectionProps {
   skillGroups: SkillGroup[];
 }
 
-const noOp = { hidden: {}, visible: {} };
+const NOOP: Variants = { hidden: {}, visible: {} };
 
 export function AboutSection({ biography, goals, aspirationSector, skillGroups }: AboutSectionProps) {
   const prefersReduced = useReducedMotion();
@@ -21,15 +21,15 @@ export function AboutSection({ biography, goals, aspirationSector, skillGroups }
 
   const animateState = isInView ? 'visible' : 'hidden';
 
-  const heading    = prefersReduced ? noOp : slideInLeft;
-  const fadeUpVar  = prefersReduced ? noOp : fadeUp;
-  const scaleInVar = prefersReduced ? noOp : scaleIn;
-  const slideLeft  = prefersReduced ? noOp : slideInLeft;
+  const heading    = prefersReduced ? NOOP : slideInLeft;
+  const fadeUpVar  = prefersReduced ? NOOP : fadeUp;
+  const scaleInVar = prefersReduced ? NOOP : scaleIn;
+  const slideLeft  = prefersReduced ? NOOP : slideInLeft;
 
-  const bioContainer      = prefersReduced ? noOp : staggerContainer(stagger.loose);
-  const blocksContainer   = prefersReduced ? noOp : staggerContainer(stagger.loose);
-  const skillRowContainer = prefersReduced ? noOp : staggerContainer(stagger.loose);
-  const tagContainer      = prefersReduced ? noOp : staggerContainer(stagger.tight);
+  const bioContainer      = prefersReduced ? NOOP : staggerContainer(stagger.loose);
+  const blocksContainer   = prefersReduced ? NOOP : staggerContainer(stagger.loose);
+  const skillRowContainer = prefersReduced ? NOOP : staggerContainer(stagger.loose);
+  const tagContainer      = prefersReduced ? NOOP : staggerContainer(stagger.tight);
 
   return (
     <section

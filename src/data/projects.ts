@@ -9,6 +9,8 @@ export const projects: Project[] = [
     url: 'https://github.com',
     imageUrl: '',
     imageAlt: 'Captura del Proyecto 1',
+    createdAt: '',
+    updatedAt: '',
   },
   {
     id: '2',
@@ -18,6 +20,8 @@ export const projects: Project[] = [
     url: 'https://github.com',
     imageUrl: '',
     imageAlt: 'Captura del Proyecto 2',
+    createdAt: '',
+    updatedAt: '',
   },
   {
     id: '3',
@@ -27,5 +31,7 @@ export const projects: Project[] = [
     url: 'https://github.com',
     imageUrl: '',
     imageAlt: 'Captura del Proyecto 3',
+    createdAt: '',
+    updatedAt: '',
   },
 ];

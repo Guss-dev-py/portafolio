@@ -104,7 +104,7 @@ describe('Property 4 — No animation exceeds cinematic duration (0.90s)', () =>
 
   it.each(Object.entries(STATIC_VARIANTS))(
     '%s.visible.transition.duration ≤ duration.cinematic',
-    (name, variant) => {
+    (_name, variant) => {
       const visible = variant.visible as VariantState;
       const transition = visible.transition as VariantState | undefined;
       if (transition && typeof transition.duration === 'number') {

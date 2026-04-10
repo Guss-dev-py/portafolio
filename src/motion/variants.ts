@@ -1,3 +1,4 @@
+import { type Variants } from 'framer-motion';
 import { duration, ease, stagger, offset } from './tokens';
 
 // ── Fade + Slide Up (most common entrance) ───────────────────────
@@ -30,7 +31,7 @@ export const fadeIn = {
 };
 
 // ── Stagger container ────────────────────────────────────────────
-export const staggerContainer = (staggerChildren = stagger.base, delayChildren = 0) => ({
+export const staggerContainer = (staggerChildren: number = stagger.base, delayChildren: number = 0): Variants => ({
   hidden: {},
   visible: {
     transition: { staggerChildren, delayChildren },

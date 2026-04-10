@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import type { Project } from '../../../types';
 import { getProjects } from '../../../api/projects';
 import { ProjectCard } from '../../ProjectCard/ProjectCard';
@@ -9,7 +9,7 @@ import { useInView } from '../../../motion/hooks/useInView';
 import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import styles from './ProjectsSection.module.css';
 
-const noOp = { hidden: {}, visible: {} };
+const NOOP: Variants = { hidden: {}, visible: {} };
 
 export function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -19,9 +19,9 @@ export function ProjectsSection() {
   const prefersReduced = useReducedMotion();
   const { ref, isInView } = useInView();
 
-  const headingVariant = prefersReduced ? noOp : fadeUp;
-  const gridVariant = prefersReduced ? noOp : staggerContainer(stagger.relaxed);
-  const cardVariant = prefersReduced ? noOp : fadeUp;
+  const headingVariant = prefersReduced ? NOOP : fadeUp;
+  const gridVariant = prefersReduced ? NOOP : staggerContainer(stagger.relaxed);
+  const cardVariant = prefersReduced ? NOOP : fadeUp;
 
   useEffect(() => {
     getProjects()

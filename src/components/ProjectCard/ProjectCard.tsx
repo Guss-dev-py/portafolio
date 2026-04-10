@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import type { Project } from '../../types';
 import { overlayReveal } from '../../motion/variants';
 import { spring } from '../../motion/tokens';
@@ -10,7 +10,7 @@ interface ProjectCardProps {
   project: Project;
 }
 
-const noOp = { hidden: {}, visible: {} };
+const NOOP: Variants = { hidden: {}, visible: {} };
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const [imgError, setImgError] = useState(false);
@@ -66,7 +66,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             {isHovered && (
               <motion.span
                 className={styles.overlayText}
-                variants={prefersReduced ? noOp : overlayReveal}
+                variants={prefersReduced ? NOOP : overlayReveal}
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
