@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useProjects } from '../../hooks/useProjects';
 import type { Project, ProjectInput } from '../../types';
+import styles from './admin.module.css';
 
 function validateForm(data: ProjectInput): Record<string, string> {
   const errors: Record<string, string> = {};
@@ -78,10 +79,7 @@ export default function ProjectsPage() {
       imageAlt: formData.imageAlt,
     };
     const errors = validateForm(input);
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
+    if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
     setFormErrors({});
     setSubmitting(true);
     try {
@@ -109,154 +107,148 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div style={{ padding: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Proyectos</h1>
+    <div className={styles.page}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Proyectos</h1>
         {!showForm && (
-          <button onClick={openCreate} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
-            Agregar proyecto
+          <button className={styles.btnPrimary} onClick={openCreate}>
+            + Agregar proyecto
           </button>
         )}
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} style={{ background: '#f9f9f9', padding: '1.25rem', borderRadius: '6px', marginBottom: '1.5rem', border: '1px solid #ddd' }}>
-          <h2 style={{ marginTop: 0, fontSize: '1.1rem' }}>
+        <div className={styles.formCard}>
+          <h2 className={styles.formCardTitle}>
             {editingProject ? 'Editar proyecto' : 'Nuevo proyecto'}
           </h2>
 
           {formErrors.form && (
-            <p style={{ color: 'red', marginBottom: '1rem' }}>{formErrors.form}</p>
+            <p className={styles.formError}>{formErrors.form}</p>
           )}
 
-          <Field label="Nombre *" error={formErrors.name} htmlFor="proj-name">
-            <input
-              id="proj-name"
-              title="Nombre del proyecto"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              style={inputStyle}
-            />
-          </Field>
+          <form onSubmit={handleSubmit} noValidate>
+            <div className={styles.formGrid}>
+              <div className={styles.field}>
+                <label htmlFor="proj-name">Nombre *</label>
+                <input
+                  id="proj-name"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                />
+                {formErrors.name && <span className={styles.fieldError}>{formErrors.name}</span>}
+              </div>
 
-          <Field label="Descripción *" error={formErrors.description} htmlFor="proj-description">
-            <textarea
-              id="proj-description"
-              title="Descripción del proyecto"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              rows={3}
-              style={{ ...inputStyle, resize: 'vertical' }}
-            />
-          </Field>
+              <div className={styles.field}>
+                <label htmlFor="proj-url">URL *</label>
+                <input
+                  id="proj-url"
+                  value={formData.url}
+                  onChange={(e) => handleChange('url', e.target.value)}
+                  placeholder="https://ejemplo.com"
+                />
+                {formErrors.url && <span className={styles.fieldError}>{formErrors.url}</span>}
+              </div>
 
-          <Field label="Tecnologías * (separadas por coma)" error={formErrors.technologies} htmlFor="proj-technologies">
-            <input
-              id="proj-technologies"
-              value={formData.technologiesRaw}
-              onChange={(e) => handleChange('technologiesRaw', e.target.value)}
-              placeholder="React, TypeScript, Node.js"
-              style={inputStyle}
-            />
-          </Field>
+              <div className={`${styles.field} ${styles.formGridFull}`}>
+                <label htmlFor="proj-description">Descripción *</label>
+                <textarea
+                  id="proj-description"
+                  value={formData.description}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  rows={3}
+                />
+                {formErrors.description && <span className={styles.fieldError}>{formErrors.description}</span>}
+              </div>
 
-          <Field label="URL *" error={formErrors.url} htmlFor="proj-url">
-            <input
-              id="proj-url"
-              value={formData.url}
-              onChange={(e) => handleChange('url', e.target.value)}
-              placeholder="https://ejemplo.com"
-              style={inputStyle}
-            />
-          </Field>
+              <div className={`${styles.field} ${styles.formGridFull}`}>
+                <label htmlFor="proj-technologies">Tecnologías * (separadas por coma)</label>
+                <input
+                  id="proj-technologies"
+                  value={formData.technologiesRaw}
+                  onChange={(e) => handleChange('technologiesRaw', e.target.value)}
+                  placeholder="React, TypeScript, Node.js"
+                />
+                {formErrors.technologies && <span className={styles.fieldError}>{formErrors.technologies}</span>}
+              </div>
 
-          <Field label="URL de imagen" error={formErrors.imageUrl} htmlFor="proj-imageUrl">
-            <input
-              id="proj-imageUrl"
-              title="URL de la imagen del proyecto"
-              value={formData.imageUrl}
-              onChange={(e) => handleChange('imageUrl', e.target.value)}
-              style={inputStyle}
-            />
-          </Field>
+              <div className={styles.field}>
+                <label htmlFor="proj-imageUrl">URL de imagen</label>
+                <input
+                  id="proj-imageUrl"
+                  value={formData.imageUrl}
+                  onChange={(e) => handleChange('imageUrl', e.target.value)}
+                />
+              </div>
 
-          <Field label="Texto alternativo de imagen" error={formErrors.imageAlt} htmlFor="proj-imageAlt">
-            <input
-              id="proj-imageAlt"
-              title="Texto alternativo de la imagen"
-              value={formData.imageAlt}
-              onChange={(e) => handleChange('imageAlt', e.target.value)}
-              style={inputStyle}
-            />
-          </Field>
+              <div className={styles.field}>
+                <label htmlFor="proj-imageAlt">Texto alternativo de imagen</label>
+                <input
+                  id="proj-imageAlt"
+                  value={formData.imageAlt}
+                  onChange={(e) => handleChange('imageAlt', e.target.value)}
+                />
+              </div>
+            </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-            <button type="submit" disabled={submitting} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
-              {submitting ? 'Guardando...' : editingProject ? 'Guardar cambios' : 'Crear proyecto'}
-            </button>
-            <button type="button" onClick={handleCancel} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
-              Cancelar
-            </button>
-          </div>
-        </form>
+            <div className={styles.formActions}>
+              <button type="submit" className={styles.btnPrimary} disabled={submitting}>
+                {submitting ? 'Guardando...' : editingProject ? 'Guardar cambios' : 'Crear proyecto'}
+              </button>
+              <button type="button" className={styles.btnSecondary} onClick={handleCancel}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      {loading && <p>Cargando proyectos...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {loading && <p className={styles.loadingText}>Cargando proyectos...</p>}
+      {error && <p className={styles.errorText}>Error: {error}</p>}
 
       {!loading && !error && projects.length === 0 && (
-        <p style={{ color: '#666' }}>No hay proyectos. Agregá el primero.</p>
+        <div className={styles.tableWrapper}>
+          <p className={styles.empty}>No hay proyectos. Agregá el primero.</p>
+        </div>
       )}
 
       {projects.length > 0 && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
-              <th style={{ padding: '0.5rem' }}>Nombre</th>
-              <th style={{ padding: '0.5rem' }}>Tecnologías</th>
-              <th style={{ padding: '0.5rem' }}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((project) => (
-              <tr key={project.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '0.5rem' }}>{project.name}</td>
-                <td style={{ padding: '0.5rem', color: '#555' }}>{project.technologies.join(', ')}</td>
-                <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-                  <button onClick={() => openEdit(project)} style={{ padding: '0.25rem 0.75rem', cursor: 'pointer' }}>
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(project)}
-                    style={{ padding: '0.25rem 0.75rem', cursor: 'pointer', color: 'white', background: '#c0392b', border: 'none', borderRadius: '4px' }}
-                  >
-                    Eliminar
-                  </button>
-                </td>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Tecnologías</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr key={project.id}>
+                  <td>{project.name}</td>
+                  <td>
+                    <div className={styles.techList}>
+                      {project.technologies.map((t) => (
+                        <span key={t} className={styles.techTag}>{t}</span>
+                      ))}
+                    </div>
+                  </td>
+                  <td>
+                    <div className={styles.tableActions}>
+                      <button className={styles.btnEdit} onClick={() => openEdit(project)}>
+                        Editar
+                      </button>
+                      <button className={styles.btnDanger} onClick={() => handleDelete(project)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 }
-
-function Field({ label, error, children, htmlFor }: { label: string; error?: string; children: React.ReactNode; htmlFor?: string }) {
-  return (
-    <div style={{ marginBottom: '0.75rem' }}>
-      <label htmlFor={htmlFor} style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>{label}</label>
-      {children}
-      {error && <span style={{ color: 'red', fontSize: '0.85rem' }}>{error}</span>}
-    </div>
-  );
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.4rem 0.6rem',
-  boxSizing: 'border-box',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-  fontSize: '0.95rem',
-};

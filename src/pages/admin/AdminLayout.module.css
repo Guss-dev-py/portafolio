@@ -1,0 +1,151 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 16px 24px;
+  background: var(--card-bg);
+  border-right: 1px solid var(--border);
+  gap: 4px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 20px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brandIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.brandName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-h);
+  letter-spacing: -0.3px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  transition: background 0.15s, color 0.15s;
+}
+
+.navLink:hover {
+  background: var(--accent-bg);
+  color: var(--text-h);
+}
+
+.navLink.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.navIcon {
+  font-size: 15px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 100px;
+  line-height: 1.6;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* ── Main content ────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 8px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand {
+    width: 100%;
+    padding-bottom: 8px;
+    margin-bottom: 0;
+  }
+
+  .nav {
+    flex-direction: row;
+    flex: unset;
+  }
+
+  .logoutBtn {
+    margin-top: 0;
+    margin-left: auto;
+    width: auto;
+  }
+}

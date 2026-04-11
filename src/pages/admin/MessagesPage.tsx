@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMessages } from '../../hooks/useMessages';
 import type { Message } from '../../types';
+import styles from './admin.module.css';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('es-AR', {
@@ -23,7 +24,7 @@ export default function MessagesPage() {
         const updated = await readMessage(msg.id);
         setSelectedMessage(updated);
       } catch {
-        // non-critical: keep message selected even if marking fails
+        // non-critical
       }
     }
   };
@@ -39,116 +40,108 @@ export default function MessagesPage() {
   };
 
   return (
-    <div style={{ padding: '1.5rem' }}>
-      <h1 style={{ margin: '0 0 1.5rem', fontSize: '1.5rem' }}>Mensajes</h1>
+    <div className={styles.page}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Mensajes</h1>
+      </div>
 
-      {loading && <p>Cargando mensajes...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {loading && <p className={styles.loadingText}>Cargando mensajes...</p>}
+      {error && <p className={styles.errorText}>Error: {error}</p>}
 
       {!loading && !error && messages.length === 0 && (
-        <p style={{ color: '#666' }}>No hay mensajes.</p>
+        <div className={styles.tableWrapper}>
+          <p className={styles.empty}>No hay mensajes.</p>
+        </div>
       )}
 
-      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-        {messages.length > 0 && (
-          <div style={{ flex: '1', minWidth: 0 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
-                  <th style={{ padding: '0.5rem' }}>Remitente</th>
-                  <th style={{ padding: '0.5rem' }}>Email</th>
-                  <th style={{ padding: '0.5rem' }}>Fecha</th>
-                  <th style={{ padding: '0.5rem' }}>Estado</th>
-                  <th style={{ padding: '0.5rem' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {messages.map((msg) => {
-                  const isUnread = msg.status === 'unread';
-                  const isSelected = selectedMessage?.id === msg.id;
-                  return (
-                    <tr
-                      key={msg.id}
-                      onClick={() => handleSelect(msg)}
-                      style={{
-                        borderBottom: '1px solid #eee',
-                        cursor: 'pointer',
-                        background: isSelected ? '#eef4ff' : 'transparent',
-                        fontWeight: isUnread ? 700 : 400,
-                      }}
-                    >
-                      <td style={{ padding: '0.5rem' }}>{msg.name}</td>
-                      <td style={{ padding: '0.5rem', color: '#555' }}>{msg.email}</td>
-                      <td style={{ padding: '0.5rem', color: '#555', whiteSpace: 'nowrap' }}>
-                        {formatDate(msg.createdAt)}
-                      </td>
-                      <td style={{ padding: '0.5rem' }}>
-                        {isUnread ? (
-                          <span style={{ color: '#2563eb', fontWeight: 700 }}>● No leído</span>
-                        ) : (
-                          <span style={{ color: '#888' }}>Leído</span>
-                        )}
-                      </td>
-                      <td style={{ padding: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(msg)}
-                          style={{
-                            padding: '0.25rem 0.75rem',
-                            cursor: 'pointer',
-                            color: 'white',
-                            background: '#c0392b',
-                            border: 'none',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {selectedMessage && (
-          <div
-            style={{
-              width: '340px',
-              flexShrink: 0,
-              background: '#f9f9f9',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              padding: '1.25rem',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1rem' }}>Detalle del mensaje</h2>
-              <button
-                type="button"
-                onClick={() => setSelectedMessage(null)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1 }}
-                aria-label="Cerrar detalle"
-              >
-                ✕
-              </button>
+      {!loading && !error && messages.length > 0 && (
+        <div className={styles.messagesLayout}>
+          <div className={styles.messagesTable}>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Remitente</th>
+                    <th>Email</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {messages.map((msg) => {
+                    const isUnread = msg.status === 'unread';
+                    const isSelected = selectedMessage?.id === msg.id;
+                    return (
+                      <tr
+                        key={msg.id}
+                        onClick={() => handleSelect(msg)}
+                        className={`
+                          ${isSelected ? styles.selected : ''}
+                          ${isUnread ? styles.unread : ''}
+                        `}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <td>{msg.name}</td>
+                        <td style={{ color: 'var(--text)' }}>{msg.email}</td>
+                        <td style={{ color: 'var(--text)', whiteSpace: 'nowrap' }}>
+                          {formatDate(msg.createdAt)}
+                        </td>
+                        <td>
+                          {isUnread ? (
+                            <span className={styles.statusUnread}>● No leído</span>
+                          ) : (
+                            <span className={styles.statusRead}>Leído</span>
+                          )}
+                        </td>
+                        <td onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className={styles.btnDanger}
+                            onClick={() => handleDelete(msg)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            <p style={{ margin: '0 0 0.25rem' }}>
-              <strong>De:</strong> {selectedMessage.name}
-            </p>
-            <p style={{ margin: '0 0 0.25rem', wordBreak: 'break-all' }}>
-              <strong>Email:</strong> {selectedMessage.email}
-            </p>
-            <p style={{ margin: '0 0 0.75rem', color: '#666', fontSize: '0.85rem' }}>
-              {formatDate(selectedMessage.createdAt)}
-            </p>
-            <hr style={{ margin: '0 0 0.75rem', border: 'none', borderTop: '1px solid #ddd' }} />
-            <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{selectedMessage.message}</p>
           </div>
-        )}
-      </div>
+
+          {selectedMessage && (
+            <div className={styles.detailPanel}>
+              <div className={styles.detailHeader}>
+                <h2 className={styles.detailTitle}>Detalle del mensaje</h2>
+                <button
+                  type="button"
+                  className={styles.detailClose}
+                  onClick={() => setSelectedMessage(null)}
+                  aria-label="Cerrar detalle"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className={styles.detailMeta}>
+                <strong>De:</strong> {selectedMessage.name}
+              </p>
+              <p className={styles.detailMeta}>
+                <strong>Email:</strong> {selectedMessage.email}
+              </p>
+              <p className={styles.detailDate}>
+                {formatDate(selectedMessage.createdAt)}
+              </p>
+
+              <hr className={styles.detailDivider} />
+
+              <p className={styles.detailBody}>{selectedMessage.message}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

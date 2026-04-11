@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useMessages } from '../../hooks/useMessages';
+import styles from './AdminLayout.module.css';
 
 export function AdminLayout() {
   const navigate = useNavigate();
@@ -11,18 +12,51 @@ export function AdminLayout() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <nav style={{ width: '200px', padding: '1rem', borderRight: '1px solid #ccc', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h2>Admin</h2>
-        <NavLink to="/admin/projects">Proyectos</NavLink>
-        <NavLink to="/admin/messages">
-          Mensajes {unreadCount > 0 && <span>({unreadCount})</span>}
-        </NavLink>
-        <button onClick={handleLogout} style={{ marginTop: 'auto' }}>
+    <div className={styles.layout}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <span className={styles.brandIcon} aria-hidden="true">⚙️</span>
+          <span className={styles.brandName}>Admin</span>
+        </div>
+
+        <nav className={styles.nav} aria-label="Navegación del panel">
+          <NavLink
+            to="/admin/projects"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon} aria-hidden="true">📁</span>
+            Proyectos
+          </NavLink>
+
+          <NavLink
+            to="/admin/messages"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon} aria-hidden="true">✉️</span>
+            Mensajes
+            {unreadCount > 0 && (
+              <span className={styles.badge} aria-label={`${unreadCount} no leídos`}>
+                {unreadCount}
+              </span>
+            )}
+          </NavLink>
+        </nav>
+
+        <button
+          type="button"
+          className={styles.logoutBtn}
+          onClick={handleLogout}
+        >
+          <span aria-hidden="true">↩</span>
           Cerrar sesión
         </button>
-      </nav>
-      <main style={{ flex: 1, padding: '1rem' }}>
+      </aside>
+
+      <main className={styles.main}>
         <Outlet />
       </main>
     </div>
