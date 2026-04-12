@@ -14,6 +14,7 @@ const REQUIRED_ENV_VARS = [
   'ADMIN_PASSWORD_HASH',
   'PORT',
   'CORS_ORIGIN',
+  'RESEND_API_KEY',
 ];
 
 const missing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
