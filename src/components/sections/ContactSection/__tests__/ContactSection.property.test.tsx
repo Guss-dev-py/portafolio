@@ -29,7 +29,26 @@ import { spring } from '../../../../motion/tokens';
 
 // ── Helpers ───────────────────────────────────────────────────────
 
+/**
+ * Generates n links using only non-email platforms so every item renders
+ * as an <a> element. The email platform intentionally renders a <button>
+ * (correct semantics for copy-to-clipboard), so tests that count <a>
+ * elements must avoid it.
+ */
 function makeLinks(n: number): ContactLink[] {
+  const platforms: ContactLink['platform'][] = ['linkedin', 'github', 'website'];
+  return Array.from({ length: n }, (_, i) => ({
+    platform: platforms[i % platforms.length],
+    href: `https://example.com/${i + 1}`,
+    label: `Link ${i + 1}`,
+  }));
+}
+
+/**
+ * Generates n links that include the email platform.
+ * Use this when testing the full set of interactive elements (a + button).
+ */
+function makeLinksWithEmail(n: number): ContactLink[] {
   const platforms: ContactLink['platform'][] = ['linkedin', 'github', 'email', 'website'];
   return Array.from({ length: n }, (_, i) => ({
     platform: platforms[i % platforms.length],
@@ -54,10 +73,10 @@ describe('Property 9 — All ContactSection social links receive hover animation
   it.each(LINK_COUNTS)(
     'renders exactly %i anchor element(s) inside the social links list when N=%i',
     (n) => {
+      // makeLinks uses only non-email platforms → every item renders as <a>
       const { container } = renderContactSection(makeLinks(n));
 
       if (n === 0) {
-        // When no links, the <ul> is not rendered
         const ul = container.querySelector('ul');
         expect(ul).toBeNull();
         return;
@@ -124,7 +143,8 @@ describe('Property 9 — All ContactSection social links receive hover animation
     );
   });
 
-  it('each anchor is a direct child of a <li> inside the <ul> (motion.a renders as <a>)', () => {
+  it('each interactive element is a direct child of a <li> inside the <ul>', () => {
+    // Use 3 non-email links so every <li> contains an <a>
     const n = 3;
     const { container } = renderContactSection(makeLinks(n));
 
@@ -136,8 +156,30 @@ describe('Property 9 — All ContactSection social links receive hover animation
 
     listItems.forEach((li) => {
       expect(li.tagName.toLowerCase()).toBe('li');
-      const anchor = li.querySelector('a');
-      expect(anchor).not.toBeNull();
+      // Each <li> must contain exactly one interactive element (a or button)
+      const interactive = li.querySelector('a, button');
+      expect(interactive).not.toBeNull();
+    });
+  });
+
+  it('email platform renders a <button> (copy-to-clipboard), not an <a>', () => {
+    const links = makeLinksWithEmail(4); // linkedin, github, email, website
+    const { container } = renderContactSection(links);
+
+    const ul = container.querySelector('ul');
+    expect(ul).not.toBeNull();
+
+    const listItems = Array.from(ul!.children);
+    expect(listItems.length).toBe(4);
+
+    // index 2 is email → should be a button
+    const emailLi = listItems[2];
+    expect(emailLi.querySelector('button')).not.toBeNull();
+    expect(emailLi.querySelector('a')).toBeNull();
+
+    // others should be anchors
+    [0, 1, 3].forEach((idx) => {
+      expect(listItems[idx].querySelector('a')).not.toBeNull();
     });
   });
 });

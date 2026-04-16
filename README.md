@@ -123,13 +123,24 @@ src/motion/
 │   │   └── admin/              # LoginPage, AdminLayout, ProjectsPage, MessagesPage, AuthGuard
 │   └── types/                  # Interfaces TypeScript compartidas
 │
-└── backend/                    # API REST Node.js
-    ├── src/
-    │   ├── middleware/          # auth.ts (JWT), validate.ts (Zod)
-    │   ├── routes/              # auth, projects, messages, contact, health
-    │   └── schemas/             # Zod schemas para validación
-    └── migrations/
-        └── 001_init.sql         # Creación de tablas
+├── backend/                    # API REST Node.js
+│   └── src/
+│       ├── middleware/          # auth.ts (JWT), validate.ts (Zod)
+│       ├── routes/              # auth, projects, messages, contact, health
+│       └── schemas/             # Zod schemas para validación
+│
+├── database/
+│   └── migrations/
+│       └── 001_init.sql         # Creación de tablas
+│
+└── infra/                      # Docker, Nginx, deploy
+    ├── docker/
+    │   └── Dockerfile.frontend
+    ├── nginx/
+    │   ├── nginx.conf           # Config interna del contenedor frontend
+    │   └── freire.conf          # Reverse proxy del host (freire.ucielbustamante.com)
+    ├── docker-compose.yml
+    └── docker-compose.postgres.yml
 ```
 
 ---
@@ -158,7 +169,7 @@ cp backend/.env.example backend/.env
 # Editar backend/.env con tus credenciales
 
 # Crear las tablas en PostgreSQL
-psql -U postgres -d portfolio -f backend/migrations/001_init.sql
+psql -U postgres -d portfolio -f database/migrations/001_init.sql
 
 # Generar hash de contraseña para el usuario admin
 node -e "const b = require('bcrypt'); b.hash('TU_CONTRASEÑA', 12).then(console.log)"
