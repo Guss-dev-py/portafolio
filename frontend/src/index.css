@@ -1,43 +1,8 @@
 /* ── Fuente ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ── Tema claro (default) ── */
+/* ── Tema oscuro fijo ── */
 :root {
-  --text:        #4a4558;
-  --text-h:      #08060d;
-  --text-muted:  #6b6880;
-  --bg:          #ffffff;
-  --bg-deep:     #f4f3f8;
-  --border:      #e5e4e7;
-  --accent:      #aa3bff;
-  --accent-2:    #7c3aed;
-  --accent-bg:   rgba(170, 59, 255, 0.08);
-  --accent-border: rgba(170, 59, 255, 0.35);
-  --nav-bg:      rgba(255, 255, 255, 0.85);
-  --card-bg:     #ffffff;
-  --section-alt-bg: rgba(249, 248, 252, 0.82);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-  --shadow-lg:
-    rgba(0, 0, 0, 0.15) 0 20px 40px -8px,
-    rgba(0, 0, 0, 0.08) 0 8px 16px -4px;
-
-  --sans:    'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono:    ui-monospace, 'Fira Code', Consolas, monospace;
-
-  font: 18px/1.5 var(--sans);
-  letter-spacing: 0.1px;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── Tema oscuro via data-theme ── */
-[data-theme='dark'] {
   --text:        #8b8fa8;
   --text-h:      #f0f0f5;
   --text-muted:  #5a5f72;
@@ -57,31 +22,18 @@
   --shadow-lg:
     rgba(0, 0, 0, 0.7) 0 20px 40px -8px,
     rgba(0, 0, 0, 0.5) 0 8px 16px -4px;
-}
 
-/* ── Fallback: preferencia del sistema ── */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --text:        #8b8fa8;
-    --text-h:      #f0f0f5;
-    --text-muted:  #5a5f72;
-    --bg:          #080810;
-    --bg-deep:     #0d0d18;
-    --border:      #1e2030;
-    --accent:      #c084fc;
-    --accent-2:    #a855f7;
-    --accent-bg:   rgba(192, 132, 252, 0.10);
-    --accent-border: rgba(192, 132, 252, 0.30);
-    --nav-bg:      rgba(8, 8, 16, 0.88);
-    --card-bg:     #0f1020;
-    --section-alt-bg: rgba(11, 11, 21, 0.78);
-    --shadow:
-      rgba(0, 0, 0, 0.6) 0 10px 15px -3px,
-      rgba(0, 0, 0, 0.4) 0 4px 6px -2px;
-    --shadow-lg:
-      rgba(0, 0, 0, 0.7) 0 20px 40px -8px,
-      rgba(0, 0, 0, 0.5) 0 8px 16px -4px;
-  }
+  --sans:    'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono:    ui-monospace, 'Fira Code', Consolas, monospace;
+
+  font: 18px/1.5 var(--sans);
+  letter-spacing: 0.1px;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Reset y base ── */

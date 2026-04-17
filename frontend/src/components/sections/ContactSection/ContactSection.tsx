@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import type { ContactLink, ContactFormData, FieldError } from '../../../types';
 import { apiClient } from '../../../api/client';
 import { duration, ease, spring, stagger } from '../../../motion/tokens';
@@ -274,9 +273,6 @@ export function ContactSection({ links }: ContactSectionProps) {
         <span className={styles.footerText}>
           Buenos Aires, Argentina · © 2026 Augusto Freire
         </span>
-        <Link to="/admin/login" className={styles.adminLink} aria-label="Admin">
-          ·
-        </Link>
       </footer>
     </section>
   );

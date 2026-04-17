@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
-import { useTheme } from "./hooks/useTheme";
 import { useActiveSection } from "./hooks/useActiveSection";
 import { NavigationBar } from "./components/NavigationBar/NavigationBar";
 import { HeroSection } from "./components/sections/HeroSection/HeroSection";
@@ -32,27 +31,19 @@ const SECTION_IDS: SectionId[] = [
 ];
 
 function PortfolioApp() {
-  const { theme, toggle } = useTheme();
   const activeSection = useActiveSection(SECTION_IDS);
 
   const scrollToProjects = () => {
-    document
-      .getElementById("proyectos")
-      ?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("proyectos")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
-      {/* Global particles — fixed, behind all content */}
       <Suspense fallback={null}>
         <ParticlesBackground />
       </Suspense>
 
-      <NavigationBar
-        activeSection={activeSection}
-        theme={theme}
-        onToggleTheme={toggle}
-      />
+      <NavigationBar activeSection={activeSection} />
       <main style={{ position: "relative", zIndex: 1 }}>
         <HeroSection
           name={profile.name}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import type { SectionId, Theme } from '../../types';
+import { Link } from 'react-router-dom';
+import { motion, type Variants } from 'framer-motion';
+import type { SectionId } from '../../types';
 import { duration, ease, spring, stagger } from '../../motion/tokens';
 import { fadeUp, staggerContainer } from '../../motion/variants';
 import { useReducedMotion } from '../../motion/hooks/useReducedMotion';
@@ -17,11 +18,9 @@ const NAV_LINKS: { id: SectionId; label: string }[] = [
 
 interface NavigationBarProps {
   activeSection: SectionId;
-  theme: Theme;
-  onToggleTheme: () => void;
 }
 
-export function NavigationBar({ activeSection, theme, onToggleTheme }: NavigationBarProps) {
+export function NavigationBar({ activeSection }: NavigationBarProps) {
   const navRef = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
 
@@ -30,21 +29,14 @@ export function NavigationBar({ activeSection, theme, onToggleTheme }: Navigatio
     ? NOOP
     : staggerContainer(stagger.tight, 0.2);
 
-  // Scroll listener — toggles .scrolled class
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        nav.classList.add(styles.scrolled);
-      } else {
-        nav.classList.remove(styles.scrolled);
-      }
+      nav.classList.toggle(styles.scrolled, window.scrollY > 20);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // run once on mount
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -97,25 +89,10 @@ export function NavigationBar({ activeSection, theme, onToggleTheme }: Navigatio
           </motion.li>
         ))}
       </motion.ul>
-      <button
-        type="button"
-        className={styles.themeToggle}
-        onClick={onToggleTheme}
-        aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-      >
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={theme}
-            initial={prefersReduced ? false : { opacity: 0, rotate: -30, scale: 0.7 }}
-            animate={{ opacity: 1, rotate: 0, scale: 1 }}
-            exit={{ opacity: 0, rotate: 30, scale: 0.7 }}
-            transition={{ duration: duration.base, ease: ease.back }}
-            className={styles.themeIcon}
-          >
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </motion.span>
-        </AnimatePresence>
-      </button>
+
+      <Link to="/admin/login" className={styles.adminDot} aria-label="Panel de administración">
+        ·
+      </Link>
     </motion.nav>
   );
 }
