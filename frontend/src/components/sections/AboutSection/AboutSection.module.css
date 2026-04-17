@@ -3,95 +3,181 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px 32px 60px;
+  padding: 100px 32px 80px;
   box-sizing: border-box;
   background: var(--section-alt-bg);
 }
 
 .container {
-  max-width: 720px;
+  max-width: 960px;
   width: 100%;
-  text-align: left;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.8;
+  margin: 0 0 16px;
 }
 
 .title {
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 700;
-  letter-spacing: -1px;
+  font-size: clamp(36px, 5.5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
   color: var(--text-h);
-  margin: 0 0 28px;
+  margin: 0 0 48px;
+  line-height: 1.05;
 }
 
+/* ── Two-column layout ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+/* ── Left column: bio ── */
 .bio {
-  font-size: 17px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.8;
   color: var(--text);
-  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bio p {
+  margin: 0;
+}
+
+.quote {
+  border-left: 2px solid var(--accent-border);
+  padding-left: 16px;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── Right column: data blocks ── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin: 0;
+  font-family: var(--mono);
+}
+
+.blockText {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.eduTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.eduSub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.eduBadge {
+  display: inline-block;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+/* ── Skills ── */
+.skillGroups {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.block {
-  margin-bottom: 32px;
-}
-
-.subtitle {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--accent);
-  margin: 0 0 10px;
-}
-
-.sector {
-  font-size: 17px;
-  color: var(--text);
-  font-style: italic;
-}
-
-.skillGroups {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .skillGroup {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .groupLabel {
-  min-width: 100px;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-h);
-  padding-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-family: var(--mono);
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tag {
   background: var(--accent-bg);
   color: var(--accent);
   border: 1px solid var(--accent-border);
-  border-radius: 20px;
+  border-radius: 100px;
   padding: 3px 12px;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-@media (max-width: 600px) {
-  .skillGroup {
-    flex-direction: column;
-    gap: 8px;
+/* ── Interest tags ── */
+.interestTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.interestTag {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
-  .groupLabel {
-    min-width: unset;
-  }
+  .section { padding: 80px 20px 60px; }
 }

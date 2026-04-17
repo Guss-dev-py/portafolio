@@ -20,8 +20,8 @@ export function ProjectsSection() {
   const { ref, isInView } = useInView();
 
   const headingVariant = prefersReduced ? NOOP : fadeUp;
-  const gridVariant = prefersReduced ? NOOP : staggerContainer(stagger.relaxed);
-  const cardVariant = prefersReduced ? NOOP : fadeUp;
+  const listVariant    = prefersReduced ? NOOP : staggerContainer(stagger.relaxed);
+  const cardVariant    = prefersReduced ? NOOP : fadeUp;
 
   useEffect(() => {
     getProjects()
@@ -38,27 +38,35 @@ export function ProjectsSection() {
       ref={ref as React.RefObject<HTMLElement>}
     >
       <div className={styles.container}>
+        <motion.p
+          className={styles.eyebrow}
+          variants={headingVariant}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          // proyectos
+        </motion.p>
+
         <motion.h2
           className={styles.title}
           variants={headingVariant}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
         >
-          Proyectos
+          Lo que construyo
         </motion.h2>
+
         <motion.p
           className={styles.subtitle}
           variants={headingVariant}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
         >
-          Algunos de los proyectos en los que trabajé
+          Proyectos reales con stack completo
         </motion.p>
 
         {loading && <p className={styles.empty}>Cargando proyectos...</p>}
-
         {!loading && error && <p className={styles.empty}>{error}</p>}
-
         {!loading && !error && projects.length === 0 && (
           <p className={styles.empty}>Próximamente...</p>
         )}
@@ -66,17 +74,29 @@ export function ProjectsSection() {
         {!loading && !error && projects.length > 0 && (
           <motion.div
             className={styles.grid}
-            variants={gridVariant}
+            variants={listVariant}
             initial="hidden"
             animate={isInView ? 'visible' : 'hidden'}
           >
-            {projects.map((p) => (
+            {projects.map((p, i) => (
               <motion.div key={p.id} variants={cardVariant}>
-                <ProjectCard project={p} />
+                <ProjectCard project={p} index={i} />
               </motion.div>
             ))}
           </motion.div>
         )}
+
+        <motion.a
+          href="https://github.com/Guss-dev-py"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.githubLink}
+          variants={headingVariant}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          Ver más en GitHub ↗
+        </motion.a>
       </div>
     </section>
   );

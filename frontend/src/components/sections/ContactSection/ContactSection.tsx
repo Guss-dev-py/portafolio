@@ -16,36 +16,45 @@ interface ContactSectionProps {
 const NOOP: Variants = { hidden: {}, visible: {} };
 
 const PLATFORM_ICONS: Record<string, string> = {
-  linkedin: '💼',
-  github: '🐙',
-  email: '✉️',
-  website: '🌐',
+  linkedin: '↗',
+  github:   '↗',
+  email:    '✉',
+  website:  '↗',
+};
+
+const PLATFORM_LABELS: Record<string, string> = {
+  linkedin: 'LinkedIn',
+  github:   'GitHub',
+  email:    'Email',
+  website:  'Web',
 };
 
 function validate(data: ContactFormData): FieldError[] {
   const errors: FieldError[] = [];
-  if (!data.name.trim()) errors.push({ field: 'name', message: 'El nombre es requerido' });
+  if (!data.name.trim())
+    errors.push({ field: 'name', message: 'El nombre es requerido' });
   if (!data.email.trim()) {
     errors.push({ field: 'email', message: 'El email es requerido' });
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.push({ field: 'email', message: 'El email no es válido' });
   }
-  if (!data.message.trim()) errors.push({ field: 'message', message: 'El mensaje es requerido' });
+  if (!data.message.trim())
+    errors.push({ field: 'message', message: 'El mensaje es requerido' });
   return errors;
 }
 
 export function ContactSection({ links }: ContactSectionProps) {
-  const [form, setForm] = useState<ContactFormData>({ name: '', email: '', message: '' });
-  const [errors, setErrors] = useState<FieldError[]>([]);
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [form, setForm]             = useState<ContactFormData>({ name: '', email: '', message: '' });
+  const [errors, setErrors]         = useState<FieldError[]>([]);
+  const [submitted, setSubmitted]   = useState(false);
+  const [sending, setSending]       = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
   const prefersReduced = useReducedMotion();
   const { ref: sectionRef, isInView } = useInView();
 
-  const resolvedFadeUp = prefersReduced ? NOOP : fadeUp;
+  const resolvedFadeUp  = prefersReduced ? NOOP : fadeUp;
   const resolvedScaleIn = prefersReduced ? NOOP : scaleIn;
   const resolvedStagger = prefersReduced ? NOOP : staggerContainer(stagger.base);
 
@@ -56,9 +65,7 @@ export function ContactSection({ links }: ContactSectionProps) {
       await navigator.clipboard.writeText(email);
       setCopiedEmail(email);
       setTimeout(() => setCopiedEmail(null), 2500);
-    } catch {
-      // fallback silencioso
-    }
+    } catch { /* fallback silencioso */ }
   };
 
   const getError = (field: keyof ContactFormData) =>
@@ -71,7 +78,6 @@ export function ContactSection({ links }: ContactSectionProps) {
     setErrors([]);
     setSubmitError(null);
     setSending(true);
-
     try {
       await apiClient('/api/contact', {
         method: 'POST',
@@ -94,23 +100,35 @@ export function ContactSection({ links }: ContactSectionProps) {
       ref={sectionRef as React.RefObject<HTMLElement>}
     >
       <div className={styles.container}>
+        <motion.p
+          className={styles.eyebrow}
+          variants={resolvedFadeUp}
+          initial="hidden"
+          animate={animateState}
+        >
+          // contacto
+        </motion.p>
+
         <motion.h2
           className={styles.title}
           variants={resolvedFadeUp}
           initial="hidden"
           animate={animateState}
         >
-          Contacto
+          Abierto a<br />oportunidades
         </motion.h2>
+
         <motion.p
           className={styles.subtitle}
           variants={resolvedFadeUp}
           initial="hidden"
           animate={animateState}
         >
-          ¿Tenés un proyecto en mente? Hablemos.
+          Si tenés una idea, un problema o una propuesta, escribime.
+          Siempre abierto a proyectos interesantes y colaboraciones.
         </motion.p>
 
+        {/* Social links */}
         {links.length > 0 && (
           <motion.ul
             className={styles.links}
@@ -128,8 +146,8 @@ export function ContactSection({ links }: ContactSectionProps) {
                     whileHover={prefersReduced ? undefined : { y: -2, scale: 1.02, transition: spring.gentle }}
                     aria-label={`Copiar email ${link.label}`}
                   >
-                    <span aria-hidden="true">{PLATFORM_ICONS[link.platform]}</span>
                     {link.label}
+                    <span aria-hidden="true">{PLATFORM_ICONS[link.platform]}</span>
                   </motion.button>
                 ) : (
                   <motion.a
@@ -139,8 +157,8 @@ export function ContactSection({ links }: ContactSectionProps) {
                     className={styles.link}
                     whileHover={prefersReduced ? undefined : { y: -2, scale: 1.02, transition: spring.gentle }}
                   >
-                    <span aria-hidden="true">{PLATFORM_ICONS[link.platform] ?? '🔗'}</span>
                     {link.label}
+                    <span aria-hidden="true">{PLATFORM_ICONS[link.platform] ?? '↗'}</span>
                   </motion.a>
                 )}
               </motion.li>
@@ -154,6 +172,7 @@ export function ContactSection({ links }: ContactSectionProps) {
           </div>
         )}
 
+        {/* Contact form */}
         <div className={styles.formWrapper}>
           <AnimatePresence mode="wait">
             {submitted ? (
@@ -196,7 +215,11 @@ export function ContactSection({ links }: ContactSectionProps) {
                       aria-describedby={getError('name') ? 'error-name' : undefined}
                       className={getError('name') ? styles.inputError : ''}
                     />
-                    {getError('name') && <span id="error-name" className={styles.error} role="alert">{getError('name')}</span>}
+                    {getError('name') && (
+                      <span id="error-name" className={styles.error} role="alert">
+                        {getError('name')}
+                      </span>
+                    )}
                   </motion.div>
 
                   <motion.div className={styles.field} variants={resolvedFadeUp}>
@@ -210,7 +233,11 @@ export function ContactSection({ links }: ContactSectionProps) {
                       aria-describedby={getError('email') ? 'error-email' : undefined}
                       className={getError('email') ? styles.inputError : ''}
                     />
-                    {getError('email') && <span id="error-email" className={styles.error} role="alert">{getError('email')}</span>}
+                    {getError('email') && (
+                      <span id="error-email" className={styles.error} role="alert">
+                        {getError('email')}
+                      </span>
+                    )}
                   </motion.div>
 
                   <motion.div className={styles.field} variants={resolvedFadeUp}>
@@ -218,13 +245,17 @@ export function ContactSection({ links }: ContactSectionProps) {
                     <textarea
                       id="contact-message"
                       name="message"
-                      rows={4}
+                      rows={5}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       aria-describedby={getError('message') ? 'error-message' : undefined}
                       className={getError('message') ? styles.inputError : ''}
                     />
-                    {getError('message') && <span id="error-message" className={styles.error} role="alert">{getError('message')}</span>}
+                    {getError('message') && (
+                      <span id="error-message" className={styles.error} role="alert">
+                        {getError('message')}
+                      </span>
+                    )}
                   </motion.div>
                 </motion.div>
 
@@ -243,13 +274,17 @@ export function ContactSection({ links }: ContactSectionProps) {
             )}
           </AnimatePresence>
         </div>
-
-        <div className={styles.adminShortcut}>
-          <Link to="/admin/login" className={styles.adminLink} aria-label="Admin">
-            ·
-          </Link>
-        </div>
       </div>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <span className={styles.footerText}>
+          Buenos Aires, Argentina · © 2026 Augusto Freire
+        </span>
+        <Link to="/admin/login" className={styles.adminLink} aria-label="Admin">
+          ·
+        </Link>
+      </footer>
     </section>
   );
 }

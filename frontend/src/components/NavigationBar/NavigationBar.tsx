@@ -61,6 +61,15 @@ export function NavigationBar({ activeSection, theme, onToggleTheme }: Navigatio
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: duration.slow, ease: ease.expo }}
     >
+      <button
+        type="button"
+        className={styles.logo}
+        onClick={() => handleNav('inicio')}
+        aria-label="Ir al inicio"
+      >
+        AF<span className={styles.logoDot}>.dev</span>
+      </button>
+
       <motion.ul
         className={styles.links}
         variants={resolvedStaggerContainer}

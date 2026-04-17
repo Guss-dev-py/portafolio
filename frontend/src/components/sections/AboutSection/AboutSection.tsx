@@ -15,21 +15,25 @@ interface AboutSectionProps {
 
 const NOOP: Variants = { hidden: {}, visible: {} };
 
-export function AboutSection({ biography, goals, aspirationSector, skillGroups }: AboutSectionProps) {
+const INTERESTS = ['FinTech', 'SaaS B2B', 'Ciberseguridad', 'Cloud Security', 'Pentesting'];
+
+export function AboutSection({ biography, goals, skillGroups }: AboutSectionProps) {
   const prefersReduced = useReducedMotion();
   const { ref, isInView } = useInView();
 
   const animateState = isInView ? 'visible' : 'hidden';
 
-  const heading    = prefersReduced ? NOOP : slideInLeft;
-  const fadeUpVar  = prefersReduced ? NOOP : fadeUp;
-  const scaleInVar = prefersReduced ? NOOP : scaleIn;
-  const slideLeft  = prefersReduced ? NOOP : slideInLeft;
+  const heading      = prefersReduced ? NOOP : slideInLeft;
+  const fadeUpVar    = prefersReduced ? NOOP : fadeUp;
+  const scaleInVar   = prefersReduced ? NOOP : scaleIn;
+  const slideLeft    = prefersReduced ? NOOP : slideInLeft;
+  const bioContainer = prefersReduced ? NOOP : staggerContainer(stagger.loose);
+  const tagContainer = prefersReduced ? NOOP : staggerContainer(stagger.tight);
 
-  const bioContainer      = prefersReduced ? NOOP : staggerContainer(stagger.loose);
-  const blocksContainer   = prefersReduced ? NOOP : staggerContainer(stagger.loose);
-  const skillRowContainer = prefersReduced ? NOOP : staggerContainer(stagger.loose);
-  const tagContainer      = prefersReduced ? NOOP : staggerContainer(stagger.tight);
+  // Split biography into paragraphs; extract the quote (3rd paragraph)
+  const paragraphs = biography.split('\n\n').filter(Boolean);
+  const bioParagraphs = paragraphs.filter((_, i) => i !== 2);
+  const quote = paragraphs[2];
 
   return (
     <section
@@ -39,79 +43,112 @@ export function AboutSection({ biography, goals, aspirationSector, skillGroups }
       ref={ref as React.RefObject<HTMLElement>}
     >
       <div className={styles.container}>
+        <motion.p
+          className={styles.eyebrow}
+          variants={fadeUpVar}
+          initial="hidden"
+          animate={animateState}
+        >
+          // sobre mí
+        </motion.p>
+
         <motion.h2
           className={styles.title}
           variants={heading}
           initial="hidden"
           animate={animateState}
         >
-          Sobre mí
+          Augusto Joaquín<br />Freire
         </motion.h2>
 
-        <motion.div
-          className={styles.bio}
-          variants={bioContainer}
-          initial="hidden"
-          animate={animateState}
-        >
-          {biography.split('\n\n').map((paragraph, i) => (
-            <motion.p key={i} variants={fadeUpVar}>
-              {paragraph}
-            </motion.p>
-          ))}
-        </motion.div>
-
-        <motion.div
-          variants={blocksContainer}
-          initial="hidden"
-          animate={animateState}
-        >
-          <motion.div className={styles.block} variants={fadeUpVar}>
-            <h3 className={styles.subtitle}>Metas profesionales</h3>
-            <p>{goals}</p>
+        <div className={styles.grid}>
+          {/* Left: bio */}
+          <motion.div
+            className={styles.bio}
+            variants={bioContainer}
+            initial="hidden"
+            animate={animateState}
+          >
+            {bioParagraphs.map((paragraph, i) => (
+              <motion.p key={i} variants={fadeUpVar}>
+                {paragraph}
+              </motion.p>
+            ))}
+            {quote && (
+              <motion.p className={styles.quote} variants={fadeUpVar}>
+                {quote}
+              </motion.p>
+            )}
           </motion.div>
 
-          <motion.div className={styles.block} variants={fadeUpVar}>
-            <h3 className={styles.subtitle}>Sector al que aspiro</h3>
-            <p className={styles.sector}>{aspirationSector}</p>
-          </motion.div>
+          {/* Right: sidebar */}
+          <motion.div
+            className={styles.sidebar}
+            variants={bioContainer}
+            initial="hidden"
+            animate={animateState}
+          >
+            {/* Education */}
+            <motion.div className={styles.block} variants={fadeUpVar}>
+              <p className={styles.subtitle}>Educación</p>
+              <p className={styles.eduTitle}>Ingeniería Informática</p>
+              <p className={styles.eduSub}>Universidad Nacional de José C. Paz (UNPAZ) — En curso</p>
+              <span className={styles.eduBadge}>Ingreso Top 18% · CIU 2026</span>
+            </motion.div>
 
-          <motion.div className={styles.block} variants={fadeUpVar}>
-            <h3 className={styles.subtitle}>Habilidades técnicas</h3>
-            <motion.div
-              className={styles.skillGroups}
-              variants={skillRowContainer}
-              initial="hidden"
-              animate={animateState}
-            >
-              {skillGroups.map((group) => (
-                <motion.div
-                  key={group.category}
-                  className={styles.skillGroup}
-                  variants={slideLeft}
-                >
-                  <span className={styles.groupLabel}>{group.category}</span>
-                  <motion.div
-                    className={styles.tags}
-                    variants={tagContainer}
-                    initial="hidden"
-                    animate={animateState}
-                  >
-                    {group.skills.map((s) => (
-                      <motion.span
-                        key={s.name}
-                        className={styles.tag}
-                        variants={scaleInVar}
-                      >
-                        {s.name}
-                      </motion.span>
-                    ))}
+            {/* Goals */}
+            <motion.div className={styles.block} variants={fadeUpVar}>
+              <p className={styles.subtitle}>Objetivo</p>
+              <p className={styles.blockText}>{goals}</p>
+            </motion.div>
+
+            {/* Interests */}
+            <motion.div className={styles.block} variants={fadeUpVar}>
+              <p className={styles.subtitle}>Áreas de interés</p>
+              <motion.div
+                className={styles.interestTags}
+                variants={tagContainer}
+                initial="hidden"
+                animate={animateState}
+              >
+                {INTERESTS.map((tag) => (
+                  <motion.span key={tag} className={styles.interestTag} variants={scaleInVar}>
+                    {tag}
+                  </motion.span>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* Skills */}
+            <motion.div className={styles.block} variants={fadeUpVar}>
+              <p className={styles.subtitle}>Stack técnico</p>
+              <motion.div
+                className={styles.skillGroups}
+                variants={bioContainer}
+                initial="hidden"
+                animate={animateState}
+              >
+                {skillGroups.map((group) => (
+                  <motion.div key={group.category} className={styles.skillGroup} variants={slideLeft}>
+                    <span className={styles.groupLabel}>{group.category}</span>
+                    <motion.div
+                      className={styles.tags}
+                      variants={tagContainer}
+                      initial="hidden"
+                      animate={animateState}
+                    >
+                      {group.skills.map((s) => (
+                        <motion.span key={s.name} className={styles.tag} variants={scaleInVar}>
+                          {s.name}
+                        </motion.span>
+                      ))}
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              ))}
+                ))}
+              </motion.div>
             </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
