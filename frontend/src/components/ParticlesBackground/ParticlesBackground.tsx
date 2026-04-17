@@ -6,31 +6,31 @@ import styles from "./ParticlesBackground.module.css";
 // ── Layer definitions ─────────────────────────────────────────────
 const LAYERS = [
   {
-    count: 120,
+    count: 600,
     zRange: [-14, -4] as [number, number],
     speedMult: 0.6,
-    sizeDark: 1.8,
-    sizeLight: 2.0,
-    opacityDark: 0.38,
-    opacityLight: 0.48,
+    sizeDark: 3.4,
+    sizeLight: 3.6,
+    opacityDark: 0.52,
+    opacityLight: 0.58,
   },
   {
-    count: 120,
+    count: 200,
     zRange: [-4, 4] as [number, number],
     speedMult: 1.0,
-    sizeDark: 2.6,
-    sizeLight: 2.8,
-    opacityDark: 0.52,
-    opacityLight: 0.6,
+    sizeDark: 5.0,
+    sizeLight: 5.2,
+    opacityDark: 0.66,
+    opacityLight: 0.72,
   },
   {
-    count: 80,
+    count: 100,
     zRange: [4, 14] as [number, number],
     speedMult: 1.6,
-    sizeDark: 3.6,
-    sizeLight: 3.8,
-    opacityDark: 0.65,
-    opacityLight: 0.7,
+    sizeDark: 6.8,
+    sizeLight: 7.0,
+    opacityDark: 0.8,
+    opacityLight: 0.82,
   },
 ];
 
@@ -40,6 +40,8 @@ const BASE_SPEED = 0.0062;
 const CONN_DIST = 4.0;
 const MAX_CONN = 5;
 const MOUSE_STR = 0.0018;
+const MOUSE_REPULSE_RADIUS = 5.0;
+const MOUSE_REPULSE_STR = 0.12;
 const LINE_FADE_IN = 3.5;
 const LINE_FADE_OUT = 2.0;
 
@@ -76,18 +78,19 @@ const FRAG = /* glsl */ `
 
     // Depth blur: farther particles become softer and less intrusive.
     float depthBlur = smoothstep(11.0, 31.0, vViewDepth);
-    float core = 1.0 - smoothstep(0.08, mix(0.26, 0.40, depthBlur), dist);
-    float halo = 1.0 - smoothstep(0.18, mix(0.50, 0.64, depthBlur), dist);
+    float core = 1.0 - smoothstep(0.06, mix(0.20, 0.36, depthBlur), dist);
+    float halo = 1.0 - smoothstep(0.10, mix(0.48, 0.62, depthBlur), dist);
+    float outerGlow = 1.0 - smoothstep(0.22, 0.50, dist);
 
     // Depth field: distant particles fade into the background mist.
     float depthFade = 1.0 - smoothstep(10.0, 32.0, vViewDepth);
 
     // Pulse brightens halo + scales particles (see vertex shader).
     float pulseGlow = uPulse * halo;
-    float alpha = vOpacity * (core * 0.76 + halo * (0.24 + pulseGlow * 1.4));
+    float alpha = vOpacity * (core * 0.78 + halo * 0.28 + outerGlow * 0.11 + pulseGlow * 1.4);
     alpha *= mix(0.12, 1.0, depthFade);
 
-    vec3 color = vColor * (1.0 + pulseGlow * 0.55);
+    vec3 color = vColor * (1.0 + outerGlow * 0.30 + pulseGlow * 0.55);
     gl_FragColor = vec4(color, alpha);
   }
 `;
@@ -294,9 +297,15 @@ export function ParticlesBackground() {
     window.addEventListener("mousemove", onMouse, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
 
+    // ── Mouse → world projection ─────────────────────────────────
+    const raycaster = new THREE.Raycaster();
+    const mouseNDC = new THREE.Vector2();
+    const mouseWorld = new THREE.Vector3();
+
     // ── Reusable ──────────────────────────────────────────────────
     const vA = new THREE.Vector3();
     const vB = new THREE.Vector3();
+    const vRepulse = new THREE.Vector3();
     let rafId: number;
 
     const posAttr = dotGeo.attributes["position"] as THREE.BufferAttribute;
@@ -335,20 +344,41 @@ export function ParticlesBackground() {
       }
       dotMat.uniforms["uPulse"].value = pulseValue;
 
-      // Move
+      // Project mouse into world space at z = 0
+      mouseNDC.set(mouseRef.current.x, -mouseRef.current.y);
+      raycaster.setFromCamera(mouseNDC, camera);
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      raycaster.ray.intersectPlane(plane, mouseWorld);
+
+      // Move + mouse repulsion
+      const pa = posAttr.array as Float32Array;
       for (let li = 0; li < LAYERS.length; li++) {
         const layer = LAYERS[li];
         const [zMin, zMax] = layer.zRange;
         const zMid = (zMin + zMax) / 2;
         const halfZ = (zMax - zMin) / 2;
         const base = LAYERS.slice(0, li).reduce((s, l) => s + l.count, 0);
+        const layerDepthFactor = 1.0 - li * 0.3;
 
         for (let i = 0; i < layer.count; i++) {
           const gi = base + i;
           const gx = gi * 3,
             gy = gx + 1,
             gz = gx + 2;
-          const pa = posAttr.array as Float32Array;
+
+          // Mouse repulsion (XY only, scaled by layer depth)
+          if (mouseWorld.x !== 0 || mouseWorld.y !== 0) {
+            vRepulse.set(pa[gx] - mouseWorld.x, pa[gy] - mouseWorld.y, 0);
+            const rd = vRepulse.length();
+            if (rd < MOUSE_REPULSE_RADIUS && rd > 0.01) {
+              const force =
+                (1 - rd / MOUSE_REPULSE_RADIUS) *
+                MOUSE_REPULSE_STR *
+                layerDepthFactor;
+              pa[gx] += (vRepulse.x / rd) * force;
+              pa[gy] += (vRepulse.y / rd) * force;
+            }
+          }
 
           pa[gx] += particles[gi].vx;
           pa[gy] += particles[gi].vy;
@@ -368,7 +398,6 @@ export function ParticlesBackground() {
       const tc = THEME[curTheme];
       let seg = 0;
       const cc = new Uint8Array(TOTAL);
-      const pa = posAttr.array as Float32Array;
       const activeKeys = new Set<number>();
 
       // Phase 1: detect in-range pairs within same/adjacent layers

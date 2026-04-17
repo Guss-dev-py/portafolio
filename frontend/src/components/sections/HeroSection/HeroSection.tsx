@@ -1,9 +1,14 @@
-import { motion, type Variants } from 'framer-motion';
-import type { SkillTag } from '../../../types';
-import { spring, stagger } from '../../../motion/tokens';
-import { fadeUp, cinematicFadeUp, scaleIn, staggerContainer } from '../../../motion/variants';
-import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
-import styles from './HeroSection.module.css';
+import { motion, type Variants } from "framer-motion";
+import type { SkillTag } from "../../../types";
+import { spring, stagger } from "../../../motion/tokens";
+import {
+  fadeUp,
+  cinematicFadeUp,
+  scaleIn,
+  staggerContainer,
+} from "../../../motion/variants";
+import { useReducedMotion } from "../../../motion/hooks/useReducedMotion";
+import styles from "./HeroSection.module.css";
 
 interface HeroSectionProps {
   name: string;
@@ -16,17 +21,26 @@ interface HeroSectionProps {
 
 const NOOP: Variants = { hidden: {}, visible: {} };
 
-export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }: HeroSectionProps) {
+export function HeroSection({
+  name,
+  lastName,
+  role,
+  intro,
+  onCtaClick,
+  skills,
+}: HeroSectionProps) {
   const prefersReduced = useReducedMotion();
 
-  const resolvedFadeUp         = prefersReduced ? NOOP : fadeUp;
+  const resolvedFadeUp = prefersReduced ? NOOP : fadeUp;
   const resolvedCinematicFadeUp = prefersReduced ? NOOP : cinematicFadeUp;
-  const resolvedScaleIn        = prefersReduced ? NOOP : scaleIn;
-  const resolvedStaggerAll     = prefersReduced ? NOOP : staggerContainer();
-  const resolvedStaggerSkills  = prefersReduced ? NOOP : staggerContainer(stagger.tight, 0.55);
+  const resolvedScaleIn = prefersReduced ? NOOP : scaleIn;
+  const resolvedStaggerAll = prefersReduced ? NOOP : staggerContainer();
+  const resolvedStaggerSkills = prefersReduced
+    ? NOOP
+    : staggerContainer(stagger.tight, 0.55);
 
   const handleContact = () => {
-    document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -37,7 +51,11 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
         initial="hidden"
         animate="visible"
       >
-        <motion.p className={styles.location} variants={resolvedFadeUp} transition={{ delay: 0.05 }}>
+        <motion.p
+          className={styles.location}
+          variants={resolvedFadeUp}
+          transition={{ delay: 0.05 }}
+        >
           Buenos Aires, Argentina
         </motion.p>
 
@@ -54,7 +72,9 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
           variants={resolvedCinematicFadeUp}
           transition={{ delay: 0.22 }}
         >
-          {name}<br />{lastName}.
+          {name}
+          <br />
+          <span className={styles.nameAccent}>{lastName}</span>
         </motion.h1>
 
         <motion.p
@@ -79,7 +99,11 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
           variants={resolvedStaggerSkills}
         >
           {skills.map((s) => (
-            <motion.span key={s.name} className={styles.skillTag} variants={resolvedScaleIn}>
+            <motion.span
+              key={s.name}
+              className={styles.skillTag}
+              variants={resolvedScaleIn}
+            >
               {s.name}
             </motion.span>
           ))}
@@ -94,8 +118,14 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
             type="button"
             className={styles.cta}
             onClick={onCtaClick}
-            whileHover={prefersReduced ? {} : { y: -3, scale: 1.02, transition: spring.gentle }}
-            whileTap={prefersReduced ? {} : { scale: 0.97, transition: spring.press }}
+            whileHover={
+              prefersReduced
+                ? {}
+                : { y: -3, scale: 1.02, transition: spring.gentle }
+            }
+            whileTap={
+              prefersReduced ? {} : { scale: 0.97, transition: spring.press }
+            }
           >
             Ver mis proyectos
           </motion.button>
@@ -103,8 +133,12 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
             type="button"
             className={styles.ctaSecondary}
             onClick={handleContact}
-            whileHover={prefersReduced ? {} : { y: -2, transition: spring.gentle }}
-            whileTap={prefersReduced ? {} : { scale: 0.97, transition: spring.press }}
+            whileHover={
+              prefersReduced ? {} : { y: -2, transition: spring.gentle }
+            }
+            whileTap={
+              prefersReduced ? {} : { scale: 0.97, transition: spring.press }
+            }
           >
             Contacto
           </motion.button>
@@ -112,7 +146,9 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
       </motion.div>
 
       {!prefersReduced && (
-        <div className={styles.scrollHint} aria-hidden="true">scroll</div>
+        <div className={styles.scrollHint} aria-hidden="true">
+          scroll
+        </div>
       )}
     </section>
   );

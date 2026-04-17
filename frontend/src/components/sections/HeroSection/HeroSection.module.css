@@ -41,7 +41,11 @@
   letter-spacing: -0.04em;
   margin: 0 0 16px;
   color: var(--text-h);
-  line-height: 1.0;
+  line-height: 1;
+}
+
+.nameAccent {
+  color: var(--accent);
 }
 
 .role {
@@ -123,7 +127,9 @@
   font-weight: 500;
   cursor: pointer;
   letter-spacing: 0.01em;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -154,7 +160,7 @@
 }
 
 .scrollHint::after {
-  content: '';
+  content: "";
   width: 1px;
   height: 32px;
   background: var(--accent);
@@ -162,11 +168,21 @@
 }
 
 @keyframes scrollBounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%       { transform: translateX(-50%) translateY(6px); }
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(6px);
+  }
 }
 
 @media (max-width: 600px) {
-  .section { padding: 80px 20px 60px; }
-  .ctas { flex-direction: column; align-items: center; }
+  .section {
+    padding: 80px 20px 60px;
+  }
+  .ctas {
+    flex-direction: column;
+    align-items: center;
+  }
 }
