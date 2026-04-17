@@ -7,12 +7,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencias
 node_modules
+frontend/node_modules
+backend/node_modules
+
+# Builds
 dist
 dist-ssr
+frontend/dist
+backend/dist
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Archivos locales
 *.local
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,13 +35,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables — NEVER commit these
-.env
-.env.local
-.env.production
+# Variables de entorno — NUNCA commitear
+frontend/.env
+frontend/.env.local
+frontend/.env.production
 backend/.env
 backend/.env.local
 backend/.env.production
 
-# Kiro specs (optional — remove if you want to track them)
+# Kiro specs (remover si querés trackearlas)
 .kiro/

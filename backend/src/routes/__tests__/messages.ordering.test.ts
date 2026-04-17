@@ -32,14 +32,15 @@ const testApp = express();
 testApp.use(express.json());
 testApp.use('/api/messages', messagesRouter);
 
-// Arbitrary for a single message row with an arbitrary created_at date
+// Arbitrary for a single message row with a valid created_at date
+// fc.date() can generate new Date(NaN) which is not a valid DB timestamp
 const messageRowArb = fc.record({
   id: fc.uuid(),
   name: fc.string({ minLength: 1, maxLength: 100 }),
   email: fc.emailAddress(),
   message: fc.string({ minLength: 1, maxLength: 2000 }),
   status: fc.constantFrom('unread' as const, 'read' as const),
-  created_at: fc.date(),
+  created_at: fc.date({ noInvalidDate: true }),
 });
 
 describe('Property 7: Ordenamiento descendente por fecha de creación (mensajes)', () => {

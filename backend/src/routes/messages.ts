@@ -6,13 +6,19 @@ import { Message } from '../types';
 const router = Router();
 
 function rowToMessage(row: Record<string, unknown>): Message {
+  const rawDate = row.created_at as Date;
+  const createdAt =
+    rawDate instanceof Date && !isNaN(rawDate.getTime())
+      ? rawDate.toISOString()
+      : new Date(0).toISOString();
+
   return {
     id: row.id as string,
     name: row.name as string,
     email: row.email as string,
     message: row.message as string,
     status: row.status as 'unread' | 'read',
-    createdAt: (row.created_at as Date).toISOString(),
+    createdAt,
   };
 }
 

@@ -1,10 +1,18 @@
-node_modules
-dist
+# Dependencias y builds — se regeneran dentro del contenedor
+frontend/node_modules
+frontend/dist
+backend/node_modules
+backend/dist
+
+# Archivos de entorno — nunca incluir en imagen
 .env
 .env.*
-!.env.example
+!frontend/.env.example
+!backend/.env.example
+
+# Control de versiones y tooling
 .git
 .kiro
-backend
-netlify
+
+# Documentación
 *.md

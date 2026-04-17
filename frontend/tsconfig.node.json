@@ -4,6 +4,7 @@
     "lib": ["ES2022"],
     "module": "esnext",
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
     "skipLibCheck": true,
 
     /* Bundler mode */

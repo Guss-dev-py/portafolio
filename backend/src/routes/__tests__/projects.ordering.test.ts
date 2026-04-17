@@ -28,7 +28,8 @@ const testApp = express();
 testApp.use(express.json());
 testApp.use('/api/projects', projectsRouter);
 
-// Arbitrary for a single project row with an arbitrary created_at date
+// Arbitrary for a single project row with valid created_at and updated_at dates
+// fc.date() can generate new Date(NaN) which is not a valid DB timestamp
 const projectRowArb = fc.record({
   id: fc.uuid(),
   name: fc.string({ minLength: 1, maxLength: 100 }),
@@ -37,8 +38,8 @@ const projectRowArb = fc.record({
   url: fc.constant('https://example.com'),
   image_url: fc.string({ minLength: 0, maxLength: 200 }),
   image_alt: fc.string({ minLength: 0, maxLength: 200 }),
-  created_at: fc.date(),
-  updated_at: fc.date(),
+  created_at: fc.date({ noInvalidDate: true }),
+  updated_at: fc.date({ noInvalidDate: true }),
 });
 
 describe('Property 7: Ordenamiento descendente por fecha de creación (proyectos)', () => {

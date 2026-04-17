@@ -7,6 +7,11 @@ import { Project } from '../types';
 
 const router = Router();
 
+function safeIso(date: unknown): string {
+  const d = date as Date;
+  return d instanceof Date && !isNaN(d.getTime()) ? d.toISOString() : new Date(0).toISOString();
+}
+
 function rowToProject(row: Record<string, unknown>): Project {
   return {
     id: row.id as string,
@@ -16,8 +21,8 @@ function rowToProject(row: Record<string, unknown>): Project {
     url: row.url as string,
     imageUrl: row.image_url as string,
     imageAlt: row.image_alt as string,
-    createdAt: (row.created_at as Date).toISOString(),
-    updatedAt: (row.updated_at as Date).toISOString(),
+    createdAt: safeIso(row.created_at),
+    updatedAt: safeIso(row.updated_at),
   };
 }
 

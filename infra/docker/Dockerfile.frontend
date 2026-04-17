@@ -1,11 +1,19 @@
 # Etapa 1: build
+# Build context: raíz del repo (para acceder tanto a frontend/ como a infra/)
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
+
+# Copiar dependencias del frontend e instalar
+COPY frontend/package*.json ./
 RUN npm ci
-COPY . .
+
+# Copiar el código fuente del frontend
+COPY frontend/ .
+
+# Inyectar la URL de la API como build arg
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Etapa 2: servidor estático
