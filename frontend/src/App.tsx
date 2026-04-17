@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { useTheme } from './hooks/useTheme';
 import { useActiveSection } from './hooks/useActiveSection';
 import { NavigationBar } from './components/NavigationBar/NavigationBar';
@@ -17,6 +18,12 @@ import MessagesPage from './pages/admin/MessagesPage';
 import type { SectionId } from './types';
 import './App.css';
 
+const ParticlesBackground = lazy(() =>
+  import('./components/ParticlesBackground/ParticlesBackground').then((m) => ({
+    default: m.ParticlesBackground,
+  }))
+);
+
 const SECTION_IDS: SectionId[] = ['inicio', 'sobre-mi', 'proyectos', 'contacto'];
 
 function PortfolioApp() {
@@ -29,12 +36,17 @@ function PortfolioApp() {
 
   return (
     <>
+      {/* Global particles — fixed, behind all content */}
+      <Suspense fallback={null}>
+        <ParticlesBackground />
+      </Suspense>
+
       <NavigationBar
         activeSection={activeSection}
         theme={theme}
         onToggleTheme={toggle}
       />
-      <main>
+      <main style={{ position: 'relative', zIndex: 1 }}>
         <HeroSection
           name={profile.name}
           lastName={profile.lastName}

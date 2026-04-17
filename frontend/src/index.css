@@ -3,9 +3,9 @@
 
 /* ── Tema claro (default) ── */
 :root {
-  --text:        #6b6375;
+  --text:        #4a4558;
   --text-h:      #08060d;
-  --text-muted:  #9ca3af;
+  --text-muted:  #6b6880;
   --bg:          #ffffff;
   --bg-deep:     #f4f3f8;
   --border:      #e5e4e7;
@@ -15,7 +15,7 @@
   --accent-border: rgba(170, 59, 255, 0.35);
   --nav-bg:      rgba(255, 255, 255, 0.85);
   --card-bg:     #ffffff;
-  --section-alt-bg: #f9f8fc;
+  --section-alt-bg: rgba(249, 248, 252, 0.82);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -50,7 +50,7 @@
   --accent-border: rgba(192, 132, 252, 0.30);
   --nav-bg:      rgba(8, 8, 16, 0.88);
   --card-bg:     #0f1020;
-  --section-alt-bg: #0b0b15;
+  --section-alt-bg: rgba(11, 11, 21, 0.78);
   --shadow:
     rgba(0, 0, 0, 0.6) 0 10px 15px -3px,
     rgba(0, 0, 0, 0.4) 0 4px 6px -2px;
@@ -74,7 +74,7 @@
     --accent-border: rgba(192, 132, 252, 0.30);
     --nav-bg:      rgba(8, 8, 16, 0.88);
     --card-bg:     #0f1020;
-    --section-alt-bg: #0b0b15;
+    --section-alt-bg: rgba(11, 11, 21, 0.78);
     --shadow:
       rgba(0, 0, 0, 0.6) 0 10px 15px -3px,
       rgba(0, 0, 0, 0.4) 0 4px 6px -2px;

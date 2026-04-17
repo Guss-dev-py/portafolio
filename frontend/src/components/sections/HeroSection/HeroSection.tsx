@@ -1,16 +1,9 @@
-import { lazy, Suspense } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import type { SkillTag } from '../../../types';
 import { spring, stagger } from '../../../motion/tokens';
 import { fadeUp, cinematicFadeUp, scaleIn, staggerContainer } from '../../../motion/variants';
 import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import styles from './HeroSection.module.css';
-
-const ParticlesBackground = lazy(() =>
-  import('../../ParticlesBackground/ParticlesBackground').then((m) => ({
-    default: m.ParticlesBackground,
-  }))
-);
 
 interface HeroSectionProps {
   name: string;
@@ -38,9 +31,6 @@ export function HeroSection({ name, lastName, role, intro, onCtaClick, skills }:
 
   return (
     <section id="inicio" className={styles.section} aria-label="Inicio">
-      <Suspense fallback={null}>
-        <ParticlesBackground />
-      </Suspense>
       <motion.div
         className={styles.content}
         variants={resolvedStaggerAll}

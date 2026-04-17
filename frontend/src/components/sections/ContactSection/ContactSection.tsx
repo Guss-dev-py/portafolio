@@ -22,13 +22,6 @@ const PLATFORM_ICONS: Record<string, string> = {
   website:  '↗',
 };
 
-const PLATFORM_LABELS: Record<string, string> = {
-  linkedin: 'LinkedIn',
-  github:   'GitHub',
-  email:    'Email',
-  website:  'Web',
-};
-
 function validate(data: ContactFormData): FieldError[] {
   const errors: FieldError[] = [];
   if (!data.name.trim())

@@ -143,12 +143,13 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  color: var(--text-muted);
+  color: var(--text);
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-family: var(--mono);
-  opacity: 0.5;
+  font-weight: 600;
+  opacity: 0.75;
   animation: scrollBounce 2s ease-in-out infinite;
 }
 
@@ -156,7 +157,8 @@
   content: '';
   width: 1px;
   height: 32px;
-  background: var(--border);
+  background: var(--accent);
+  opacity: 0.6;
 }
 
 @keyframes scrollBounce {
