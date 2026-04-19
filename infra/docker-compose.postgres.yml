@@ -14,7 +14,7 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3001"
     env_file:
       - ../backend/.env.production
     restart: unless-stopped
