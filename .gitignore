@@ -36,6 +36,7 @@ backend/dist
 *.sw?
 
 # Variables de entorno — NUNCA commitear
+.env
 frontend/.env
 frontend/.env.local
 frontend/.env.production

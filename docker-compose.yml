@@ -1,29 +1,33 @@
 services:
   frontend:
     build:
-      context: ..
+      context: .
       dockerfile: infra/docker/Dockerfile.frontend
       args:
         VITE_API_URL: /api
     ports:
-      - "8080:8080"
+      - "${FRONTEND_PORT:-8080}:${FRONTEND_PORT:-8080}"
+    environment:
+      FRONTEND_PORT: "${FRONTEND_PORT:-8080}"
+      BACKEND_PORT: "${BACKEND_PORT:-3001}"
     restart: unless-stopped
 
   backend:
     build:
-      context: ../backend
+      context: ./backend
       dockerfile: Dockerfile
+      args:
+        PORT: "${BACKEND_PORT:-3001}"
     ports:
-      - "3001:3001"
+      - "${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
     environment:
-      # Variables cargadas directamente para evitar interpolación de $ en bcrypt hashes
-      DATABASE_URL: "postgresql://portfolio_user:${POSTGRES_PASSWORD}@postgres:5432/portfolio"
+      # Variables pasadas directamente para evitar interpolación de $ en bcrypt hashes
+      DATABASE_URL: "${DATABASE_URL}"
       JWT_SECRET: "${JWT_SECRET}"
       ADMIN_USERNAME: "${ADMIN_USERNAME}"
-      # ADMIN_PASSWORD_HASH se pasa como variable de entorno directa — NO via env_file
-      # porque Docker Compose interpola los $ del hash bcrypt ($2b$12$...) como variables
+      # ADMIN_PASSWORD_HASH NO va via env_file — Docker Compose interpola $2b$12$... como variables
       ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH}"
-      PORT: "3001"
+      PORT: "${BACKEND_PORT:-3001}"
       CORS_ORIGIN: "${CORS_ORIGIN}"
       RESEND_API_KEY: "${RESEND_API_KEY}"
     restart: unless-stopped
@@ -37,9 +41,11 @@ services:
       POSTGRES_DB: portfolio
       POSTGRES_USER: portfolio_user
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ../database/migrations:/docker-entrypoint-initdb.d
+      - ./database/migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U portfolio_user -d portfolio"]
       interval: 5s

@@ -62,12 +62,11 @@ git clone https://github.com/Guss-dev-py/portafolio.git
 cd portafolio
 
 # 2. Crear variables de entorno
-cp infra/.env.example infra/.env
-# Editar infra/.env con los valores reales (ver sección Variables de entorno)
+cp .env.example .env
+# Editar .env con los valores reales (ver sección Variables de entorno)
 
 # 3. Levantar el stack completo
-cd infra
-docker compose -f docker-compose.postgres.yml --env-file .env up -d --build
+docker compose up -d --build
 ```
 
 El portfolio estará en `http://localhost:8080` y el panel admin en `http://localhost:8080/admin/login`.
@@ -75,7 +74,7 @@ El portfolio estará en `http://localhost:8080` y el panel admin en `http://loca
 La primera vez que se levanta el stack, insertar el usuario admin en la DB:
 
 ```bash
-docker exec -it infra-postgres-1 psql -U portfolio_user -d portfolio -c \
+docker exec -it portafolio-postgres-1 psql -U portfolio_user -d portfolio -c \
   "INSERT INTO admin_users (username, password_hash) VALUES ('tu-usuario', 'EL_HASH_BCRYPT');"
 ```
 
@@ -202,16 +201,18 @@ project-root/
 
 | Variable | Descripción |
 |----------|-------------|
+| `FRONTEND_PORT` | Puerto del frontend (default: 8080) |
+| `BACKEND_PORT` | Puerto del backend (default: 3001) |
+| `POSTGRES_PORT` | Puerto expuesto de PostgreSQL (default: 5432) |
 | `POSTGRES_PASSWORD` | Contraseña de PostgreSQL |
 | `DATABASE_URL` | URL de conexión a la DB |
 | `JWT_SECRET` | Secreto para firmar tokens JWT (mín. 32 chars) |
 | `ADMIN_USERNAME` | Usuario del panel admin |
 | `ADMIN_PASSWORD_HASH` | Hash bcrypt de la contraseña (escapar `$` → `$$` en el archivo) |
-| `PORT` | Puerto del backend (3001) |
 | `CORS_ORIGIN` | Dominio del frontend en producción |
 | `RESEND_API_KEY` | API key de Resend para emails |
 
-> **Importante:** Docker Compose interpola los `$` como variables de entorno. El hash bcrypt `$2b$12$...` debe escribirse como `$$2b$$12$$...` en `infra/.env`.
+> **Importante:** Docker Compose interpola los `$` como variables de entorno. El hash bcrypt `$2b$12$...` debe escribirse como `$$2b$$12$$...` en `.env`.
 
 ### `frontend/.env`
 
@@ -236,7 +237,7 @@ Ver `infra/.env.example` y `frontend/.env.example` para la lista completa. **Nun
 ### Actualizar el hash del admin
 
 ```bash
-docker exec -it infra-postgres-1 psql -U portfolio_user -d portfolio
+docker exec -it portafolio-postgres-1 psql -U portfolio_user -d portfolio
 
 UPDATE admin_users
 SET password_hash = '$2b$12$...'
@@ -260,23 +261,23 @@ cd backend && npm run test
 ## Comandos Docker útiles
 
 ```bash
-# Levantar stack
-docker compose -f docker-compose.postgres.yml --env-file .env up -d --build
+# Levantar stack (desde la raíz del repo)
+docker compose up -d --build
 
 # Reiniciar sin rebuild
-docker compose -f docker-compose.postgres.yml --env-file .env up -d
+docker compose up -d
 
 # Ver logs
-docker compose -f docker-compose.postgres.yml logs -f --tail=50
+docker compose logs -f --tail=50
 
 # Detener
-docker compose -f docker-compose.postgres.yml down
+docker compose down
 
 # Detener y borrar la DB
-docker compose -f docker-compose.postgres.yml down -v
+docker compose down -v
 
 # Rebuild de un servicio
-docker compose -f docker-compose.postgres.yml --env-file .env up -d --build backend
+docker compose up -d --build backend
 ```
 
 ---
