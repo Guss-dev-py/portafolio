@@ -15,8 +15,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
-    env_file:
-      - ../backend/.env.production
+    environment:
+      # Variables cargadas directamente para evitar interpolación de $ en bcrypt hashes
+      DATABASE_URL: "postgresql://portfolio_user:${POSTGRES_PASSWORD}@postgres:5432/portfolio"
+      JWT_SECRET: "${JWT_SECRET}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME}"
+      # ADMIN_PASSWORD_HASH se pasa como variable de entorno directa — NO via env_file
+      # porque Docker Compose interpola los $ del hash bcrypt ($2b$12$...) como variables
+      ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH}"
+      PORT: "3001"
+      CORS_ORIGIN: "${CORS_ORIGIN}"
+      RESEND_API_KEY: "${RESEND_API_KEY}"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -27,7 +36,7 @@ services:
     environment:
       POSTGRES_DB: portfolio
       POSTGRES_USER: portfolio_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ../database/migrations:/docker-entrypoint-initdb.d

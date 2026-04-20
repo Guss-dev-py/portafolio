@@ -42,6 +42,7 @@ frontend/.env.production
 backend/.env
 backend/.env.local
 backend/.env.production
+infra/.env
 
-# Kiro specs (remover si querés trackearlas)
+# Kiro specs
 .kiro/
