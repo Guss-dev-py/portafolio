@@ -1,243 +1,170 @@
 # Augusto Freire — Portafolio Personal
 
-Portafolio personal full-stack con panel de administración privado. Construido con React + Vite en el frontend y Node.js + Express + PostgreSQL en el backend. Incluye sistema de animaciones con partículas Three.js, modo oscuro fijo, formulario de contacto funcional y gestión de proyectos y mensajes desde un panel admin protegido con JWT.
+Portafolio full-stack con estética editorial tipo terminal y panel de administración privado. Frontend en **React 19 + TypeScript (Vite)**, API REST en **Node.js + Express + PostgreSQL**, todo desplegado como un stack autocontenido de **Docker Compose** detrás de **Nginx**.
+
+🌐 **Producción:** [freire.ucielbustamante.com](https://freire.ucielbustamante.com)
 
 ---
 
 ## Stack tecnológico
 
 ### Frontend
-- **React 19** + **TypeScript** — componentes tipados y hooks personalizados
-- **Vite 8** — bundler y dev server
-- **React Router v7** — navegación SPA con rutas protegidas
-- **Framer Motion** — sistema de animaciones con tokens y variantes reutilizables
-- **Three.js** — fondo de partículas 3D con ShaderMaterial, conexiones dinámicas y parallax al mouse
-- **CSS Modules** + **CSS custom properties** — sistema de diseño con tema oscuro fijo
-- **Inter** — tipografía principal via Google Fonts
+- **React 19** + **TypeScript** — componentes tipados y hooks de datos propios (sin state manager externo)
+- **Vite** — bundler y dev server
+- **React Router v7** — SPA con rutas protegidas para el admin
+- **Framer Motion** — sistema de animaciones propio (`src/motion/`) con tokens y variantes reutilizables
+- **Canvas 2D** — fondo de partículas de 5 capas con drift, repulsión al mouse, conexiones por profundidad, parallax y escalado retina; respeta `prefers-reduced-motion`
+- **CSS Modules** + custom properties — sistema de diseño "paper": paleta crema/tinta, JetBrains Mono + Newsreader
 - **Vitest** + **Testing Library** + **fast-check** — tests unitarios y property-based
 
 ### Backend
-- **Node.js** + **Express** + **TypeScript** — API REST tipada
-- **PostgreSQL** + **node-postgres (pg)** — persistencia con queries SQL directas
-- **JWT** + **bcrypt** — autenticación stateless segura
-- **Zod** — validación de schemas con tipado estático
-- **Resend** — envío de emails de notificación desde el formulario de contacto
-- **Vitest** + **fast-check** — property-based testing
+- **Express** + **TypeScript** — API REST con validación en el borde
+- **PostgreSQL 16** + **node-postgres** — queries parametrizadas, IDs UUID
+- **Zod** — todo body entrante se valida antes de llegar al handler
+- **JWT (HS256, 8 h)** + **bcrypt (cost 12)** — autenticación del admin
+- **express-rate-limit** — login (10 req/15 min) y contacto (5 req/15 min), por IP real detrás del proxy
+- **Resend** — notificación por email de cada mensaje del formulario
+- **Migraciones automáticas** — el backend aplica las migraciones pendientes al arrancar (tabla `schema_migrations`, transaccional e idempotente)
 
 ### Infraestructura
-- **Docker** + **Docker Compose** — stack autocontenido (frontend + backend + PostgreSQL)
-- **Nginx** — servidor estático del frontend + reverse proxy interno hacia el backend en `:3001`
-- **PostgreSQL 16** — base de datos dentro del stack Docker con volumen persistente
+- **Docker Compose** — frontend (Nginx) + backend + PostgreSQL con volumen persistente
+- **Nginx** — sirve la SPA y proxya `/api/*` al backend
+- `infra/rotate-secrets.sh` — rotación guiada de secretos (JWT, Postgres, admin, Resend) con backup y health check
 
 ---
 
 ## Funcionalidades
 
-### Portafolio público
-- **Hero** — presentación con animación de entrada escalonada y fondo de partículas 3D
-- **Sobre mí** — biografía, educación, metas, áreas de interés y stack técnico
-- **Proyectos** — lista numerada con datos desde la API, link a GitHub
-- **Contacto** — links sociales + formulario funcional con envío por email (Resend)
-- **Partículas Three.js** — fondo global con ShaderMaterial (círculos reales), conexiones dinámicas, profundidad por capas y parallax al mouse
-- **Tema oscuro fijo** — diseño premium con paleta violeta/lavanda
+### Sitio público
+- **Hero terminal** — sesión de consola con animación de tipeo y estado de disponibilidad en vivo (`open / working / occupied`) gestionado desde el admin
+- **Proyectos** — listado tipo índice servido desde la API: tecnologías expandibles con animación, link al sitio en vivo (click en la fila) y al repositorio ("Ver repo")
+- **Contacto** — formulario con validación accesible (labels, `aria-invalid`, mensajes de error), persistencia en DB y notificación por email
+- **CV** — botón en la barra de navegación que abre el PDF en una pestaña nueva
+- **Accesibilidad** — skip-link, focus rings visibles, focus trap en menú móvil y diálogos, toasts anunciados con `aria-live`, `prefers-reduced-motion` respetado
 
 ### Panel de administración (`/admin`)
-- **Login** — autenticación con JWT, sesión de 8 horas
-- **Proyectos** — crear, editar y eliminar proyectos del portafolio
-- **Mensajes** — ver y gestionar mensajes recibidos desde el formulario de contacto
-- **Rutas protegidas** — `AuthGuard` redirige a login si no hay sesión válida
-- **Acceso** — punto `·` discreto en la barra de navegación
+- **Login** con JWT (8 h); las credenciales salen de variables de entorno — no hace falta insertar nada en la DB
+- **Proyectos** — CRUD completo con búsqueda, filtros por tecnología, orden y export a JSON
+- **Mensajes** — bandeja con filtros leído/no-leído, detalle, respuesta vía Gmail y eliminación con confirmación
+- **Ajustes** — cambia el estado de disponibilidad que muestra el hero público
+- **Atajos de teclado** — `/` buscar · `n` nuevo proyecto · `g p / g m / g s` navegar · `Esc` cerrar
 
 ---
 
-## Cómo levantar el portfolio
+## Cómo levantarlo
 
-### Opción A — Docker (recomendado)
+### Opción A — Docker (recomendada)
 
-**Requisitos:** Docker Desktop corriendo + Git + Node.js (para generar el hash del admin)
+**Requisitos:** Docker + Node.js (solo para generar el hash del admin)
 
 ```bash
-# 1. Clonar
 git clone https://github.com/Guss-dev-py/portafolio.git
 cd portafolio
 
-# 2. Crear variables de entorno
 cp .env.example .env
-# Editar .env con los valores reales (ver sección Variables de entorno)
+# Completar los valores (ver tabla de variables)
 
-# 3. Generar el hash bcrypt para la contraseña del admin
+# Generar el hash bcrypt del password del admin:
 cd backend && npm install
-node -e "const b = require('bcrypt'); b.hash('TU_CONTRASEÑA', 12).then(console.log)"
+node -e "const b=require('bcrypt');b.hash('TU_PASSWORD',12).then(console.log)"
 cd ..
-# Pegar el hash generado en ADMIN_PASSWORD_HASH dentro de .env
-# Importante: escapar los $ del hash en el archivo .env → $2b$12$... se escribe como $$2b$$12$$...
+# Pegarlo en ADMIN_PASSWORD_HASH escapando cada $ como $$ → $$2b$$12$$...
 
-# 4. Levantar el stack completo
 docker compose up -d --build
 ```
 
-El portfolio estará en `http://localhost:8080` y el panel admin en `http://localhost:8080/admin/login`.  
-Las credenciales del admin se toman de `ADMIN_USERNAME` y `ADMIN_PASSWORD_HASH` en `.env` — no hace falta insertar nada en la base de datos manualmente.
+- Portfolio: `http://localhost:8080`
+- Admin: `http://localhost:8080/admin/login`
+
+Las migraciones se aplican solas al arrancar el backend — tanto en la primera corrida como al actualizar (`git pull && docker compose up -d --build`).
+
+### Opción B — Desarrollo local
+
+**Requisitos:** Node.js 20+ y PostgreSQL 14+
+
+```bash
+# Backend
+cd backend
+cp .env.example .env   # completar todas las variables
+npm install
+npm run dev            # → http://localhost:3001 (aplica migraciones al arrancar)
+
+# Frontend (otra terminal)
+cd frontend
+cp .env.example .env   # VITE_API_URL=http://localhost:3001
+npm install
+npm run dev            # → http://localhost:5173
+```
 
 ---
 
-### Opción B — Desarrollo local (sin Docker)
+## Variables de entorno (`.env` raíz)
 
-**Requisitos:** Node.js 20+ + PostgreSQL 14+ corriendo localmente
+| Variable | Descripción |
+|----------|-------------|
+| `FRONTEND_PORT` / `BACKEND_PORT` / `POSTGRES_PORT` | Puertos publicados (defaults: 8080 / 3001 / 5432) |
+| `POSTGRES_PASSWORD` | Password de PostgreSQL |
+| `DATABASE_URL` | Conexión a la DB (host `postgres` dentro del compose) |
+| `JWT_SECRET` | Secreto de firma JWT — `openssl rand -hex 32` |
+| `ADMIN_USERNAME` | Usuario del panel admin |
+| `ADMIN_PASSWORD_HASH` | Hash bcrypt (escapar `$` → `$$` en el archivo) |
+| `CORS_ORIGIN` | Dominio del frontend en producción, **sin barra final** |
+| `RESEND_API_KEY` | API key de Resend |
+| `RECIPIENT_EMAIL` | Casilla que recibe los mensajes del formulario |
 
-**Frontend:**
-```bash
-cd frontend
-cp .env.example .env
-# Editar .env: VITE_API_URL=http://localhost:3001
-npm install
-npm run dev
-# → http://localhost:5173
-```
-
-**Backend:**
-```bash
-cd backend
-cp .env.example .env
-# Completar todas las variables (ver sección Variables de entorno)
-npm install
-npm run dev
-# → http://localhost:3001
-```
-
-**Crear las tablas (primera vez):**
-```bash
-psql -U postgres -d portfolio -f database/migrations/001_init.sql
-```
+El backend valida todas las variables al arrancar y corta con un error claro si falta alguna.
 
 ---
 
 ## Arquitectura
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │         freire.ucielbustamante.com   │
-                    │         Nginx (reverse proxy host)   │
-                    └──────────┬──────────────┬────────────┘
-                               │              │
-                    ┌──────────▼──────┐  ┌────▼──────────────┐
-                    │  Frontend       │  │  Backend           │
-                    │  React + Vite   │  │  Express + Node.js │
-                    │  Nginx :8080    │  │  :3001             │
-                    └─────────────────┘  └────────┬──────────┘
-                                                  │
-                                         ┌────────▼──────────┐
-                                         │  PostgreSQL 16     │
-                                         │  :5432 (interno)   │
-                                         └───────────────────┘
+            ┌──────────────────────────────────────┐
+            │   freire.ucielbustamante.com          │
+            │   Nginx del host (reverse proxy)      │
+            └────────────────┬───────────────────── ┘
+                             │
+            ┌────────────────▼─────────────────┐
+            │  frontend (Nginx :8080)           │
+            │  /        → SPA React             │
+            │  /api/*   → proxy ─────────────┐  │
+            └────────────────────────────────│──┘
+                                             │
+            ┌────────────────────────────────▼──┐
+            │  backend (Express :3001)           │
+            │  JWT · Zod · rate limit · Resend   │
+            └────────────────┬──────────────────┘
+                             │
+            ┌────────────────▼──────────────────┐
+            │  PostgreSQL 16 (volumen pgdata)    │
+            │  migraciones automáticas al boot   │
+            └───────────────────────────────────┘
 ```
-
-El frontend corre en Nginx en el puerto 8080. Nginx actúa como reverse proxy interno: sirve la SPA en `/` y redirige `/api/*` al backend en `backend:3001`. En producción, un segundo Nginx en el host redirige el dominio al contenedor frontend.
 
 ---
 
-## Estructura del proyecto
+## Estructura
 
 ```
-project-root/
-├── frontend/                   # SPA React + Vite
-│   ├── src/
-│   │   ├── api/                # Cliente HTTP y funciones de API
-│   │   ├── components/
-│   │   │   ├── NavigationBar/
-│   │   │   ├── ParticlesBackground/  # Three.js ShaderMaterial
-│   │   │   ├── ProjectCard/
-│   │   │   └── sections/       # Hero, About, Projects, Contact
-│   │   ├── data/               # Datos estáticos (perfil, skills, contacto)
-│   │   ├── hooks/              # useActiveSection, useProjects, useMessages
-│   │   ├── motion/             # Sistema de animaciones (tokens, variants, hooks)
-│   │   ├── pages/
-│   │   │   └── admin/          # Login, AdminLayout, ProjectsPage, MessagesPage
-│   │   └── types/              # Interfaces TypeScript compartidas
-│   ├── public/                 # Assets estáticos (favicon, icons)
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── vitest.config.ts
-│   ├── eslint.config.js
-│   ├── tsconfig.json
-│   └── .env.example
-│
-├── backend/                    # API REST Node.js + Express
+├── frontend/
 │   └── src/
-│       ├── middleware/         # auth.ts (JWT), validate.ts (Zod)
-│       ├── routes/             # auth, projects, messages, contact, health
-│       └── schemas/            # Zod schemas para validación de requests
-│
-├── database/
-│   └── migrations/
-│       └── 001_init.sql        # Creación de tablas (projects, messages, admin_users)
-│
-├── infra/                      # Docker, Nginx, deploy
-│   ├── docker/
-│   │   └── Dockerfile.frontend
-│   ├── nginx/
-│   │   ├── nginx.conf          # Config interna del contenedor frontend (proxy → backend:3001)
-│   │   └── freire.conf         # Reverse proxy del host (freire.ucielbustamante.com)
-│   ├── docker-compose.postgres.yml   # Stack completo: frontend + backend + PostgreSQL
-│   ├── docker-compose.yml            # Stack sin PostgreSQL (DB externa)
-│   ├── .env                    # Variables para Docker Compose (NO commitear)
-│   └── .env.example            # Plantilla de variables
-│
-├── .gitignore
-├── .dockerignore
-└── README.md
-```
-
----
-
-## Variables de entorno
-
-### `.env` (Docker Compose — raíz del repo)
-
-| Variable | Descripción |
-|----------|-------------|
-| `FRONTEND_PORT` | Puerto del frontend (default: 8080) |
-| `BACKEND_PORT` | Puerto del backend (default: 3001) |
-| `POSTGRES_PORT` | Puerto expuesto de PostgreSQL (default: 5432) |
-| `POSTGRES_PASSWORD` | Contraseña de PostgreSQL |
-| `DATABASE_URL` | URL de conexión a la DB |
-| `JWT_SECRET` | Secreto para firmar tokens JWT (mín. 32 chars) |
-| `ADMIN_USERNAME` | Usuario del panel admin |
-| `ADMIN_PASSWORD_HASH` | Hash bcrypt de la contraseña (escapar `$` → `$$` en el archivo) |
-| `CORS_ORIGIN` | Dominio del frontend en producción |
-| `RESEND_API_KEY` | API key de Resend para emails |
-
-> **Importante:** Docker Compose interpola los `$` como variables de entorno. El hash bcrypt `$2b$12$...` debe escribirse como `$$2b$$12$$...` en `.env`.
-
-### `frontend/.env`
-
-| Variable | Descripción |
-|----------|-------------|
-| `VITE_API_URL` | URL base de la API (`http://localhost:3001` en dev, `/api` en Docker) |
-
-Ver `infra/.env.example` y `frontend/.env.example` para la lista completa. **Nunca commitear archivos `.env`.**
-
----
-
-## Base de datos
-
-### Tablas
-
-| Tabla | Descripción |
-|-------|-------------|
-| `projects` | Proyectos del portafolio |
-| `messages` | Mensajes del formulario de contacto |
-| `admin_users` | Usuarios del panel de administración |
-
-### Actualizar el hash del admin
-
-```bash
-docker exec -it portafolio-postgres-1 psql -U portfolio_user -d portfolio
-
-UPDATE admin_users
-SET password_hash = '$2b$12$...'
-WHERE username = 'tu-usuario';
+│       ├── api/            # apiClient + funciones por recurso
+│       ├── components/     # NavigationBar, ParticlesBackground, Toast, secciones…
+│       ├── hooks/          # useProjects, useMessages, useWorkStatus
+│       ├── motion/         # tokens, variantes y hooks de animación
+│       └── pages/admin/    # Login, Layout, Projects, Messages, Settings
+├── backend/
+│   └── src/
+│       ├── middleware/     # auth (JWT), validate (Zod), validateUuid, rate limiters
+│       ├── routes/         # auth, projects, messages, contact, status, health
+│       ├── schemas/        # Zod schemas
+│       └── utils/          # runMigrations, helpers
+├── database/migrations/    # 001_init · 002_site_settings · 003_repo_url
+├── infra/
+│   ├── docker/             # Dockerfile del frontend
+│   ├── nginx/              # nginx.conf (contenedor) + freire.conf (host)
+│   └── rotate-secrets.sh   # rotación de secretos en producción
+└── docker-compose.yml
 ```
 
 ---
@@ -245,58 +172,20 @@ WHERE username = 'tu-usuario';
 ## Tests
 
 ```bash
-# Frontend
-cd frontend && npx vitest --run
-
-# Backend
-cd backend && npm run test
+cd frontend && npx vitest --run   # 111 tests (unitarios + property-based)
+cd backend  && npm run test       # 44 tests (rutas con supertest, DB mockeada)
 ```
 
 ---
 
-## Comandos Docker útiles
+## Seguridad
 
-```bash
-# Levantar stack (desde la raíz del repo)
-docker compose up -d --build
-
-# Reiniciar sin rebuild
-docker compose up -d
-
-# Ver logs
-docker compose logs -f --tail=50
-
-# Detener
-docker compose down
-
-# Detener y borrar la DB
-docker compose down -v
-
-# Rebuild de un servicio
-docker compose up -d --build backend
-```
-
----
-
-## Nginx en el host (producción)
-
-```bash
-sudo cp infra/nginx/freire.conf /etc/nginx/sites-available/freire.ucielbustamante.com
-sudo ln -s /etc/nginx/sites-available/freire.ucielbustamante.com /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
----
-
-## Próximos pasos
-
-- [ ] Agregar proyectos reales con imágenes y descripciones completas
-- [ ] Implementar paginación en la lista de mensajes del admin
-- [ ] Agregar soporte para imágenes de proyectos con upload a S3 o Cloudinary
-- [ ] Configurar HTTPS con Certbot en el servidor de producción
-- [ ] Agregar rate limiting al endpoint de contacto
-- [ ] Implementar refresh tokens para extender sesiones del admin
-- [ ] CI/CD con GitHub Actions
+- Queries 100 % parametrizadas, validación Zod en todos los endpoints públicos
+- JWT con algoritmo fijado (HS256) y expiración verificada en backend y frontend
+- Rate limiting por IP real (`trust proxy` detrás de Nginx)
+- Login con comparación bcrypt de tiempo constante (sin filtrar usuarios válidos)
+- CORS restringido al dominio exacto de producción
+- Rotación de secretos guiada: `./infra/rotate-secrets.sh`
 
 ---
 

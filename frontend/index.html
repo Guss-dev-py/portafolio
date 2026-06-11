@@ -26,16 +26,5 @@
     <body>
         <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
-
-        <!--
-      Formulario oculto para que Netlify lo detecte durante el build.
-      Netlify escanea el HTML estático, no el JS renderizado.
-      Los nombres de los campos deben coincidir exactamente con el formulario en React.
-    -->
-        <form name="contacto" data-netlify="true" hidden>
-            <input type="text" name="name" />
-            <input type="email" name="email" />
-            <textarea name="message"></textarea>
-        </form>
     </body>
 </html>

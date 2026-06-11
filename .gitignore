@@ -35,6 +35,13 @@ backend/dist
 *.sln
 *.sw?
 
+# Documentación interna y tooling de Claude — solo local, no va al repo público
+/*.md
+!/README.md
+.claude/
+.github/
+.impeccable/
+
 # Variables de entorno — NUNCA commitear
 .env
 .env.bak.*
