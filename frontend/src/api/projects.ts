@@ -1,7 +1,8 @@
 import { apiClient } from './client';
 import type { Project, ProjectInput } from '../types';
 
-export const getProjects = () => apiClient<Project[]>('/api/projects');
+export const getProjects = (signal?: AbortSignal) =>
+  apiClient<Project[]>('/api/projects', { signal });
 
 export const createProject = (data: ProjectInput) =>
   apiClient<Project>('/api/projects', { method: 'POST', body: JSON.stringify(data) });

@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { useProjects } from '../../hooks/useProjects';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Project, ProjectInput } from '../../types';
+import { useAdminContext } from './adminContext';
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { useToast } from '../../components/Toast/toastContext';
+import { relDateDays } from '../../utils/date';
 import styles from './admin.module.css';
 
 function validateForm(data: ProjectInput): Record<string, string> {
@@ -9,20 +12,22 @@ function validateForm(data: ProjectInput): Record<string, string> {
   if (!data.description.trim()) errors.description = 'La descripción es requerida';
   if (!data.technologies.length) errors.technologies = 'Al menos una tecnología es requerida';
   try { new URL(data.url); } catch { errors.url = 'La URL debe ser válida'; }
+  if (data.repoUrl.trim()) {
+    try { new URL(data.repoUrl); } catch { errors.repoUrl = 'La URL debe ser válida'; }
+  }
   return errors;
 }
 
 const emptyForm = (): ProjectInput => ({
-  name: '',
-  description: '',
-  technologies: [],
-  url: '',
-  imageUrl: '',
-  imageAlt: '',
+  name: '', description: '', technologies: [], url: '', repoUrl: '', imageUrl: '', imageAlt: '',
 });
 
+
 export default function ProjectsPage() {
-  const { projects, loading, error, addProject, editProject, removeProject } = useProjects();
+  const { searchRef, setOpenCreateHandler, projectsApi } = useAdminContext();
+  const { projects, loading, error, addProject, editProject, removeProject } = projectsApi;
+  const { toast } = useToast();
+
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<ProjectInput & { technologiesRaw: string }>(
@@ -30,13 +35,28 @@ export default function ProjectsPage() {
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'name'>('updated');
+  const [filterTech, setFilterTech] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<Project | null>(null);
+  const localSearchRef = useRef<HTMLInputElement | null>(null);
 
-  const openCreate = () => {
+  // sync external ref once on mount (refs don't change identity)
+  useEffect(() => {
+    searchRef.current = localSearchRef.current;
+  }, [searchRef]);
+
+  const openCreate = useCallback(() => {
     setEditingProject(null);
     setFormData({ ...emptyForm(), technologiesRaw: '' });
     setFormErrors({});
     setShowForm(true);
-  };
+  }, []);
+
+  useEffect(() => {
+    setOpenCreateHandler(openCreate);
+    return () => setOpenCreateHandler(null);
+  }, [setOpenCreateHandler, openCreate]);
 
   const openEdit = (project: Project) => {
     setEditingProject(project);
@@ -46,6 +66,7 @@ export default function ProjectsPage() {
       technologies: project.technologies,
       technologiesRaw: project.technologies.join(', '),
       url: project.url,
+      repoUrl: project.repoUrl,
       imageUrl: project.imageUrl,
       imageAlt: project.imageAlt,
     });
@@ -61,10 +82,10 @@ export default function ProjectsPage() {
 
   const handleChange = (field: keyof ProjectInput | 'technologiesRaw', value: string) => {
     if (field === 'technologiesRaw') {
-      const techs = value.split(',').map((t) => t.trim()).filter(Boolean);
-      setFormData((prev) => ({ ...prev, technologiesRaw: value, technologies: techs }));
+      const techs = value.split(',').map(t => t.trim()).filter(Boolean);
+      setFormData(prev => ({ ...prev, technologiesRaw: value, technologies: techs }));
     } else {
-      setFormData((prev) => ({ ...prev, [field]: value }));
+      setFormData(prev => ({ ...prev, [field]: value }));
     }
   };
 
@@ -75,127 +96,216 @@ export default function ProjectsPage() {
       description: formData.description,
       technologies: formData.technologies,
       url: formData.url,
+      repoUrl: formData.repoUrl,
       imageUrl: formData.imageUrl,
       imageAlt: formData.imageAlt,
     };
-    const errors = validateForm(input);
-    if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+    const errs = validateForm(input);
+    if (Object.keys(errs).length > 0) { setFormErrors(errs); return; }
     setFormErrors({});
     setSubmitting(true);
     try {
       if (editingProject) {
         await editProject(editingProject.id, input);
+        toast({ title: 'Proyecto actualizado', msg: input.name, variant: 'ok' });
       } else {
         await addProject(input);
+        toast({ title: 'Proyecto creado', msg: input.name, variant: 'ok' });
       }
       setShowForm(false);
       setEditingProject(null);
     } catch (err) {
-      setFormErrors({ form: err instanceof Error ? err.message : 'Error al guardar el proyecto' });
+      setFormErrors({ form: err instanceof Error ? err.message : 'Error al guardar' });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (project: Project) => {
-    if (!window.confirm(`¿Eliminar el proyecto "${project.name}"?`)) return;
+  const handleDeleteConfirm = async () => {
+    if (!confirmDelete) return;
     try {
-      await removeProject(project.id);
+      await removeProject(confirmDelete.id);
+      toast({ title: 'Proyecto eliminado', msg: confirmDelete.name, variant: 'ok' });
     } catch {
-      alert('Error al eliminar el proyecto');
+      toast({ title: 'Error', msg: 'No se pudo eliminar el proyecto', variant: 'danger' });
+    } finally {
+      setConfirmDelete(null);
     }
   };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(projects, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'projects.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  };
+
+  const allTechs = useMemo(
+    () => Array.from(new Set(projects.flatMap(p => p.technologies))).sort(),
+    [projects],
+  );
+
+  const stats = useMemo(() => {
+    const techCount = new Set(projects.flatMap(p => p.technologies)).size;
+    if (!projects.length) return { techCount, lastUpdate: '-' };
+    const latest = [...projects].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )[0];
+    return { techCount, lastUpdate: relDateDays(latest.updatedAt) };
+  }, [projects]);
+
+  const filtered = useMemo(() => projects
+    .filter(p => {
+      const q = search.toLowerCase();
+      return !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
+    })
+    .filter(p => !filterTech || p.technologies.includes(filterTech))
+    .sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'created') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    }),
+    [projects, search, filterTech, sortBy],
+  );
 
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
+        <div className={styles.crumbs}>admin / proyectos</div>
         <h1 className={styles.pageTitle}>Proyectos</h1>
-        {!showForm && (
-          <button className={styles.btnPrimary} onClick={openCreate}>
-            + Agregar proyecto
-          </button>
-        )}
+        <div className={styles.headerActions}>
+          <button className={styles.btnGhost} onClick={handleExport}>Exportar JSON</button>
+          <button className={styles.btnPrimary} onClick={openCreate}>+ Nuevo proyecto [n]</button>
+        </div>
+      </div>
+
+      <div className={styles.statsStrip}>
+        <div className={styles.statCell}>
+          <span className={styles.statLabel}>Total</span>
+          <span className={styles.statValue}>{projects.length}</span>
+        </div>
+        <div className={styles.statCell}>
+          <span className={styles.statLabel}>Tecnologías</span>
+          <span className={styles.statValue}>{stats.techCount}</span>
+        </div>
+        <div className={styles.statCell}>
+          <span className={styles.statLabel}>Último update</span>
+          <span className={styles.statValue}>{stats.lastUpdate}</span>
+        </div>
+        <div className={styles.statCell}>
+          <span className={styles.statLabel}>Repo</span>
+          <span className={styles.statValue}>github.com/Guss-dev-py</span>
+        </div>
       </div>
 
       {showForm && (
         <div className={styles.formCard}>
-          <h2 className={styles.formCardTitle}>
-            {editingProject ? 'Editar proyecto' : 'Nuevo proyecto'}
-          </h2>
+          <div className={styles.formCardHead}>
+            <span>{editingProject ? `┌─ editando: ${editingProject.name}` : '┌─ nuevo proyecto'}</span>
+            <button type="button" className={styles.closeBtn} onClick={handleCancel}>✕</button>
+          </div>
 
           {formErrors.form && (
-            <p className={styles.formError}>{formErrors.form}</p>
+            <div className={styles.formAlert}>{formErrors.form}</div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate>
+          <form onSubmit={handleSubmit} noValidate className={styles.form}>
             <div className={styles.formGrid}>
               <div className={styles.field}>
-                <label htmlFor="proj-name">Nombre *</label>
+                <label htmlFor="proj-name">NOMBRE *</label>
                 <input
                   id="proj-name"
                   value={formData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
+                  onChange={e => handleChange('name', e.target.value)}
+                  className={formErrors.name ? styles.inputErr : ''}
                 />
-                {formErrors.name && <span className={styles.fieldError}>{formErrors.name}</span>}
+                {formErrors.name && <span className={styles.fieldErr}>{formErrors.name}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="proj-url">URL *</label>
+                <label htmlFor="proj-url">URL DEL PROYECTO *</label>
                 <input
                   id="proj-url"
                   value={formData.url}
-                  onChange={(e) => handleChange('url', e.target.value)}
-                  placeholder="https://ejemplo.com"
+                  onChange={e => handleChange('url', e.target.value)}
+                  placeholder="https://miproyecto.com"
+                  className={formErrors.url ? styles.inputErr : ''}
                 />
-                {formErrors.url && <span className={styles.fieldError}>{formErrors.url}</span>}
+                {formErrors.url && <span className={styles.fieldErr}>{formErrors.url}</span>}
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="proj-repoUrl">URL DEL REPO</label>
+                <input
+                  id="proj-repoUrl"
+                  value={formData.repoUrl}
+                  onChange={e => handleChange('repoUrl', e.target.value)}
+                  placeholder="https://github.com/..."
+                  className={formErrors.repoUrl ? styles.inputErr : ''}
+                />
+                {formErrors.repoUrl && <span className={styles.fieldErr}>{formErrors.repoUrl}</span>}
               </div>
 
               <div className={`${styles.field} ${styles.formGridFull}`}>
-                <label htmlFor="proj-description">Descripción *</label>
+                <label htmlFor="proj-description">DESCRIPCIÓN *</label>
                 <textarea
                   id="proj-description"
                   value={formData.description}
-                  onChange={(e) => handleChange('description', e.target.value)}
+                  onChange={e => handleChange('description', e.target.value)}
                   rows={3}
+                  className={formErrors.description ? styles.inputErr : ''}
                 />
-                {formErrors.description && <span className={styles.fieldError}>{formErrors.description}</span>}
+                {formErrors.description && <span className={styles.fieldErr}>{formErrors.description}</span>}
               </div>
 
               <div className={`${styles.field} ${styles.formGridFull}`}>
-                <label htmlFor="proj-technologies">Tecnologías * (separadas por coma)</label>
+                <label htmlFor="proj-tech">
+                  TECNOLOGÍAS * <span className={styles.fieldHint}>(separadas por coma)</span>
+                </label>
                 <input
-                  id="proj-technologies"
+                  id="proj-tech"
                   value={formData.technologiesRaw}
-                  onChange={(e) => handleChange('technologiesRaw', e.target.value)}
+                  onChange={e => handleChange('technologiesRaw', e.target.value)}
                   placeholder="React, TypeScript, Node.js"
+                  className={formErrors.technologies ? styles.inputErr : ''}
                 />
-                {formErrors.technologies && <span className={styles.fieldError}>{formErrors.technologies}</span>}
+                {formData.technologies.length > 0 && (
+                  <div className={styles.chipPreview}>
+                    {formData.technologies.map(t => (
+                      <span key={t} className={styles.chip}>{t}</span>
+                    ))}
+                  </div>
+                )}
+                {formErrors.technologies && <span className={styles.fieldErr}>{formErrors.technologies}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="proj-imageUrl">URL de imagen</label>
+                <label htmlFor="proj-imageUrl">URL IMAGEN</label>
                 <input
                   id="proj-imageUrl"
                   value={formData.imageUrl}
-                  onChange={(e) => handleChange('imageUrl', e.target.value)}
+                  onChange={e => handleChange('imageUrl', e.target.value)}
                 />
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="proj-imageAlt">Texto alternativo de imagen</label>
+                <label htmlFor="proj-imageAlt">ALT TEXTO</label>
                 <input
                   id="proj-imageAlt"
                   value={formData.imageAlt}
-                  onChange={(e) => handleChange('imageAlt', e.target.value)}
+                  onChange={e => handleChange('imageAlt', e.target.value)}
                 />
               </div>
             </div>
 
             <div className={styles.formActions}>
               <button type="submit" className={styles.btnPrimary} disabled={submitting}>
-                {submitting ? 'Guardando...' : editingProject ? 'Guardar cambios' : 'Crear proyecto'}
+                {submitting ? 'Guardando...' : editingProject ? '↵ Guardar cambios' : '↵ Crear proyecto'}
               </button>
-              <button type="button" className={styles.btnSecondary} onClick={handleCancel}>
+              <button type="button" className={styles.btnGhost} onClick={handleCancel}>
                 Cancelar
               </button>
             </div>
@@ -203,52 +313,106 @@ export default function ProjectsPage() {
         </div>
       )}
 
+      <div className={styles.toolbar}>
+        <div className={styles.searchWrap}>
+          <span className={styles.searchGlyph}>/</span>
+          <input
+            ref={localSearchRef}
+            type="text"
+            placeholder="buscar proyecto..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+        <div className={styles.filterGroup}>
+          <button
+            className={`${styles.filterBtn} ${sortBy === 'updated' ? styles.filterActive : ''}`}
+            onClick={() => setSortBy('updated')}
+          >Modificado</button>
+          <button
+            className={`${styles.filterBtn} ${sortBy === 'created' ? styles.filterActive : ''}`}
+            onClick={() => setSortBy('created')}
+          >Creado</button>
+          <button
+            className={`${styles.filterBtn} ${sortBy === 'name' ? styles.filterActive : ''}`}
+            onClick={() => setSortBy('name')}
+          >A→Z</button>
+        </div>
+        <select
+          className={styles.techFilter}
+          value={filterTech}
+          onChange={e => setFilterTech(e.target.value)}
+        >
+          <option value="">Todas las techs</option>
+          {allTechs.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+
       {loading && <p className={styles.loadingText}>Cargando proyectos...</p>}
       {error && <p className={styles.errorText}>Error: {error}</p>}
 
-      {!loading && !error && projects.length === 0 && (
-        <div className={styles.tableWrapper}>
-          <p className={styles.empty}>No hay proyectos. Agregá el primero.</p>
-        </div>
+      {!loading && !error && (
+        <>
+          <div className={styles.tableWrapper}>
+            <div className={`${styles.tableRow} ${styles.tableHead}`}>
+              <span>#</span>
+              <span>Nombre</span>
+              <span>Descripción</span>
+              <span>Tecnologías</span>
+              <span>Modificado</span>
+              <span>Acciones</span>
+            </div>
+
+            {filtered.length === 0 && (
+              <div className={styles.empty}>
+                {search || filterTech ? 'Sin resultados para la búsqueda.' : 'No hay proyectos. Agregá el primero.'}
+              </div>
+            )}
+
+            {filtered.map((p, i) => (
+              <div key={p.id} className={styles.tableRow}>
+                <span className={styles.rowIndex}>{String(i + 1).padStart(2, '0')}</span>
+                <div className={styles.rowName}>
+                  <div className={styles.rowThumb} aria-hidden="true" />
+                  <span className={styles.rowNameText}>{p.name}</span>
+                </div>
+                <span className={styles.rowDesc}>{p.description}</span>
+                <div className={styles.rowTech}>
+                  {p.technologies.slice(0, 3).map(t => (
+                    <span key={t} className={styles.chip}>{t}</span>
+                  ))}
+                  {p.technologies.length > 3 && (
+                    <span className={styles.chipMore}>+{p.technologies.length - 3}</span>
+                  )}
+                </div>
+                <span className={styles.rowDate}>{relDateDays(p.updatedAt)}</span>
+                <div className={styles.tableActions}>
+                  <button className={styles.btnEdit} onClick={() => openEdit(p)}>Editar</button>
+                  <button className={styles.btnDanger} onClick={() => setConfirmDelete(p)}>Eliminar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.tableFooter}>
+            ─── FIN DEL LISTADO · {filtered.length} REGISTRO(S) ───
+          </div>
+        </>
       )}
 
-      {projects.length > 0 && (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Tecnologías</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((project) => (
-                <tr key={project.id}>
-                  <td>{project.name}</td>
-                  <td>
-                    <div className={styles.techList}>
-                      {project.technologies.map((t) => (
-                        <span key={t} className={styles.techTag}>{t}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.tableActions}>
-                      <button className={styles.btnEdit} onClick={() => openEdit(project)}>
-                        Editar
-                      </button>
-                      <button className={styles.btnDanger} onClick={() => handleDelete(project)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Eliminar proyecto"
+        body={
+          <>
+            ¿Eliminar <strong>{confirmDelete?.name}</strong>? Esta acción no se puede deshacer.
+          </>
+        }
+        confirmLabel="Eliminar"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

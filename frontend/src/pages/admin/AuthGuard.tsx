@@ -3,7 +3,8 @@ import { Navigate, Outlet } from 'react-router-dom';
 function isTokenValid(token: string | null): boolean {
   if (!token) return false;
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const raw = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(raw));
     return payload.exp * 1000 > Date.now();
   } catch {
     return false;

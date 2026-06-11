@@ -1,0 +1,195 @@
+/* ─── FOOTER ─────────────────────────────────────────────────────────── */
+.footer {
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--mono);
+}
+
+/* ─── TOP GRID ───────────────────────────────────────────────────────── */
+.top {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr 1fr;
+  column-gap: 56px;
+  row-gap: 0;
+  padding: 52px 48px 44px;
+  border-bottom: 1px solid rgba(243, 239, 229, 0.13);
+}
+
+/* ─── BRAND ──────────────────────────────────────────────────────────── */
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brandName {
+  font-family: var(--mono);
+  font-size: clamp(46px, 5.2vw, 76px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  color: var(--bg);
+}
+
+.brandSub {
+  font-family: var(--serif);
+  font-size: clamp(46px, 5.2vw, 76px);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.0;
+  text-transform: uppercase;
+  color: var(--bg);
+}
+
+.tagline {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: rgba(243, 239, 229, 0.75);
+  letter-spacing: 0.01em;
+  margin-top: 18px;
+  line-height: 1.68;
+}
+
+/* ─── COLUMNS ────────────────────────────────────────────────────────── */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 4px;   /* optical alignment with brand cap-height */
+}
+
+.colTitle {
+  font-size: 10.5px;
+  color: rgba(243, 239, 229, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin: 0 0 16px;
+  line-height: 1;
+}
+
+.sym {
+  /* renders as plain dim text matching the column header tone */
+  color: rgba(243, 239, 229, 0.4);
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+/* ─── NAV LIST ───────────────────────────────────────────────────────── */
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.navList a,
+.navList button {
+  display: block;
+  color: var(--bg);
+  text-decoration: none;
+  font-size: 12.5px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: 0;
+  line-height: 1;
+  transition: opacity 100ms linear;
+}
+
+.navList a:hover,
+.navList button:hover {
+  opacity: 0.7;
+  text-decoration: none;
+}
+
+.copyBtn {
+  color: var(--bg);
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0;
+  line-height: 1;
+  transition: opacity 100ms linear;
+}
+
+.copyBtn:hover {
+  opacity: 0.7;
+}
+
+
+.linkNum {
+  font-size: 10px;
+  color: rgba(243, 239, 229, 0.28);
+  margin-right: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── BOTTOM BAR ─────────────────────────────────────────────────────── */
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 48px;
+  font-size: 10px;
+  color: rgba(243, 239, 229, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────── */
+@media (max-width: 840px) {
+  .top {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    row-gap: 36px;
+    padding: 40px 24px 36px;
+  }
+
+  .brand {
+    grid-column: span 2;
+  }
+
+  .brandName,
+  .brandSub {
+    font-size: clamp(36px, 9vw, 52px);
+  }
+
+  .tagline {
+    margin-top: 14px;
+  }
+
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top {
+    grid-template-columns: 1fr;
+    row-gap: 28px;
+    padding: 32px 20px 28px;
+  }
+
+  .brand {
+    grid-column: span 1;
+  }
+
+  .brandName,
+  .brandSub {
+    font-size: clamp(38px, 12vw, 56px);
+  }
+
+  .bottom {
+    padding: 12px 20px;
+  }
+}

@@ -2,6 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { AuthGuard } from '../AuthGuard';
 
+// jsdom no provee localStorage — lo mockeamos manualmente
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+    get length() { return Object.keys(store).length; },
+    key: (i: number) => Object.keys(store)[i] ?? null,
+  };
+})();
+vi.stubGlobal('localStorage', localStorageMock);
+
 vi.mock('react-router-dom', () => ({
   Navigate: vi.fn(({ to, state }: { to: string; state?: unknown }) => (
     <div

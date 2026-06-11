@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 function buildUrl(path: string): string {
   const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;

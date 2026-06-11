@@ -54,7 +54,7 @@ Portafolio personal full-stack con panel de administración privado. Construido 
 
 ### Opción A — Docker (recomendado)
 
-**Requisitos:** Docker Desktop corriendo + Git
+**Requisitos:** Docker Desktop corriendo + Git + Node.js (para generar el hash del admin)
 
 ```bash
 # 1. Clonar
@@ -65,23 +65,19 @@ cd portafolio
 cp .env.example .env
 # Editar .env con los valores reales (ver sección Variables de entorno)
 
-# 3. Levantar el stack completo
+# 3. Generar el hash bcrypt para la contraseña del admin
+cd backend && npm install
+node -e "const b = require('bcrypt'); b.hash('TU_CONTRASEÑA', 12).then(console.log)"
+cd ..
+# Pegar el hash generado en ADMIN_PASSWORD_HASH dentro de .env
+# Importante: escapar los $ del hash en el archivo .env → $2b$12$... se escribe como $$2b$$12$$...
+
+# 4. Levantar el stack completo
 docker compose up -d --build
 ```
 
-El portfolio estará en `http://localhost:8080` y el panel admin en `http://localhost:8080/admin/login`.
-
-La primera vez que se levanta el stack, insertar el usuario admin en la DB:
-
-```bash
-docker exec -it portafolio-postgres-1 psql -U portfolio_user -d portfolio -c \
-  "INSERT INTO admin_users (username, password_hash) VALUES ('tu-usuario', 'EL_HASH_BCRYPT');"
-```
-
-Para generar el hash:
-```bash
-node -e "const b = require('bcrypt'); b.hash('TU_CONTRASEÑA', 12).then(console.log)"
-```
+El portfolio estará en `http://localhost:8080` y el panel admin en `http://localhost:8080/admin/login`.  
+Las credenciales del admin se toman de `ADMIN_USERNAME` y `ADMIN_PASSWORD_HASH` en `.env` — no hace falta insertar nada en la base de datos manualmente.
 
 ---
 
@@ -197,7 +193,7 @@ project-root/
 
 ## Variables de entorno
 
-### `infra/.env` (Docker Compose)
+### `.env` (Docker Compose — raíz del repo)
 
 | Variable | Descripción |
 |----------|-------------|

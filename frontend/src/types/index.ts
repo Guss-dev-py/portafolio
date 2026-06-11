@@ -1,6 +1,4 @@
-export type SectionId = 'inicio' | 'sobre-mi' | 'proyectos' | 'contacto';
-
-export type Theme = 'dark' | 'light';
+export type SectionId = 'inicio' | 'sobre-mi' | 'sobre' | 'proyectos' | 'contacto';
 
 export interface SkillTag {
   name: string;
@@ -18,6 +16,7 @@ export interface Project {
   description: string;
   technologies: string[];
   url: string;
+  repoUrl: string;
   imageUrl: string;
   imageAlt: string;
   createdAt: string;
@@ -29,6 +28,7 @@ export interface ProjectInput {
   description: string;
   technologies: string[];
   url: string;
+  repoUrl: string;
   imageUrl: string;
   imageAlt: string;
 }

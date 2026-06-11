@@ -1,0 +1,155 @@
+.page {
+  padding: 24px 32px;
+  font-family: var(--mono);
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--rule);
+  margin-bottom: 28px;
+}
+
+.crumbs {
+  font-size: var(--fs-10);
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wider);
+}
+
+.pageTitle {
+  font-family: var(--mono);
+  font-size: var(--fs-22);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.pageTitle::before {
+  content: '> ';
+  color: var(--status-open);
+}
+
+/* ── Section ─────────────────────────────────────────────────── */
+.section {
+  max-width: 720px;
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: var(--fs-11);
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wider);
+}
+
+.sectionHint {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+}
+
+/* ── Option cards ────────────────────────────────────────────── */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.optionCard {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  border: 1px solid var(--hairline);
+  background: var(--bg-1);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.optionCard:hover:not(:disabled) {
+  border-color: var(--rule);
+  background: var(--bg-2);
+}
+
+.optionCard:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.optionCardActive {
+  border-color: var(--accent);
+  background: var(--bg-2);
+}
+
+.optionTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotOpen     { background: var(--status-open); }
+.dotWorking  { background: #f59e0b; }
+.dotOccupied { background: var(--danger); }
+
+.optionLabel {
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+
+.activeBadge {
+  font-size: var(--fs-10);
+  color: var(--accent);
+  letter-spacing: var(--ls-wider);
+}
+
+.termPreview {
+  font-family: var(--mono);
+  font-size: var(--fs-12);
+  color: var(--accent);
+  background: var(--bg-0, var(--bg-1));
+  padding: 6px 10px;
+  border: 1px solid var(--hairline);
+}
+
+.optionDesc {
+  font-size: var(--fs-12);
+  color: var(--ink-mute);
+  margin: 0;
+}
+
+/* ── Feedback ────────────────────────────────────────────────── */
+.loadingMsg,
+.savingMsg {
+  font-size: var(--fs-12);
+  color: var(--ink-mute);
+  margin-top: 12px;
+}
+
+.errorMsg {
+  font-size: var(--fs-12);
+  color: var(--danger);
+  margin-top: 12px;
+}

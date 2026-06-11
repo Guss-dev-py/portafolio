@@ -30,6 +30,11 @@ services:
       PORT: "${BACKEND_PORT:-3001}"
       CORS_ORIGIN: "${CORS_ORIGIN}"
       RESEND_API_KEY: "${RESEND_API_KEY}"
+      RECIPIENT_EMAIL: "${RECIPIENT_EMAIL}"
+      MIGRATIONS_DIR: /app/database/migrations
+    volumes:
+      # El backend aplica las migraciones pendientes al arrancar (runMigrations)
+      - ./database/migrations:/app/database/migrations:ro
     restart: unless-stopped
     depends_on:
       postgres:

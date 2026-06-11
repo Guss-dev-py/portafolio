@@ -6,6 +6,9 @@ import authRouter from './routes/auth';
 import projectsRouter from './routes/projects';
 import contactRouter from './routes/contact';
 import messagesRouter from './routes/messages';
+import statusRouter from './routes/status';
+import { loginLimiter, contactLimiter } from './middleware/rateLimiter';
+import { runMigrations } from './utils/runMigrations';
 
 const REQUIRED_ENV_VARS = [
   'DATABASE_URL',
@@ -15,6 +18,7 @@ const REQUIRED_ENV_VARS = [
   'PORT',
   'CORS_ORIGIN',
   'RESEND_API_KEY',
+  'RECIPIENT_EMAIL',
 ];
 
 const missing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
@@ -28,14 +32,20 @@ if (missing.length > 0) {
 
 const app = express();
 
+// Detrás de nginx: sin esto express-rate-limit ve la IP del proxy para todos
+// los clientes y los límites se vuelven globales en vez de por visitante.
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use(express.json());
 
 app.use('/api/health', healthRouter);
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/projects', projectsRouter);
-app.use('/api/contact', contactRouter);
+app.use('/api/contact', contactLimiter, contactRouter);
 app.use('/api/messages', messagesRouter);
+app.use('/api/status', statusRouter);
 
 // Global error handler — must have 4 params to be recognized by Express
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
@@ -47,6 +57,13 @@ export default app;
 
 const PORT = process.env.PORT ?? 3000;
 
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
-});
+runMigrations()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Servidor escuchando en el puerto ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error(err.message);
+    process.exit(1);
+  });

@@ -1,279 +1,212 @@
+import type { RefObject } from 'react';
 import { useState } from 'react';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import type { ContactLink, ContactFormData, FieldError } from '../../../types';
+import { motion } from 'framer-motion';
 import { apiClient } from '../../../api/client';
-import { duration, ease, spring, stagger } from '../../../motion/tokens';
-import { fadeUp, scaleIn, staggerContainer } from '../../../motion/variants';
-import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
+import { useToast } from '../../Toast/toastContext';
 import { useInView } from '../../../motion/hooks/useInView';
+import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
+import { fadeUp, slideInLeft } from '../../../motion/variants';
 import styles from './ContactSection.module.css';
 
-interface ContactSectionProps {
-  links: ContactLink[];
+interface FormData {
+  name: string;
+  email: string;
+  message: string;
 }
 
-const NOOP: Variants = { hidden: {}, visible: {} };
-
-const PLATFORM_ICONS: Record<string, string> = {
-  linkedin: '↗',
-  github:   '↗',
-  email:    '✉',
-  website:  '↗',
-};
-
-function validate(data: ContactFormData): FieldError[] {
-  const errors: FieldError[] = [];
-  if (!data.name.trim())
-    errors.push({ field: 'name', message: 'El nombre es requerido' });
-  if (!data.email.trim()) {
-    errors.push({ field: 'email', message: 'El email es requerido' });
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push({ field: 'email', message: 'El email no es válido' });
-  }
-  if (!data.message.trim())
-    errors.push({ field: 'message', message: 'El mensaje es requerido' });
-  return errors;
+function validate(d: FormData): Record<string, string> {
+  const e: Record<string, string> = {};
+  if (!d.name.trim()) e.name = 'Nombre requerido';
+  if (!d.email.trim()) e.email = 'Email requerido';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) e.email = 'Email inválido';
+  if (d.message.length < 12) e.message = 'Mínimo 12 caracteres';
+  return e;
 }
 
-export function ContactSection({ links }: ContactSectionProps) {
-  const [form, setForm]             = useState<ContactFormData>({ name: '', email: '', message: '' });
-  const [errors, setErrors]         = useState<FieldError[]>([]);
-  const [submitted, setSubmitted]   = useState(false);
-  const [sending, setSending]       = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+export function ContactSection() {
+  const { toast } = useToast();
+  const reduced = useReducedMotion();
+  const { ref, isInView } = useInView();
+  const animate = reduced || isInView ? 'visible' : 'hidden';
+  const [form, setForm] = useState<FormData>({ name: '', email: '', message: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [submitErr, setSubmitErr] = useState<string | null>(null);
 
-  const prefersReduced = useReducedMotion();
-  const { ref: sectionRef, isInView } = useInView();
-
-  const resolvedFadeUp  = prefersReduced ? NOOP : fadeUp;
-  const resolvedScaleIn = prefersReduced ? NOOP : scaleIn;
-  const resolvedStagger = prefersReduced ? NOOP : staggerContainer(stagger.base);
-
-  const animateState = isInView ? 'visible' : 'hidden';
-
-  const handleCopyEmail = async (email: string) => {
+  const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(email);
-      setCopiedEmail(email);
-      setTimeout(() => setCopiedEmail(null), 2500);
-    } catch { /* fallback silencioso */ }
+      await navigator.clipboard.writeText('augustofreire02@gmail.com');
+      toast({ title: '¡Copiado!', msg: 'augustofreire02@gmail.com', variant: 'ok' });
+    } catch {
+      toast({ title: 'Error', msg: 'No se pudo copiar', variant: 'danger' });
+    }
   };
 
-  const getError = (field: keyof ContactFormData) =>
-    errors.find((e) => e.field === field)?.message;
+  const set = (k: keyof FormData, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate(form);
-    if (errs.length > 0) { setErrors(errs); return; }
-    setErrors([]);
-    setSubmitError(null);
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setErrors({});
+    setSubmitErr(null);
     setSending(true);
     try {
       await apiClient('/api/contact', {
         method: 'POST',
         body: JSON.stringify(form),
       });
-      setSubmitted(true);
-      setForm({ name: '', email: '', message: '' });
+      setSuccess(true);
     } catch {
-      setSubmitError('No se pudo enviar el mensaje. Por favor, intentá de nuevo.');
+      setSubmitErr('No se pudo enviar. Intentá de nuevo.');
     } finally {
       setSending(false);
     }
   };
 
+  const reset = () => {
+    setSuccess(false);
+    setForm({ name: '', email: '', message: '' });
+    setErrors({});
+    setSubmitErr(null);
+  };
+
   return (
-    <section
-      id="contacto"
-      className={styles.section}
-      aria-label="Contacto"
-      ref={sectionRef as React.RefObject<HTMLElement>}
-    >
-      <div className={styles.container}>
-        <motion.p
-          className={styles.eyebrow}
-          variants={resolvedFadeUp}
-          initial="hidden"
-          animate={animateState}
-        >
-          // contacto
-        </motion.p>
+    <section id="contacto" className={styles.section} aria-label="Contacto" ref={ref as RefObject<HTMLElement>}>
+      <motion.div className={styles.sectionHead} variants={fadeUp} initial="hidden" animate={animate}>
+        <span className={styles.num}>03</span>
+        <h2 className={styles.title}><span className={styles.sym}>//</span> contacto</h2>
+        <span className={styles.meta}>respondo en menos de 24h · GMT-3</span>
+      </motion.div>
 
-        <motion.h2
-          className={styles.title}
-          variants={resolvedFadeUp}
-          initial="hidden"
-          animate={animateState}
-        >
-          Abierto a<br />oportunidades
-        </motion.h2>
+      <div className={styles.twoCol}>
+        {/* Left */}
+        <motion.div className={styles.leftCol} variants={slideInLeft} initial="hidden" animate={animate}>
+          <p className={styles.lead}>
+            ¿Tenés un proyecto en mente o querés <em className={styles.leadAccent}>charlar de código</em>? Mandame un mensaje: te responde un humano.
+          </p>
 
-        <motion.p
-          className={styles.subtitle}
-          variants={resolvedFadeUp}
-          initial="hidden"
-          animate={animateState}
-        >
-          Si tenés una idea, un problema o una propuesta, escribime.
-          Siempre abierto a proyectos interesantes y colaboraciones.
-        </motion.p>
-
-        {/* Social links */}
-        {links.length > 0 && (
-          <motion.ul
-            className={styles.links}
-            variants={resolvedStagger}
-            initial="hidden"
-            animate={animateState}
-          >
-            {links.map((link) => (
-              <motion.li key={link.platform} variants={resolvedScaleIn}>
-                {link.platform === 'email' ? (
-                  <motion.button
-                    type="button"
-                    className={styles.link}
-                    onClick={() => handleCopyEmail(link.href.replace('mailto:', ''))}
-                    whileHover={prefersReduced ? undefined : { y: -2, scale: 1.02, transition: spring.gentle }}
-                    aria-label={`Copiar email ${link.label}`}
-                  >
-                    {link.label}
-                    <span aria-hidden="true">{PLATFORM_ICONS[link.platform]}</span>
-                  </motion.button>
-                ) : (
-                  <motion.a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.link}
-                    whileHover={prefersReduced ? undefined : { y: -2, scale: 1.02, transition: spring.gentle }}
-                  >
-                    {link.label}
-                    <span aria-hidden="true">{PLATFORM_ICONS[link.platform] ?? '↗'}</span>
-                  </motion.a>
-                )}
-              </motion.li>
-            ))}
-          </motion.ul>
-        )}
-
-        {copiedEmail && (
-          <div className={styles.copyToast} role="status" aria-live="polite">
-            ✓ Email copiado al portapapeles
+          <div className={styles.caLinks}>
+            <button
+              type="button"
+              onClick={copyEmail}
+              className={`${styles.caLink} ${styles.caButton}`}
+              aria-label="Copiar email augustofreire02@gmail.com"
+            >
+              <span className={styles.caKey}>Email</span>
+              <span className={styles.caVal}>augustofreire02@gmail.com</span>
+              <span className={styles.caArrow} aria-hidden="true">→</span>
+            </button>
+            <a
+              href="https://www.linkedin.com/in/augusto-freire-web"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.caLink}
+              aria-label="LinkedIn: augusto-freire-web (abre en nueva pestaña)"
+            >
+              <span className={styles.caKey}>LinkedIn</span>
+              <span className={styles.caVal}>in/augusto-freire-web</span>
+              <span className={styles.caArrow} aria-hidden="true">→</span>
+            </a>
+            <a
+              href="https://github.com/Guss-dev-py"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.caLink}
+              aria-label="GitHub: Guss-dev-py (abre en nueva pestaña)"
+            >
+              <span className={styles.caKey}>GitHub</span>
+              <span className={styles.caValAccent}>Guss-dev-py</span>
+              <span className={styles.caArrow} aria-hidden="true">→</span>
+            </a>
           </div>
-        )}
+        </motion.div>
 
-        {/* Contact form */}
-        <div className={styles.formWrapper}>
-          <AnimatePresence mode="wait">
-            {submitted ? (
-              <motion.p
-                key="success"
-                className={styles.success}
-                role="status"
-                initial={{ opacity: 0, y: 20, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.96 }}
-                transition={{ duration: duration.slow, ease: ease.expo }}
-              >
-                ¡Mensaje enviado! Me pondré en contacto pronto.
-              </motion.p>
-            ) : (
-              <motion.form
-                key="form"
-                onSubmit={handleSubmit}
-                className={styles.form}
-                noValidate
-              >
-                {submitError && (
-                  <p className={styles.error} role="alert">{submitError}</p>
-                )}
+        {/* Right: Form card */}
+        <motion.div className={styles.formCard} variants={fadeUp} initial="hidden" animate={animate}>
+          <div className={styles.formCardHead}>
+            <span><span className={styles.sym}>//</span> formulario</span>
+          </div>
 
-                <motion.div
-                  className={styles.fieldsContainer}
-                  variants={resolvedStagger}
-                  initial="hidden"
-                  animate={animateState}
-                >
-                  <motion.div className={styles.field} variants={resolvedFadeUp}>
-                    <label htmlFor="contact-name">Nombre</label>
-                    <input
-                      id="contact-name"
-                      type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      aria-describedby={getError('name') ? 'error-name' : undefined}
-                      className={getError('name') ? styles.inputError : ''}
-                    />
-                    {getError('name') && (
-                      <span id="error-name" className={styles.error} role="alert">
-                        {getError('name')}
-                      </span>
-                    )}
-                  </motion.div>
+          {success ? (
+            <div className={styles.successBlock}>
+              <pre className={styles.ascii}>{`  ╔══════════════╗\n  ║   ✓ ENVIADO  ║\n  ╚══════════════╝`}</pre>
+              <p className={styles.successMsg}>
+                Gracias {form.name || 'amigo'}. Te escribo a {form.email || 'tu email'}.
+              </p>
+              <button type="button" className={styles.resetBtn} onClick={reset}>
+                Enviar otro
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} noValidate className={styles.form}>
+              {submitErr && (
+                <div className={styles.formAlert} role="alert">{submitErr}</div>
+              )}
 
-                  <motion.div className={styles.field} variants={resolvedFadeUp}>
-                    <label htmlFor="contact-email">Email</label>
-                    <input
-                      id="contact-email"
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      aria-describedby={getError('email') ? 'error-email' : undefined}
-                      className={getError('email') ? styles.inputError : ''}
-                    />
-                    {getError('email') && (
-                      <span id="error-email" className={styles.error} role="alert">
-                        {getError('email')}
-                      </span>
-                    )}
-                  </motion.div>
+              <div className={styles.row2}>
+                <div className={styles.field}>
+                  <label htmlFor="c-name">NOMBRE</label>
+                  <input
+                    id="c-name"
+                    type="text"
+                    placeholder="Tu nombre"
+                    value={form.name}
+                    onChange={e => set('name', e.target.value)}
+                    className={errors.name ? styles.inputErr : ''}
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'c-name-err' : undefined}
+                  />
+                  {errors.name && <span id="c-name-err" className={styles.fieldErr}>{errors.name}</span>}
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="c-email">EMAIL</label>
+                  <input
+                    id="c-email"
+                    type="email"
+                    placeholder="tu@correo.com"
+                    value={form.email}
+                    onChange={e => set('email', e.target.value)}
+                    className={errors.email ? styles.inputErr : ''}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'c-email-err' : undefined}
+                  />
+                  {errors.email && <span id="c-email-err" className={styles.fieldErr}>{errors.email}</span>}
+                </div>
+              </div>
 
-                  <motion.div className={styles.field} variants={resolvedFadeUp}>
-                    <label htmlFor="contact-message">Mensaje</label>
-                    <textarea
-                      id="contact-message"
-                      name="message"
-                      rows={5}
-                      value={form.message}
-                      onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      aria-describedby={getError('message') ? 'error-message' : undefined}
-                      className={getError('message') ? styles.inputError : ''}
-                    />
-                    {getError('message') && (
-                      <span id="error-message" className={styles.error} role="alert">
-                        {getError('message')}
-                      </span>
-                    )}
-                  </motion.div>
-                </motion.div>
+              <div className={styles.field}>
+                <label htmlFor="c-msg">MENSAJE</label>
+                <textarea
+                  id="c-msg"
+                  rows={8}
+                  placeholder="Contame sobre el proyecto, plazo y stack..."
+                  value={form.message}
+                  onChange={e => set('message', e.target.value)}
+                  className={`${styles.textareaMsg} ${errors.message ? styles.inputErr : ''}`}
+                  aria-invalid={!!errors.message}
+                  aria-describedby={errors.message ? 'c-msg-err' : undefined}
+                />
+                {errors.message && <span id="c-msg-err" className={styles.fieldErr}>{errors.message}</span>}
+                <div className={styles.fieldMeta}>
+                  <span className={styles.hint}>mínimo 12 caracteres · markdown ok</span>
+                  <span className={styles.charCount}>{form.message.length} chars</span>
+                </div>
+              </div>
 
-                <motion.button
-                  type="submit"
-                  className={styles.submit}
-                  disabled={sending}
-                  whileHover={prefersReduced ? undefined : { y: -2, scale: 1.02, transition: spring.gentle }}
-                  whileTap={prefersReduced ? undefined : { scale: 0.96, transition: spring.press }}
-                  animate={sending ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
-                  transition={sending ? { repeat: Infinity, duration: 1.2 } : undefined}
-                >
-                  {sending ? 'Enviando...' : 'Enviar mensaje'}
-                </motion.button>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </div>
+              <div className={styles.formDivider} />
+
+              <div className={styles.formActions}>
+                <span className={styles.enterHint}>↵ enter para enviar</span>
+                <button type="submit" className={styles.submitBtn} disabled={sending} aria-busy={sending}>
+                  {sending ? 'Enviando...' : 'Enviar mensaje →'}
+                </button>
+              </div>
+            </form>
+          )}
+        </motion.div>
       </div>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <span className={styles.footerText}>
-          Buenos Aires, Argentina · © 2026 Augusto Freire
-        </span>
-      </footer>
     </section>
   );
 }

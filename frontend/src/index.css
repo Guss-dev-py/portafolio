@@ -1,83 +1,110 @@
-/* ── Fuente ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
-/* ── Tema oscuro fijo ── */
 :root {
-  --text:        #8b8fa8;
-  --text-h:      #f0f0f5;
-  --text-muted:  #5a5f72;
-  --bg:          #080810;
-  --bg-deep:     #0d0d18;
-  --border:      #1e2030;
-  --accent:      #c084fc;
-  --accent-2:    #a855f7;
-  --accent-bg:   rgba(192, 132, 252, 0.10);
-  --accent-border: rgba(192, 132, 252, 0.30);
-  --nav-bg:      rgba(8, 8, 16, 0.88);
-  --card-bg:     #0f1020;
-  --section-alt-bg: rgba(11, 11, 21, 0.78);
-  --shadow:
-    rgba(0, 0, 0, 0.6) 0 10px 15px -3px,
-    rgba(0, 0, 0, 0.4) 0 4px 6px -2px;
-  --shadow-lg:
-    rgba(0, 0, 0, 0.7) 0 20px 40px -8px,
-    rgba(0, 0, 0, 0.5) 0 8px 16px -4px;
-
-  --sans:    'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono:    ui-monospace, 'Fira Code', Consolas, monospace;
-
-  font: 18px/1.5 var(--sans);
-  letter-spacing: 0.1px;
-  color: var(--text);
+  --bg:          #f3efe5;
+  --bg-1:        #ebe6d8;
+  --bg-2:        #ddd6c2;
+  --bg-deep:     #e5dfd0;
+  --ink:         #161412;
+  --ink-2:       #2b2722;
+  --ink-dim:     #4a463c;
+  --ink-mute:    #6e6757; /* AA 4.89:1 sobre --bg, 4.50:1 sobre --bg-1 */
+  --hairline:    #b3ab95;
+  --rule:        #161412;
+  --accent:      #c1272d;
+  --accent-2:    #161412;
+  --status-open: #1b8a3e;
+  --status-away: #c1272d;
+  --danger:      #c1272d;
+  --warn:        #a55a00;
+  --selection-bg: var(--ink);
+  --selection-fg: var(--bg);
+  --mono:  'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --heading: var(--mono);
+  --fs-10: 10px; --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px;
+  --fs-16: 16px; --fs-22: 22px; --fs-28: 28px; --fs-32: 32px; --fs-36: 36px;
+  --fs-56: 56px;
+  --fs-name-terminal: clamp(48px, 7.5vw, 116px);
+  --lh-tight: 1.05; --lh-snug: 1.25; --lh-base: 1.5; --lh-loose: 1.65;
+  --ls-tight: -0.045em; --ls-normal: 0; --ls-wide: 0.08em; --ls-wider: 0.14em;
+  --u: 8px; --u-1: 8px; --u-2: 16px; --u-3: 24px; --u-4: 32px;
+  --u-5: 40px; --u-6: 48px; --u-7: 56px; --u-8: 64px; --u-10: 80px;
+  --page-max-width: 1280px;
+  --border-hairline: 1px solid var(--hairline);
+  --border-rule: 1px solid var(--rule);
+  --border-rule-2: 2px solid var(--rule);
+  --shadow-stamp: 4px 4px 0 var(--rule);
+  --shadow-stamp-lg: 8px 8px 0 var(--rule);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --t-fast: 80ms linear; --t-base: 120ms var(--ease-out); --t-slow: 200ms var(--ease-out);
+  --z-canvas: 0; --z-page: 2; --z-nav: 50; --z-dialog: 9000; --z-toast: 9100;
+  /* Backward-compat aliases for old modules */
+  --text:        var(--ink);
+  --text-h:      var(--ink);
+  --text-muted:  var(--ink-mute);
+  --border:      var(--rule);
+  --card-bg:     var(--bg-1);
+  --section-alt-bg: var(--bg-1);
+  --nav-bg:      var(--bg);
+  --shadow:      var(--shadow-stamp);
+  --shadow-lg:   var(--shadow-stamp-lg);
+  --sans:        var(--mono);
+  font: 400 13px/1.5 var(--mono);
+  color: var(--ink);
   background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'calt' 0, 'liga' 0;
 }
-
-/* ── Reset y base ── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  transition: background 0.3s, color 0.3s;
-}
-
-h1, h2, h3 {
-  font-family: var(--heading);
-  color: var(--text-h);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-
-p { margin: 0; }
-
-main {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── Eyebrow label reutilizable ── */
-.eyebrow {
+*, *::before, *::after { box-sizing: border-box; }
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: var(--z-nav);
+  background: var(--ink);
+  color: var(--bg);
   font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  opacity: 0.8;
-  margin: 0 0 16px;
+  font-size: var(--fs-12);
+  padding: 8px 16px;
+  text-decoration: none;
 }
-
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+*::selection { background: var(--selection-bg); color: var(--selection-fg); }
+body { margin: 0; background: var(--bg); color: var(--ink); }
+h1,h2,h3 { font-family: var(--mono); color: var(--ink); line-height: var(--lh-tight); margin: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+section[id] { scroll-margin-top: 72px; }
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { color: var(--accent); text-decoration-thickness: 2px; }
+button { font: inherit; cursor: pointer; border-radius: 0; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+button:active:not(:disabled) { transform: scale(0.98); }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  button { transition: none; }
+  button:active:not(:disabled) { transform: none; }
 }
+.page {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  border-left: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  background: var(--bg);
+  min-height: 100vh;
+  position: relative;
+  z-index: var(--z-page);
+}
+/* Particles body treatments */
+body[data-particles="on"] .page { background: rgba(243,239,229,0.78); backdrop-filter: blur(0.5px); }
+body[data-particles="on"] .section { background: transparent; }
+body[data-particles="on"] .regbar,
+body[data-particles="on"] .topnav { background: rgba(243,239,229,0.85); backdrop-filter: blur(2px); }
+body[data-particles="on"] .footer { background: var(--ink); }

@@ -1,155 +1,193 @@
-import { motion, type Variants } from "framer-motion";
-import type { SkillTag } from "../../../types";
-import { spring, stagger } from "../../../motion/tokens";
-import {
-  fadeUp,
-  cinematicFadeUp,
-  scaleIn,
-  staggerContainer,
-} from "../../../motion/variants";
-import { useReducedMotion } from "../../../motion/hooks/useReducedMotion";
-import styles from "./HeroSection.module.css";
+import { useState, useEffect, useRef } from 'react';
+import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
+import type { WorkStatus } from '../../../api/status';
+import { getWorkStatus } from '../../../api/status';
+import styles from './HeroSection.module.css';
 
-interface HeroSectionProps {
-  name: string;
-  lastName: string;
-  role: string;
-  intro: string;
-  skills: SkillTag[];
-  onCtaClick: () => void;
+interface ScriptLine {
+  type: 'cmd' | 'out' | 'out_h' | 'blank';
+  text?: string;
 }
 
-const NOOP: Variants = { hidden: {}, visible: {} };
+const STATUS_LINE: Record<WorkStatus, string> = {
+  open:     '> open to work · freelance · full-time',
+  working:  '> working · respondiendo con demoras · GMT-3',
+  occupied: '> occupied · no disponible por ahora',
+};
 
-export function HeroSection({
-  name,
-  lastName,
-  role,
-  intro,
-  onCtaClick,
-  skills,
-}: HeroSectionProps) {
-  const prefersReduced = useReducedMotion();
+const STATUS_LABEL: Record<WorkStatus, string> = {
+  open:     'Open to work',
+  working:  'Working · con demoras',
+  occupied: 'Occupied',
+};
 
-  const resolvedFadeUp = prefersReduced ? NOOP : fadeUp;
-  const resolvedCinematicFadeUp = prefersReduced ? NOOP : cinematicFadeUp;
-  const resolvedScaleIn = prefersReduced ? NOOP : scaleIn;
-  const resolvedStaggerAll = prefersReduced ? NOOP : staggerContainer();
-  const resolvedStaggerSkills = prefersReduced
-    ? NOOP
-    : staggerContainer(stagger.tight, 0.55);
+function buildScript(status: WorkStatus): ScriptLine[] {
+  return [
+    { type: 'cmd',   text: 'whoami' },
+    { type: 'out',   text: 'augusto.freire - fullstack developer · buenos aires, ar' },
+    { type: 'blank' },
+    { type: 'cmd',   text: 'cat about.md | head -3' },
+    { type: 'out',   text: '# Apasionado y entusiasta en todo lo que hago.' },
+    { type: 'out',   text: '# Construyo productos digitales de punta a punta.' },
+    { type: 'out',   text: '# Foco: sistemas limpios, escalables y con buena UX.' },
+    { type: 'blank' },
+    { type: 'cmd',   text: 'ls stack/' },
+    { type: 'out_h', text: 'frontend/   backend/   data/   devops/' },
+    { type: 'out',   text: 'react       node       postgres pg   docker' },
+    { type: 'out',   text: 'typescript  express    zod           nginx' },
+    { type: 'out',   text: 'vite        python                   linux' },
+    { type: 'blank' },
+    { type: 'cmd',   text: 'status' },
+    { type: 'out_h', text: STATUS_LINE[status] },
+    { type: 'out',   text: '> ubicación: buenos aires, AR (GMT-3)' },
+    { type: 'out',   text: '> estudios:  ing. informática · UNPAZ' },
+    { type: 'out',   text: '> focos:     fintech · saas b2b · ciberseguridad' },
+    { type: 'blank' },
+    { type: 'cmd',   text: 'contact --form' },
+  ];
+}
 
-  const handleContact = () => {
-    document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" });
-  };
+const DELAY_MAP: Record<string, number> = {
+  cmd: 220,
+  out: 90,
+  out_h: 90,
+  blank: 80,
+};
+
+function useTimestamp() {
+  const [ts, setTs] = useState(() => {
+    const now = new Date();
+    return now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  });
+  useEffect(() => {
+    const id = setInterval(() => {
+      const now = new Date();
+      setTs(now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
+    }, 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return ts;
+}
+
+export function HeroSection() {
+  const reduced = useReducedMotion();
+  const [workStatus, setWorkStatus] = useState<WorkStatus>('open');
+  const script = buildScript(workStatus);
+  const [visibleCount, setVisibleCount] = useState(reduced ? script.length : 0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timestamp = useTimestamp();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getWorkStatus(controller.signal)
+      .then((r) => setWorkStatus(r.status))
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    // Los seteos de estado van siempre dentro de timers (nunca síncronos en
+    // el cuerpo del effect) para no disparar renders en cascada.
+    if (reduced) {
+      timerRef.current = setTimeout(() => setVisibleCount(script.length), 0);
+      return () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
+    }
+
+    let current = 0;
+    const showNext = () => {
+      if (current >= script.length) return;
+      current++;
+      setVisibleCount(current);
+      const line = script[current - 1];
+      const delay = DELAY_MAP[line.type] ?? 90;
+      timerRef.current = setTimeout(showNext, delay);
+    };
+    timerRef.current = setTimeout(() => {
+      setVisibleCount(0);
+      timerRef.current = setTimeout(showNext, 300);
+    }, 0);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduced, workStatus]);
+
+  const lines = script.slice(0, visibleCount);
 
   return (
-    <section id="inicio" className={styles.section} aria-label="Inicio">
-      <motion.div
-        className={styles.content}
-        variants={resolvedStaggerAll}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.p
-          className={styles.location}
-          variants={resolvedFadeUp}
-          transition={{ delay: 0.05 }}
-        >
-          Buenos Aires, Argentina
-        </motion.p>
-
-        <motion.p
-          className={styles.greeting}
-          variants={resolvedFadeUp}
-          transition={{ delay: 0.12 }}
-        >
-          Hola, soy
-        </motion.p>
-
-        <motion.h1
-          className={styles.name}
-          variants={resolvedCinematicFadeUp}
-          transition={{ delay: 0.22 }}
-        >
-          {name}
-          <br />
-          <span className={styles.nameAccent}>{lastName}</span>
-        </motion.h1>
-
-        <motion.p
-          className={styles.role}
-          variants={resolvedFadeUp}
-          transition={{ delay: 0.36 }}
-        >
-          {role}
-        </motion.p>
-
-        <motion.p
-          className={styles.intro}
-          variants={resolvedFadeUp}
-          transition={{ delay: 0.46 }}
-        >
-          {intro}
-        </motion.p>
-
-        <motion.div
-          className={styles.skills}
-          aria-label="Tecnologías principales"
-          variants={resolvedStaggerSkills}
-        >
-          {skills.map((s) => (
-            <motion.span
-              key={s.name}
-              className={styles.skillTag}
-              variants={resolvedScaleIn}
-            >
-              {s.name}
-            </motion.span>
-          ))}
-        </motion.div>
-
-        <motion.div
-          className={styles.ctas}
-          variants={resolvedFadeUp}
-          transition={{ delay: 0.76 }}
-        >
-          <motion.button
-            type="button"
-            className={styles.cta}
-            onClick={onCtaClick}
-            whileHover={
-              prefersReduced
-                ? {}
-                : { y: -3, scale: 1.02, transition: spring.gentle }
-            }
-            whileTap={
-              prefersReduced ? {} : { scale: 0.97, transition: spring.press }
-            }
-          >
-            Ver mis proyectos
-          </motion.button>
-          <motion.button
-            type="button"
-            className={styles.ctaSecondary}
-            onClick={handleContact}
-            whileHover={
-              prefersReduced ? {} : { y: -2, transition: spring.gentle }
-            }
-            whileTap={
-              prefersReduced ? {} : { scale: 0.97, transition: spring.press }
-            }
-          >
-            Contacto
-          </motion.button>
-        </motion.div>
-      </motion.div>
-
-      {!prefersReduced && (
-        <div className={styles.scrollHint} aria-hidden="true">
-          scroll
+    <section id="inicio" className={styles.section}>
+      <div className={styles.grid}>
+        <div className={styles.termBox}>
+          <div className={styles.termHead}>
+            <div className={styles.termDots}>
+              <i className={styles.dot} />
+              <i className={styles.dot} />
+              <i className={`${styles.dot} ${styles.dotFilled}`} />
+            </div>
+            <span className={styles.termLabel}>augusto@portafolio:~$</span>
+            <span className={styles.termSession}>SESSION · LIVE</span>
+          </div>
+          <div className={styles.termBody}>
+            {lines.map((line, i) => {
+              if (line.type === 'blank') return <div key={`blank-${i}`} className={styles.blankLine} />;
+              return (
+                <div key={`${line.type}-${i}`} className={`${styles.termLine} ${styles[line.type]}`}>
+                  {line.type === 'cmd' && <span className={styles.prompt}>$ </span>}
+                  <span>{line.text}</span>
+                </div>
+              );
+            })}
+            <div className={styles.termLine}>
+              <span className={styles.prompt}>$ </span>
+              <span className={styles.cursor} />
+            </div>
+          </div>
+          <div className={styles.termFooter}>
+            <span>JetBrains Mono · UTF-8 · LF</span>
+            <span>{timestamp}</span>
+          </div>
         </div>
-      )}
+
+        <div className={styles.infoCol}>
+          <h1 className={styles.nameBlock}>
+            <span className={styles.nameLine1}>AUGUSTO</span>
+            <span className={styles.nameLine2}><em>Freire.</em></span>
+          </h1>
+
+          <p className={styles.lede}>
+            <em>FullStack Developer</em>. Construyo productos digitales de punta a punta con{' '}
+            <span className={styles.tech}>Python</span>,{' '}
+            <span className={styles.tech}>Node</span>,{' '}
+            <span className={styles.tech}>React</span> y{' '}
+            <span className={styles.tech}>PostgreSQL</span>.{' '}
+            Foco en sistemas limpios y escalables.
+          </p>
+
+          <div className={styles.dataStrip}>
+            <div className={styles.dataCell}>
+              <span className={styles.dataKey}>STATUS</span>
+              <span className={styles.dataVal}>
+                <span className={`${styles.statusDot} ${styles[`statusDot_${workStatus}`]}`} />
+                {STATUS_LABEL[workStatus]}
+              </span>
+            </div>
+            <div className={styles.dataCell}>
+              <span className={styles.dataKey}>UBICACIÓN</span>
+              <span className={styles.dataVal}>Buenos Aires, AR</span>
+            </div>
+            <div className={styles.dataCell}>
+              <span className={styles.dataKey}>FORMACIÓN</span>
+              <span className={styles.dataVal}>Ing. Informática · UNPAZ</span>
+            </div>
+            <div className={styles.dataCell}>
+              <span className={styles.dataKey}>SECTORES</span>
+              <span className={styles.dataVal}>FinTech · SaaS · CiberSeg.</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

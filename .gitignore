@@ -37,6 +37,7 @@ backend/dist
 
 # Variables de entorno — NUNCA commitear
 .env
+.env.bak.*
 frontend/.env
 frontend/.env.local
 frontend/.env.production
@@ -47,3 +48,7 @@ infra/.env
 
 # Kiro specs
 .kiro/
+
+# CV personal — contiene datos de contacto privados
+CV_Augusto_Freire_ATS.md
+CV_Augusto_Freire.pdf

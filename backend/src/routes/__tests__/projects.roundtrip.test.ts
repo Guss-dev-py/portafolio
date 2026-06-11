@@ -34,7 +34,7 @@ const validProjectArb = fc.record({
   description: fc.string({ minLength: 1, maxLength: 500 }),
   technologies: fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 1, maxLength: 10 }),
   url: fc.constant('https://example.com'),
-  imageUrl: fc.string({ minLength: 0, maxLength: 200 }),
+  imageUrl: fc.oneof(fc.constant(''), fc.webUrl()),
   imageAlt: fc.string({ minLength: 0, maxLength: 200 }),
 });
 

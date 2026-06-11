@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { apiClient } from '../../api/client';
 import styles from './LoginPage.module.css';
 
@@ -11,8 +11,6 @@ interface LoginResponse {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const sessionMessage = (location.state as { message?: string } | null)?.message;
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +19,10 @@ export function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!username.trim() || !password.trim()) {
+      setError('Completá usuario y contraseña.');
+      return;
+    }
     setError(null);
     setLoading(true);
     try {
@@ -31,66 +33,108 @@ export function LoginPage() {
       localStorage.setItem('token', data.token);
       navigate('/admin');
     } catch {
-      setError('Credenciales inválidas');
+      setError('Credenciales inválidas. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleClear = () => {
+    setUsername('');
+    setPassword('');
+    setError(null);
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.header}>
-          <span className={styles.icon} aria-hidden="true">🔐</span>
-          <h1 className={styles.title}>Panel Admin</h1>
-          <p className={styles.subtitle}>Acceso restringido</p>
+        {/* Header */}
+        <div className={styles.cardHead}>
+          <span className={styles.cardLabel}>freire@portafolio:~/admin</span>
+          <div className={styles.dots}>
+            <i className={styles.dot} />
+            <i className={styles.dot} />
+            <i className={`${styles.dot} ${styles.dotGreen}`} />
+          </div>
         </div>
 
+        {/* Shell intro */}
+        <div className={styles.shellIntro}>
+          <div className={styles.shellLine}>
+            <span className={styles.prompt}>$</span>
+            <span> ssh admin@portafolio.app</span>
+          </div>
+          <div className={styles.shellLine}>
+            <span className={styles.muted}>Acceso restringido. Solo usuarios autorizados.</span>
+          </div>
+          <div className={styles.shellLine}>
+            <span className={styles.prompt}>$</span>
+            <span> login</span>
+            <span className={styles.cursor} />
+          </div>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className={styles.errorAlert} role="alert">
+            {error}
+          </div>
+        )}
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
-          {sessionMessage && (
-            <p className={`${styles.alert} ${styles.alertWarning}`} role="status">
-              {sessionMessage}
-            </p>
-          )}
-          {error && (
-            <p className={`${styles.alert} ${styles.alertError}`} role="alert">
-              {error}
-            </p>
-          )}
-
           <div className={styles.field}>
-            <label htmlFor="login-username">Usuario</label>
-            <input
-              id="login-username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-              autoFocus
-            />
+            <label htmlFor="login-username">USUARIO</label>
+            <div className={styles.inputWrap}>
+              <span className={styles.inputGlyph}>$</span>
+              <input
+                id="login-username"
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+                autoComplete="username"
+                autoFocus
+              />
+            </div>
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="login-password">Contraseña</label>
-            <input
-              id="login-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
+            <label htmlFor="login-password">CONTRASEÑA</label>
+            <div className={styles.inputWrap}>
+              <span className={styles.inputGlyph}>#</span>
+              <input
+                id="login-password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
           </div>
 
-          <button type="submit" className={styles.submit} disabled={loading}>
-            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-          </button>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Conectando...' : '↵ Iniciar sesión'}
+            </button>
+            <button type="button" className={styles.clearBtn} onClick={handleClear}>
+              Limpiar
+            </button>
+          </div>
+
+          <p className={styles.hint}>
+            › sesión expira a las 8h · acceso solo para admin
+          </p>
         </form>
 
-        <Link to="/" className={styles.backLink}>
-          ← Volver al portafolio
-        </Link>
+        {/* Footer */}
+        <div className={styles.cardFoot}>
+          <Link to="/" className={styles.backLink}>
+            ← volver al portafolio público
+          </Link>
+          <span className={styles.footMeta}>JWT · 8H · BCRYPT</span>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,50 @@
+.regbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 16px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wider);
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  align-items: center;
+}
+
+.id {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+.issue {
+  color: var(--ink-mute);
+}
+
+.status {
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--status-open);
+  border: 1px solid var(--ink);
+  flex-shrink: 0;
+}
+
+.rates {
+  color: var(--ink-mute);
+}
+
+@media (max-width: 800px) {
+  .regbar {
+    display: none;
+  }
+}

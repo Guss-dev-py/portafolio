@@ -12,13 +12,11 @@ export const verifyToken: RequestHandler = (req: Request, res: Response, next: N
   const token = authHeader.slice(7);
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET!);
+    jwt.verify(token, process.env.JWT_SECRET!, { algorithms: ['HS256'] });
     next();
   } catch (err) {
     if (err instanceof TokenExpiredError) {
       res.status(401).json({ error: 'Sesión expirada' });
-    } else if (err instanceof JsonWebTokenError) {
-      res.status(401).json({ error: 'No autorizado' });
     } else {
       res.status(401).json({ error: 'No autorizado' });
     }

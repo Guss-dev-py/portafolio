@@ -8,10 +8,12 @@ export function useMessages() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getMessages()
+    const controller = new AbortController();
+    getMessages(controller.signal)
       .then(setMessages)
-      .catch((e) => setError(e.message))
+      .catch((e) => { if (e.name !== 'AbortError') setError(e.message); })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, []);
 
   const readMessage = async (id: string) => {

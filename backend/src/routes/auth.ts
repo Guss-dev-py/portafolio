@@ -2,21 +2,21 @@ import { Router, Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db";
+import { validate } from "../middleware/validate";
+import { loginSchema, LoginInput } from "../schemas/login.schema";
 
 const router = Router();
 
+// Hash de relleno: cuando el username no existe igual se ejecuta un compare,
+// para que el tiempo de respuesta no delate qué usuarios son válidos.
+const DUMMY_HASH = "$2b$12$xFoGcAqw2UDT1rxtxHUDVew7t7tH41N8wl8Au64ZijjWm5mkNI1Ca";
+
 router.post(
   "/login",
+  validate(loginSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { username, password } = req.body as {
-        username?: string;
-        password?: string;
-      };
-
-      if (!username || !password) {
-        return res.status(401).json({ error: "Credenciales inválidas" });
-      }
+      const { username, password } = req.body as LoginInput;
 
       const result = await pool.query<{
         id: string;
@@ -52,6 +52,8 @@ router.post(
             password_hash: envAdminPasswordHash,
           };
         }
+      } else if (!user) {
+        await bcrypt.compare(password, DUMMY_HASH);
       }
 
       if (!passwordMatch || !user) {
@@ -61,7 +63,7 @@ router.post(
       const token = jwt.sign(
         { sub: user.id, username: user.username },
         process.env.JWT_SECRET!,
-        { expiresIn: "8h" },
+        { expiresIn: "8h", algorithm: "HS256" },
       );
 
       return res.status(200).json({ token, expiresIn: 28800 });

@@ -1,24 +1,41 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Augusto Freire — Portafolio</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Augusto Freire — FullStack Developer</title>
+        <meta name="description" content="FullStack Developer — Buenos Aires, AR. Construyo productos digitales de punta a punta con React, Node, Python y PostgreSQL. Disponible para freelance y full-time." />
+        <meta name="author" content="Augusto Freire" />
 
-    <!--
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://freire.ucielbustamante.com/" />
+        <meta property="og:title" content="Augusto Freire — FullStack Developer" />
+        <meta property="og:description" content="FullStack Developer · Buenos Aires, AR. React · Node · Python · PostgreSQL. Disponible para freelance y full-time." />
+        <meta property="og:image" content="https://freire.ucielbustamante.com/og-image.png" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Augusto Freire — FullStack Developer" />
+        <meta name="twitter:description" content="FullStack Developer · Buenos Aires, AR. React · Node · Python · PostgreSQL." />
+        <meta name="twitter:image" content="https://freire.ucielbustamante.com/og-image.png" />
+
+        <link rel="canonical" href="https://freire.ucielbustamante.com/" />
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+
+        <!--
       Formulario oculto para que Netlify lo detecte durante el build.
       Netlify escanea el HTML estático, no el JS renderizado.
       Los nombres de los campos deben coincidir exactamente con el formulario en React.
     -->
-    <form name="contacto" data-netlify="true" hidden>
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <textarea name="message"></textarea>
-    </form>
-  </body>
+        <form name="contacto" data-netlify="true" hidden>
+            <input type="text" name="name" />
+            <input type="email" name="email" />
+            <textarea name="message"></textarea>
+        </form>
+    </body>
 </html>

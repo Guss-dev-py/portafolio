@@ -4,6 +4,7 @@ export interface Project {
   description: string;
   technologies: string[];
   url: string;
+  repoUrl: string;
   imageUrl: string;
   imageAlt: string;
   createdAt: string;
