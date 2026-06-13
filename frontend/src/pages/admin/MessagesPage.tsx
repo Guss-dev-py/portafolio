@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAdminContext } from './adminContext';
 import type { Message } from '../../types';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { AdminTableSkeleton } from './AdminTableSkeleton';
 import { useToast } from '../../components/Toast/toastContext';
 import { relDateHours } from '../../utils/date';
 import { messagesPerDay } from '../../utils/messagesPerDay';
@@ -26,11 +27,11 @@ function formatDate(iso: string): string {
 
 export default function MessagesPage() {
   const { messagesApi } = useAdminContext();
-  const { messages, loading, error, readMessage, removeMessage, unreadCount } = messagesApi;
+  const { messages, loading, error, readMessage, removeMessage, restore, unreadCount } = messagesApi;
   const { toast } = useToast();
   const [selected, setSelected] = useState<Message | null>(null);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'read' | 'trash'>('all');
   const [confirmDelete, setConfirmDelete] = useState<Message | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [confirmBulk, setConfirmBulk] = useState(false);
@@ -88,18 +89,33 @@ export default function MessagesPage() {
     } catch { /* non-critical */ }
   };
 
-  const { filtered, readCount, lastActivity, sparkBuckets, sparkMax } = useMemo(() => {
+  const handleRestore = async (msg: Message) => {
+    try {
+      const restored = await restore(msg.id);
+      setSelected(restored);
+      toast({ title: 'Mensaje restaurado', msg: `De: ${msg.name}`, variant: 'ok' });
+    } catch {
+      toast({ title: 'Error', msg: 'No se pudo restaurar el mensaje', variant: 'danger' });
+    }
+  };
+
+  const { filtered, activeCount, readCount, trashCount, lastActivity, sparkBuckets, sparkMax } = useMemo(() => {
     const q = search.toLowerCase();
-    const filt = messages
+    const active = messages.filter(m => !m.deletedAt);
+    const trashed = messages.filter(m => m.deletedAt);
+    const base = filter === 'trash' ? trashed : active;
+    const filt = base
       .filter(m => !q || m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || m.message.toLowerCase().includes(q))
-      .filter(m => filter === 'all' || m.status === filter);
-    const rc = messages.length - unreadCount;
-    const sorted = [...messages].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .filter(m => filter === 'all' || filter === 'trash' || m.status === filter);
+    const rc = active.length - unreadCount;
+    const sorted = [...active].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     const la = sorted.length ? relDateHours(sorted[0].createdAt) : '-';
-    const buckets = messagesPerDay(messages.map(m => m.createdAt), SPARK_DAYS);
+    const buckets = messagesPerDay(active.map(m => m.createdAt), SPARK_DAYS);
     return {
       filtered: filt,
+      activeCount: active.length,
       readCount: rc,
+      trashCount: trashed.length,
       lastActivity: la,
       sparkBuckets: buckets,
       sparkMax: Math.max(...buckets, 1),
@@ -121,7 +137,7 @@ export default function MessagesPage() {
       <div className={`${styles.statsStrip} ${styles.statsStripWide}`}>
         <div className={styles.statCell}>
           <span className={styles.statLabel}>Total</span>
-          <span className={styles.statValue}>{messages.length}</span>
+          <span className={styles.statValue}>{activeCount}</span>
         </div>
         <div className={styles.statCell}>
           <span className={styles.statLabel}>No leídos</span>
@@ -180,6 +196,10 @@ export default function MessagesPage() {
             className={`${styles.filterBtn} ${filter === 'read' ? styles.filterActive : ''}`}
             onClick={() => setFilter('read')}
           >Leídos</button>
+          <button
+            className={`${styles.filterBtn} ${filter === 'trash' ? styles.filterActive : ''}`}
+            onClick={() => setFilter('trash')}
+          >Papelera{trashCount > 0 ? ` (${trashCount})` : ''}</button>
         </div>
         {checked.size > 0 && (
           <button
@@ -192,7 +212,7 @@ export default function MessagesPage() {
         )}
       </div>
 
-      {loading && <p className={styles.loadingText}>Cargando mensajes...</p>}
+      {loading && <AdminTableSkeleton />}
       {error && <p className={styles.errorText}>Error: {error}</p>}
 
       {!loading && !error && (
@@ -294,30 +314,51 @@ export default function MessagesPage() {
                 <div className={styles.detailDivider}>──── MENSAJE ────</div>
                 <div className={styles.detailBody}>{selected.message}</div>
                 <div className={styles.detailActions}>
-                  <a
-                    href={gmailReplyUrl(selected)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.btnPrimary}
-                  >
-                    ↪ Responder en Gmail
-                  </a>
-                  {selected.status === 'unread' && (
-                    <button
-                      type="button"
-                      className={styles.btnGhost}
-                      onClick={() => handleMarkRead(selected)}
-                    >
-                      Marcar leído
-                    </button>
+                  {selected.deletedAt ? (
+                    <>
+                      <button
+                        type="button"
+                        className={styles.btnPrimary}
+                        onClick={() => handleRestore(selected)}
+                      >
+                        ↩ Restaurar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.btnDanger}
+                        onClick={() => setConfirmDelete(selected)}
+                      >
+                        Eliminar definitivamente
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href={gmailReplyUrl(selected)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.btnPrimary}
+                      >
+                        ↪ Responder en Gmail
+                      </a>
+                      {selected.status === 'unread' && (
+                        <button
+                          type="button"
+                          className={styles.btnGhost}
+                          onClick={() => handleMarkRead(selected)}
+                        >
+                          Marcar leído
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.btnDanger}
+                        onClick={() => setConfirmDelete(selected)}
+                      >
+                        Eliminar
+                      </button>
+                    </>
                   )}
-                  <button
-                    type="button"
-                    className={styles.btnDanger}
-                    onClick={() => setConfirmDelete(selected)}
-                  >
-                    Eliminar
-                  </button>
                 </div>
               </>
             ) : (

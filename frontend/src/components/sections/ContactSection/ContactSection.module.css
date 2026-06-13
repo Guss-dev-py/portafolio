@@ -54,7 +54,7 @@
 .lead {
   font-family: var(--serif);
   font-size: 32px;
-  line-height: 1.2;
+  line-height: 1.3;
   color: var(--ink);
   letter-spacing: -0.01em;
 }

@@ -9,12 +9,14 @@ import { ProjectsSection } from "./components/sections/ProjectsSection/ProjectsS
 import { ContactSection } from "./components/sections/ContactSection/ContactSection";
 import { Footer } from "./components/Footer/Footer";
 import { ToastProvider } from "./components/Toast/Toast";
+import { BackToTop } from "./components/BackToTop/BackToTop";
 import { LoginPage } from "./pages/admin/LoginPage";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AuthGuard } from "./pages/admin/AuthGuard";
 import ProjectsPage from "./pages/admin/ProjectsPage";
 import MessagesPage from "./pages/admin/MessagesPage";
 import SettingsPage from "./pages/admin/SettingsPage";
+import LogsPage from "./pages/admin/LogsPage";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -62,6 +64,7 @@ function PortfolioApp() {
           <ContactSection />
         </main>
         <Footer />
+        <BackToTop />
       </div>
     </>
   );
@@ -80,6 +83,7 @@ function App() {
               <Route path="projects" element={<ProjectsPage />} />
               <Route path="messages" element={<MessagesPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="logs" element={<LogsPage />} />
             </Route>
           </Route>
           <Route path="/*" element={<PortfolioApp />} />

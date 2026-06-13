@@ -61,6 +61,26 @@ services:
       retries: 5
     restart: unless-stopped
 
+  db-backup:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: postgres
+      POSTGRES_USER: portfolio_user
+      POSTGRES_DB: portfolio
+      PGPASSWORD: "${POSTGRES_PASSWORD}"
+      BACKUP_INTERVAL: "${BACKUP_INTERVAL:-86400}"
+      BACKUP_KEEP: "${BACKUP_KEEP:-7}"
+      BACKUP_DIR: /backups
+    volumes:
+      - ./database/backup.sh:/usr/local/bin/backup.sh:ro
+      - db-backups:/backups
+    entrypoint: ["sh", "/usr/local/bin/backup.sh"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:
   uploads:
+  db-backups:

@@ -3,6 +3,7 @@ import pool from '../db';
 import { verifyToken } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { statusSchema, type WorkStatus } from '../schemas/status.schema';
+import { audit } from '../utils/audit';
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.patch('/', verifyToken, validate(statusSchema), async (req: Request, res:
        ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()`,
       [status]
     );
+    audit('status_changed', 'settings', 'work_status', status);
     res.json({ status });
   } catch (err) {
     next(err);

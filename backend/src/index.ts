@@ -8,7 +8,10 @@ import contactRouter from './routes/contact';
 import messagesRouter from './routes/messages';
 import statusRouter from './routes/status';
 import uploadsRouter from './routes/uploads';
+import logsRouter from './routes/logs';
+import statsRouter from './routes/stats';
 import { loginLimiter, contactLimiter } from './middleware/rateLimiter';
+import { securityHeaders, mutationLimiter } from './middleware/security';
 import { runMigrations } from './utils/runMigrations';
 
 const REQUIRED_ENV_VARS = [
@@ -37,8 +40,14 @@ const app = express();
 // los clientes y los límites se vuelven globales en vez de por visitante.
 app.set('trust proxy', 1);
 
-app.use(cors({ origin: process.env.CORS_ORIGIN }));
+app.use(securityHeaders);
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  // El frontend necesita leer el token renovado por la sesión deslizante
+  exposedHeaders: ['X-Refreshed-Token'],
+}));
 app.use(express.json());
+app.use('/api', mutationLimiter);
 
 app.use('/api/health', healthRouter);
 app.use('/api/auth/login', loginLimiter);
@@ -48,6 +57,8 @@ app.use('/api/contact', contactLimiter, contactRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/status', statusRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/logs', logsRouter);
+app.use('/api/stats', statsRouter);
 
 // Global error handler — must have 4 params to be recognized by Express
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

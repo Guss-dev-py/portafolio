@@ -1,0 +1,32 @@
+.backToTop {
+  /* Solo mobile: en desktop la nav fija ya resuelve la navegación */
+  display: none;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: var(--z-nav);
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  box-shadow: var(--shadow-stamp);
+  cursor: pointer;
+  transition: background var(--t-base), color var(--t-base);
+}
+
+.backToTop:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+@media (max-width: 800px) {
+  .backToTop {
+    display: inline-flex;
+  }
+}

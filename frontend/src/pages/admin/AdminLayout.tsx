@@ -4,6 +4,9 @@ import { useMessages } from '../../hooks/useMessages';
 import { useProjects } from '../../hooks/useProjects';
 import { apiClient } from '../../api/client';
 import { AdminContext } from './adminContext';
+import { AdminThemeToggle } from './AdminThemeToggle';
+import { CommandPalette } from './CommandPalette';
+import { useUnreadTitle } from '../../hooks/useUnreadTitle';
 import styles from './AdminLayout.module.css';
 
 interface HealthState {
@@ -38,8 +41,12 @@ export function AdminLayout() {
   const { messages, unreadCount } = messagesApi;
   const { projects } = projectsApi;
 
+  useUnreadTitle(unreadCount);
+
   const [now, setNow] = useState(new Date());
   const [health, setHealth] = useState<HealthState | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   // useState con inicializador lazy en vez de useRef(Date.now()):
   // llamar funciones impuras o leer refs durante el render viola las reglas de React.
   const [startTime] = useState(() => Date.now());
@@ -79,6 +86,12 @@ export function AdminLayout() {
       const tag = (e.target as HTMLElement).tagName;
       const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+
       if (e.key === 'Escape') {
         leaderMode = false;
         return;
@@ -88,6 +101,7 @@ export function AdminLayout() {
         if (e.key === 'p') { navigate('/admin/projects'); leaderMode = false; }
         if (e.key === 'm') { navigate('/admin/messages'); leaderMode = false; }
         if (e.key === 's') { navigate('/admin/settings'); leaderMode = false; }
+        if (e.key === 'l') { navigate('/admin/logs'); leaderMode = false; }
         if (leaderTimer) clearTimeout(leaderTimer);
         return;
       }
@@ -128,15 +142,28 @@ export function AdminLayout() {
     <AdminContext.Provider value={{ searchRef, requestOpenCreate, setOpenCreateHandler, projectsApi, messagesApi }}>
       <div className={styles.layout}>
         <div className={styles.menubar}>
+          <button
+            type="button"
+            className={styles.menuToggle}
+            aria-label={sidebarOpen ? 'Cerrar navegación' : 'Abrir navegación'}
+            aria-expanded={sidebarOpen}
+            onClick={() => setSidebarOpen(v => !v)}
+          >
+            ≡
+          </button>
           <span className={styles.menuBrand}>▌ FREIRE/ADMIN</span>
           <span className={styles.menuSpacer} />
+          <AdminThemeToggle />
           <span className={styles.menuInfo}>
-            augusto@portafolio · PAPER · {formatDate(now)} · {formatTime(now)}
+            augusto@portafolio · {formatDate(now)} · {formatTime(now)}
           </span>
         </div>
 
         <div className={styles.workspace}>
-          <aside className={styles.sidebar}>
+          {sidebarOpen && (
+            <div className={styles.sideBackdrop} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+          )}
+          <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
             <div className={styles.sideHead}>
               <p className={styles.sideEyebrow}>SESIÓN ACTIVA</p>
               <p className={styles.sideName}>◆ augusto</p>
@@ -144,7 +171,8 @@ export function AdminLayout() {
             </div>
 
             <p className={styles.sideSection}>── Navegación ──</p>
-            <nav className={styles.nav} aria-label="Navegación del panel">
+            {/* Cerrar el drawer (mobile) al tocar cualquier link: event-driven, sin effect */}
+            <nav className={styles.nav} aria-label="Navegación del panel" onClick={() => setSidebarOpen(false)}>
               <NavLink to="/admin/projects" className={navClass}>
                 <span className={styles.glyph}>[P]</span> Proyectos
               </NavLink>
@@ -156,9 +184,9 @@ export function AdminLayout() {
                   </span>
                 )}
               </NavLink>
-              <span className={`${styles.navLink} ${styles.disabled}`}>
-                <span className={styles.glyph}>[L]</span> Logs <span className={styles.soon}>(pronto)</span>
-              </span>
+              <NavLink to="/admin/logs" className={navClass}>
+                <span className={styles.glyph}>[L]</span> Logs
+              </NavLink>
               <NavLink to="/admin/settings" className={navClass}>
                 <span className={styles.glyph}>[S]</span> Ajustes
               </NavLink>
@@ -190,6 +218,11 @@ export function AdminLayout() {
                 <span>ir a ajustes</span>
               </div>
               <div className={styles.kbdRow}>
+                <kbd className={styles.kbd}>ctrl</kbd>
+                <kbd className={styles.kbd}>k</kbd>
+                <span>paleta de comandos</span>
+              </div>
+              <div className={styles.kbdRow}>
                 <kbd className={styles.kbd}>esc</kbd>
                 <span>cerrar diálogo</span>
               </div>
@@ -215,6 +248,8 @@ export function AdminLayout() {
           <main className={styles.main}>
             <Outlet />
           </main>
+
+          {paletteOpen && <CommandPalette open onClose={() => setPaletteOpen(false)} />}
         </div>
 
         <div className={styles.statusbar}>

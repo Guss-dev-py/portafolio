@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Project, ProjectInput } from '../../types';
 import { useAdminContext } from './adminContext';
 import { uploadImage } from '../../api/projects';
+import { resolveAssetUrl } from '../../api/client';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { AdminTableSkeleton } from './AdminTableSkeleton';
 import { useToast } from '../../components/Toast/toastContext';
 import { relDateDays } from '../../utils/date';
 import styles from './admin.module.css';
@@ -41,8 +43,11 @@ export default function ProjectsPage() {
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'name' | 'manual'>('updated');
   const [filterTech, setFilterTech] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Project | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const localSearchRef = useRef<HTMLInputElement | null>(null);
   const dragIndexRef = useRef<number | null>(null);
+  // Snapshot del form al abrirlo, para detectar cambios sin guardar al cancelar
+  const initialFormRef = useRef<string>('');
 
   // sync external ref once on mount (refs don't change identity)
   useEffect(() => {
@@ -51,7 +56,9 @@ export default function ProjectsPage() {
 
   const openCreate = useCallback(() => {
     setEditingProject(null);
-    setFormData({ ...emptyForm(), technologiesRaw: '' });
+    const fresh = { ...emptyForm(), technologiesRaw: '' };
+    setFormData(fresh);
+    initialFormRef.current = JSON.stringify(fresh);
     setFormErrors({});
     setShowForm(true);
   }, []);
@@ -63,7 +70,7 @@ export default function ProjectsPage() {
 
   const openEdit = (project: Project) => {
     setEditingProject(project);
-    setFormData({
+    const initial = {
       name: project.name,
       description: project.description,
       technologies: project.technologies,
@@ -72,15 +79,26 @@ export default function ProjectsPage() {
       repoUrl: project.repoUrl,
       imageUrl: project.imageUrl,
       imageAlt: project.imageAlt,
-    });
+    };
+    setFormData(initial);
+    initialFormRef.current = JSON.stringify(initial);
     setFormErrors({});
     setShowForm(true);
   };
 
-  const handleCancel = () => {
+  const closeForm = () => {
     setShowForm(false);
     setEditingProject(null);
     setFormErrors({});
+    setConfirmDiscard(false);
+  };
+
+  const handleCancel = () => {
+    if (JSON.stringify(formData) !== initialFormRef.current) {
+      setConfirmDiscard(true);
+      return;
+    }
+    closeForm();
   };
 
   const handleChange = (field: keyof ProjectInput | 'technologiesRaw', value: string) => {
@@ -358,6 +376,35 @@ export default function ProjectsPage() {
               </div>
             </div>
 
+            {(formData.name || formData.description || formData.technologies.length > 0) && (
+              <div className={styles.previewBlock}>
+                <span className={styles.previewLabel}>── Vista previa (portfolio público) ──</span>
+                <div className={styles.previewRow}>
+                  {formData.imageUrl && (
+                    <img
+                      src={resolveAssetUrl(formData.imageUrl)}
+                      alt=""
+                      className={styles.previewThumb}
+                    />
+                  )}
+                  <div className={styles.previewBody}>
+                    <span className={styles.previewName}>
+                      {formData.name || 'nombre'}<span className={styles.previewExt}> .proj</span>
+                    </span>
+                    <span className={styles.previewDesc}>{formData.description || 'descripción'}</span>
+                  </div>
+                  <div className={styles.previewTech}>
+                    {formData.technologies.slice(0, 3).map(t => (
+                      <span key={t} className={styles.chip}>{t}</span>
+                    ))}
+                    {formData.technologies.length > 3 && (
+                      <span className={styles.chipMore}>+{formData.technologies.length - 3}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className={styles.formActions}>
               <button type="submit" className={styles.btnPrimary} disabled={submitting}>
                 {submitting ? 'Guardando...' : editingProject ? '↵ Guardar cambios' : '↵ Crear proyecto'}
@@ -411,7 +458,7 @@ export default function ProjectsPage() {
         </select>
       </div>
 
-      {loading && <p className={styles.loadingText}>Cargando proyectos...</p>}
+      {loading && <AdminTableSkeleton />}
       {error && <p className={styles.errorText}>Error: {error}</p>}
 
       {!loading && !error && (
@@ -469,6 +516,15 @@ export default function ProjectsPage() {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirmDiscard}
+        title="Descartar cambios"
+        body={<>Hay cambios sin guardar en el formulario. ¿Descartarlos?</>}
+        confirmLabel="Descartar"
+        onConfirm={closeForm}
+        onCancel={() => setConfirmDiscard(false)}
+      />
 
       <ConfirmDialog
         open={!!confirmDelete}

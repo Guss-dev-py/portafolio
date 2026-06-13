@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 
+vi.mock('../../utils/audit', () => ({ audit: vi.fn() }));
 vi.mock('../../db', () => ({ default: { query: vi.fn() } }));
 vi.mock('../../middleware/auth', () => ({
   verifyToken: (_req: express.Request, _res: express.Response, next: express.NextFunction) => next(),

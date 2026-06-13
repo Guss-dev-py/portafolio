@@ -9,6 +9,7 @@ import express from 'express';
 import request from 'supertest';
 
 // Mock the pg pool before importing the router
+vi.mock('../../utils/audit', () => ({ audit: vi.fn() }));
 vi.mock('../../db', () => ({
   default: {
     query: vi.fn(),

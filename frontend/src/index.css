@@ -22,6 +22,10 @@
   /* El footer es una losa de tinta en ambos temas: tokens propios, no invertibles */
   --footer-bg:   var(--ink);
   --footer-ink:  #f3efe5;
+  /* Statusbar del admin: losa de tinta con texto papel en el tema base */
+  --statusbar-bg:  var(--ink);
+  --statusbar-fg:  rgba(243, 239, 229, 0.7);
+  --statusbar-sep: rgba(243, 239, 229, 0.3);
   /* Veladuras sobre las partículas (mismo tono que --bg, con alpha) */
   --bg-veil:        rgba(243, 239, 229, 0.78);
   --bg-veil-strong: rgba(243, 239, 229, 0.85);
@@ -87,8 +91,55 @@
   --danger:      #e0565c;
   --warn:        #d39a45;
   --footer-bg:   #100e0b;
+  --statusbar-bg: #100e0b;
   --bg-veil:        rgba(24, 21, 17, 0.78);
   --bg-veil-strong: rgba(24, 21, 17, 0.85);
+}
+
+/* ── Admin "hackerman": fósforo verde sobre negro CRT ─────────────────
+   Solo activo dentro del panel: AdminThemeToggle pone data-admin-theme
+   en <html> mientras el layout está montado y lo limpia al salir.
+   Declarado después de [data-theme] para ganar en orden de cascada. */
+[data-admin-theme='hacker'] {
+  color-scheme: dark;
+  --bg:          #060906;
+  --bg-1:        #0b130c;
+  --bg-2:        #122013;
+  --bg-deep:     #0e1a0f;
+  --ink:         #41f07e; /* fósforo: 13:1 sobre --bg */
+  --ink-2:       #38d96f;
+  --ink-dim:     #2fb35c;
+  --ink-mute:    #28954d; /* AA ≥4.5:1 sobre --bg y --bg-1 */
+  --hairline:    #1d4a29;
+  --rule:        #41f07e;
+  --accent:      #ff5c57; /* alertas: rojo terminal, 6.6:1 */
+  --accent-2:    #41f07e;
+  --status-open: #41f07e;
+  --status-away: #ff5c57;
+  --danger:      #ff5c57;
+  --warn:        #ffb000;
+  --statusbar-bg:  #0b130c;
+  --statusbar-fg:  #2fb35c;
+  --statusbar-sep: #1d4a29;
+}
+
+/* Brillo de fósforo y scanlines CRT (estáticos: no molestan la lectura) */
+[data-admin-theme='hacker'] body {
+  text-shadow: 0 0 8px rgba(65, 240, 126, 0.22);
+}
+
+[data-admin-theme='hacker'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(6, 9, 6, 0.18) 3px
+  );
 }
 
 *, *::before, *::after { box-sizing: border-box; }

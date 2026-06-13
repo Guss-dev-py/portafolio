@@ -46,6 +46,14 @@ export async function apiClient<T>(
     headers,
   });
 
+  // Sesión deslizante: el backend renueva el JWT por header cuando está por vencer
+  const refreshed = response.headers.get("X-Refreshed-Token");
+  if (refreshed) {
+    try {
+      localStorage.setItem("token", refreshed);
+    } catch { /* almacenamiento no disponible */ }
+  }
+
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new ApiError(

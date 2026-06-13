@@ -7,6 +7,7 @@ import { projectSchema } from '../schemas/project.schema';
 import { reorderSchema } from '../schemas/reorder.schema';
 import { Project } from '../types';
 import { safeIso } from '../utils/date';
+import { audit } from '../utils/audit';
 
 const router = Router();
 
@@ -47,6 +48,7 @@ router.put('/reorder', verifyToken, validate(reorderSchema), async (req: Request
        WHERE projects.id = u.id`,
       [ids]
     );
+    audit('projects_reordered', 'project', null, `${ids.length} proyectos`);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -78,6 +80,7 @@ router.post('/', verifyToken, validate(projectSchema), async (req: Request, res:
        RETURNING *`,
       [name, description, technologies, url, repoUrl, imageUrl, imageAlt]
     );
+    audit('project_created', 'project', result.rows[0].id as string, name);
     res.status(201).json(rowToProject(result.rows[0]));
   } catch (err) {
     next(err);
@@ -96,6 +99,7 @@ router.put('/:id', validateUuidParam(), verifyToken, validate(projectSchema), as
       res.status(404).json({ error: 'Recurso no encontrado' });
       return;
     }
+    audit('project_updated', 'project', req.params.id, name);
     res.json(rowToProject(result.rows[0]));
   } catch (err) {
     next(err);
@@ -110,6 +114,7 @@ router.delete('/:id', validateUuidParam(), verifyToken, async (req: Request, res
       res.status(404).json({ error: 'Recurso no encontrado' });
       return;
     }
+    audit('project_deleted', 'project', req.params.id);
     res.status(204).send();
   } catch (err) {
     next(err);

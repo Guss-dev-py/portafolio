@@ -14,7 +14,7 @@ import MessagesPage from '../MessagesPage';
 
 type MessagesApi = AdminContextValue['messagesApi'];
 
-function makeMessage(i: number, status: Message['status']): Message {
+function makeMessage(i: number, status: Message['status'], deletedAt: string | null = null): Message {
   return {
     id: `00000000-0000-0000-0000-${String(i).padStart(12, '0')}`,
     name: `Remitente ${i}`,
@@ -22,6 +22,7 @@ function makeMessage(i: number, status: Message['status']): Message {
     message: `Mensaje de prueba número ${i} con contenido suficiente.`,
     status,
     createdAt: new Date(Date.now() - i * 3_600_000).toISOString(),
+    deletedAt,
   };
 }
 
@@ -35,7 +36,11 @@ function makeMessagesApi(messages: Message[], overrides: Partial<MessagesApi> = 
       return { ...msg, status: 'read' as const };
     }),
     removeMessage: vi.fn(async () => {}),
-    unreadCount: messages.filter(m => m.status === 'unread').length,
+    restore: vi.fn(async (id: string) => {
+      const msg = messages.find(m => m.id === id)!;
+      return { ...msg, deletedAt: null };
+    }),
+    unreadCount: messages.filter(m => m.status === 'unread' && !m.deletedAt).length,
     ...overrides,
   };
 }
@@ -168,6 +173,36 @@ describe('MessagesPage', () => {
   it('sin mensajes muestra el estado vacío', () => {
     renderPage(makeMessagesApi([]));
     expect(screen.getByText('No hay mensajes.')).toBeInTheDocument();
+  });
+
+  it('los mensajes en papelera no aparecen en la vista por defecto', () => {
+    const messages = [makeMessage(1, 'read'), makeMessage(2, 'read', new Date().toISOString())];
+    renderPage(makeMessagesApi(messages));
+
+    expect(screen.getByText('Remitente 1')).toBeInTheDocument();
+    expect(screen.queryByText('Remitente 2')).not.toBeInTheDocument();
+  });
+
+  it('el filtro Papelera muestra solo los borrados y permite restaurar', async () => {
+    const messages = [makeMessage(1, 'read'), makeMessage(2, 'read', new Date().toISOString())];
+    const api = makeMessagesApi(messages);
+    renderPage(api);
+
+    fireEvent.click(screen.getByRole('button', { name: /Papelera/ }));
+
+    expect(screen.queryByText('Remitente 1')).not.toBeInTheDocument();
+    expect(screen.getByText('Remitente 2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Remitente 2'));
+    fireEvent.click(screen.getByRole('button', { name: /Restaurar/ }));
+
+    await waitFor(() => expect(api.restore).toHaveBeenCalledExactlyOnceWith(messages[1].id));
+  });
+
+  it('mientras carga muestra filas skeleton en vez de texto plano', () => {
+    const { container } = renderPage(makeMessagesApi([], { loading: true }));
+    expect(container.querySelectorAll('[class*="skelRow"]').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Cargando mensajes...')).not.toBeInTheDocument();
   });
 
   it('bulk delete: seleccionar varios mensajes y confirmar llama a removeMessage por cada uno', async () => {

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import pool from "../db";
 import { validate } from "../middleware/validate";
 import { loginSchema, LoginInput } from "../schemas/login.schema";
+import { audit } from "../utils/audit";
 
 const router = Router();
 
@@ -57,6 +58,7 @@ router.post(
       }
 
       if (!passwordMatch || !user) {
+        audit("login_failed", "auth", null, `usuario: ${username.slice(0, 40)}`);
         return res.status(401).json({ error: "Credenciales inválidas" });
       }
 
@@ -66,6 +68,7 @@ router.post(
         { expiresIn: "8h", algorithm: "HS256" },
       );
 
+      audit("login_ok", "auth", user.id, user.username);
       return res.status(200).json({ token, expiresIn: 28800 });
     } catch (err) {
       next(err);

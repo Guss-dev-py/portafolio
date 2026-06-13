@@ -113,10 +113,19 @@
   transition: transform var(--t-slow);
 }
 
+/* Press feedback: único feedback táctil; en desktop "hunde" el sello */
+.indexRow:active {
+  background: var(--bg-2);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .indexRow:hover {
     background: var(--bg-1);
     text-decoration: none;
+  }
+
+  .indexRow:active > * {
+    transform: translate(16px, 1px);
   }
 
   .indexRow:hover > * {
@@ -181,7 +190,7 @@
   font-family: var(--serif);
   font-size: var(--fs-16);
   color: var(--ink-dim);
-  line-height: var(--lh-snug);
+  line-height: 1.4;
 }
 
 .rowTech {

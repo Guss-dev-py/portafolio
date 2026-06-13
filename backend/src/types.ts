@@ -18,6 +18,8 @@ export interface Message {
   message: string;
   status: 'unread' | 'read';
   createdAt: string;
+  /** Fecha de borrado lógico (papelera); null si está activo. */
+  deletedAt: string | null;
 }
 
 export interface ValidationError {

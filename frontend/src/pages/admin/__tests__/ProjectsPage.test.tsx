@@ -178,6 +178,55 @@ describe('ProjectsPage', () => {
     expect(screen.getByText('No hay proyectos. Agregá el primero.')).toBeInTheDocument();
   });
 
+  it('el formulario muestra una vista previa de la fila pública', () => {
+    const { container } = renderPage(makeProjectsApi([]));
+
+    fireEvent.click(screen.getByRole('button', { name: '+ Nuevo proyecto [n]' }));
+    fireEvent.change(screen.getByLabelText('NOMBRE *'), { target: { value: 'Mi App' } });
+    fireEvent.change(screen.getByLabelText('DESCRIPCIÓN *'), { target: { value: 'Una demo' } });
+    fireEvent.change(screen.getByLabelText(/TECNOLOGÍAS \*/), { target: { value: 'React' } });
+
+    const preview = container.querySelector('[class*="previewRow"]')!;
+    expect(preview).not.toBeNull();
+    expect(preview.textContent).toContain('Mi App');
+    expect(preview.textContent).toContain('.proj');
+    expect(preview.textContent).toContain('Una demo');
+    expect(preview.textContent).toContain('React');
+  });
+
+  describe('cambios sin guardar', () => {
+    it('cancelar con cambios pide confirmación antes de descartar', () => {
+      renderPage(makeProjectsApi([]));
+
+      fireEvent.click(screen.getByRole('button', { name: '+ Nuevo proyecto [n]' }));
+      fireEvent.change(screen.getByLabelText('NOMBRE *'), { target: { value: 'Borrador' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+      // El form sigue abierto y aparece el diálogo
+      expect(screen.getByLabelText('NOMBRE *')).toBeInTheDocument();
+      expect(screen.getByText(/Descartar cambios/)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
+      expect(screen.queryByLabelText('NOMBRE *')).not.toBeInTheDocument();
+    });
+
+    it('cancelar sin cambios cierra directo, sin diálogo', () => {
+      renderPage(makeProjectsApi([]));
+
+      fireEvent.click(screen.getByRole('button', { name: '+ Nuevo proyecto [n]' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+      expect(screen.queryByLabelText('NOMBRE *')).not.toBeInTheDocument();
+      expect(screen.queryByText('Descartar cambios')).not.toBeInTheDocument();
+    });
+  });
+
+  it('mientras carga muestra filas skeleton en vez de texto plano', () => {
+    const { container } = renderPage(makeProjectsApi([], { loading: true } as never));
+    expect(container.querySelectorAll('[class*="skelRow"]').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Cargando proyectos...')).not.toBeInTheDocument();
+  });
+
   describe('subida de imagen', () => {
     it('subir un archivo completa el campo URL IMAGEN con la url devuelta', async () => {
       vi.mocked(uploadImage).mockResolvedValueOnce({ url: '/api/uploads/abc123.png' });

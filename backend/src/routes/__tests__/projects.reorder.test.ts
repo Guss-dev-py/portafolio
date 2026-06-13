@@ -9,6 +9,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 // Mock the pg pool — do NOT mock auth middleware (we test real auth behavior)
+vi.mock('../../utils/audit', () => ({ audit: vi.fn() }));
 vi.mock('../../db', () => ({
   default: {
     query: vi.fn(),

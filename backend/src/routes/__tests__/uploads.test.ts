@@ -3,7 +3,9 @@
  * Valida tipo de archivo y devuelve la URL pública relativa.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+
+vi.mock('../../utils/audit', () => ({ audit: vi.fn() }));
 import express, { type Router } from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
@@ -68,20 +70,27 @@ describe('POST /api/uploads', () => {
     expect(res.status).toBe(400);
   });
 
-  it('PNG válido → 201 con url relativa y archivo en disco', async () => {
+  it('PNG válido → 201, se optimiza a .webp y queda en disco', async () => {
     const res = await request(testApp)
       .post('/api/uploads')
       .set('Authorization', `Bearer ${makeValidToken()}`)
       .attach('image', PNG_BYTES, { filename: 'foto.png', contentType: 'image/png' });
 
     expect(res.status).toBe(201);
-    expect(res.body.url).toMatch(/^\/api\/uploads\/[\w.-]+\.png$/);
+    // sharp normaliza todo a webp para ahorrar peso
+    expect(res.body.url).toMatch(/^\/api\/uploads\/[\w.-]+\.webp$/);
 
     const filename = res.body.url.split('/').pop()!;
-    expect(fs.existsSync(path.join(uploadsDir, filename))).toBe(true);
+    const stored = path.join(uploadsDir, filename);
+    expect(fs.existsSync(stored)).toBe(true);
+
+    // El archivo en disco es realmente webp (magic bytes RIFF....WEBP)
+    const buf = fs.readFileSync(stored);
+    expect(buf.subarray(0, 4).toString('ascii')).toBe('RIFF');
+    expect(buf.subarray(8, 12).toString('ascii')).toBe('WEBP');
   });
 
-  it('la imagen subida se sirve por GET', async () => {
+  it('la imagen optimizada se sirve por GET como webp', async () => {
     const upload = await request(testApp)
       .post('/api/uploads')
       .set('Authorization', `Bearer ${makeValidToken()}`)
@@ -90,6 +99,6 @@ describe('POST /api/uploads', () => {
     const res = await request(testApp).get(upload.body.url as string);
 
     expect(res.status).toBe(200);
-    expect(res.headers['content-type']).toContain('image/png');
+    expect(res.headers['content-type']).toContain('image/webp');
   });
 });

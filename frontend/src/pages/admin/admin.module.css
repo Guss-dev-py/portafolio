@@ -114,6 +114,134 @@
   cursor: pointer;
 }
 
+.logList {
+  border: 1px solid var(--hairline);
+}
+
+.logRow {
+  display: grid;
+  grid-template-columns: 130px 240px 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--fs-12);
+}
+
+.logRow:last-child {
+  border-bottom: none;
+}
+
+.logDate {
+  color: var(--ink-mute);
+}
+
+.logAction {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.logDanger {
+  color: var(--accent);
+}
+
+.logDetail {
+  color: var(--ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewBlock {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewLabel {
+  font-size: var(--fs-10);
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wider);
+}
+
+.previewRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+}
+
+.previewThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  flex-shrink: 0;
+}
+
+.previewBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.previewName {
+  font-weight: 700;
+  font-size: var(--fs-16);
+  color: var(--ink);
+}
+
+.previewExt {
+  color: var(--ink-mute);
+  font-weight: 400;
+  font-size: var(--fs-12);
+}
+
+.previewDesc {
+  font-family: var(--serif);
+  font-size: var(--fs-13);
+  color: var(--ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewTech {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.skelRow {
+  display: grid;
+  grid-template-columns: 40px 1.2fr 2fr 80px;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.skelBar {
+  display: inline-block;
+  height: 12px;
+  background: var(--bg-2);
+  animation: skelPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes skelPulse {
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skelBar { animation: none; }
+}
+
 .draggableRow {
   cursor: grab;
 }

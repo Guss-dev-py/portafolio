@@ -9,6 +9,7 @@ import request from 'supertest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+vi.mock('../../utils/audit', () => ({ audit: vi.fn() }));
 vi.mock('../../db', () => ({
   default: {
     query: vi.fn(),
