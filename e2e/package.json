@@ -1,0 +1,13 @@
+{
+  "name": "portafolio-e2e",
+  "private": true,
+  "description": "Tests end-to-end del portfolio (Playwright). Corre contra el stack de Docker (http://localhost:8080) o el que indique E2E_BASE_URL.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

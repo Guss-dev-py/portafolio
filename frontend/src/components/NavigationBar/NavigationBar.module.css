@@ -87,6 +87,28 @@
   text-decoration: none;
 }
 
+.themeBtn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: var(--fs-14);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--t-base), color var(--t-base), border-color var(--t-base);
+}
+
+.themeBtn:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
 .cvBtn {
   border: 1px solid var(--ink);
   padding: 5px 12px;
@@ -149,7 +171,7 @@
   z-index: calc(var(--z-nav) - 1);
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0;
 }
 
@@ -161,7 +183,7 @@
 .mobileLink {
   width: 100%;
   text-align: center;
-  padding: 20px 24px;
+  padding: 28px 24px;
   border-bottom: 1px solid var(--hairline);
   text-decoration: none;
   color: var(--ink-dim);
@@ -174,6 +196,10 @@
   justify-content: center;
   gap: 10px;
   transition: background var(--t-base), color var(--t-base);
+}
+
+.mobileLink:first-child {
+  border-top: 1px solid var(--hairline);
 }
 
 .mobileLink.activeMobileLink {

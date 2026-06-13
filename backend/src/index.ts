@@ -7,6 +7,7 @@ import projectsRouter from './routes/projects';
 import contactRouter from './routes/contact';
 import messagesRouter from './routes/messages';
 import statusRouter from './routes/status';
+import uploadsRouter from './routes/uploads';
 import { loginLimiter, contactLimiter } from './middleware/rateLimiter';
 import { runMigrations } from './utils/runMigrations';
 
@@ -46,6 +47,7 @@ app.use('/api/projects', projectsRouter);
 app.use('/api/contact', contactLimiter, contactRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/status', statusRouter);
+app.use('/api/uploads', uploadsRouter);
 
 // Global error handler — must have 4 params to be recognized by Express
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

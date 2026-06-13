@@ -1,6 +1,6 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-function buildUrl(path: string): string {
+export function buildUrl(path: string): string {
   const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
@@ -9,6 +9,15 @@ function buildUrl(path: string): string {
   }
 
   return `${base}${normalizedPath}`;
+}
+
+/**
+ * Resuelve la URL de un asset: los paths relativos (ej. /api/uploads/x.png)
+ * se sirven desde el backend, así que se resuelven contra VITE_API_URL.
+ * Las URLs absolutas se devuelven tal cual.
+ */
+export function resolveAssetUrl(url: string): string {
+  return url.startsWith('/') ? buildUrl(url) : url;
 }
 
 export class ApiError extends Error {

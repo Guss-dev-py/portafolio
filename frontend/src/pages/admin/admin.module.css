@@ -85,6 +85,43 @@
   color: var(--accent);
 }
 
+.statsStripWide {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.sparkRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+  margin-top: 3px;
+}
+
+.sparkBar {
+  flex: 1;
+  min-height: 2px;
+  background: var(--hairline);
+}
+
+.sparkBarFilled {
+  background: var(--ink);
+}
+
+.rowCheck {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.draggableRow {
+  cursor: grab;
+}
+
+.draggableRow:active {
+  cursor: grabbing;
+}
+
 /* ── Buttons ─────────────────────────────────────────────────── */
 .btnPrimary {
   display: inline-flex;
@@ -570,7 +607,7 @@
 
 .msgRow {
   display: grid;
-  grid-template-columns: 40px 16px 1fr 1.2fr 100px 90px 32px;
+  grid-template-columns: 24px 40px 16px 1fr 1.2fr 100px 90px 32px;
   align-items: center;
   padding: 10px 12px;
   border-bottom: 1px solid var(--hairline);
@@ -815,7 +852,7 @@
   }
 
   .msgRow {
-    grid-template-columns: 32px 14px 1fr 80px 26px;
+    grid-template-columns: 22px 32px 14px 1fr 80px 26px;
   }
   .msgEmail,
   .msgDate { display: none; }

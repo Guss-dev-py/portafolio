@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { scrollToSection } from '../../utils/scroll';
+import { useTheme } from '../../hooks/useTheme';
 import styles from './NavigationBar.module.css';
 
 const NAV_LINKS = [
@@ -22,6 +23,7 @@ function getActiveSection(): string {
 export function NavigationBar() {
   const [active, setActive] = useState('inicio');
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -115,6 +117,15 @@ export function NavigationBar() {
 
         <div className={styles.topRight}>
           <a href="/admin/login" className={styles.handle}>Guss-dev-py</a>
+          <button
+            type="button"
+            className={styles.themeBtn}
+            onClick={toggleTheme}
+            aria-label={theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
+            title={theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
+          >
+            {theme === 'light' ? '◐' : '◑'}
+          </button>
           <a
             href="/cv.pdf"
             target="_blank"

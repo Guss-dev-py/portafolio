@@ -19,6 +19,13 @@
   --warn:        #a55a00;
   --selection-bg: var(--ink);
   --selection-fg: var(--bg);
+  /* El footer es una losa de tinta en ambos temas: tokens propios, no invertibles */
+  --footer-bg:   var(--ink);
+  --footer-ink:  #f3efe5;
+  /* Veladuras sobre las partículas (mismo tono que --bg, con alpha) */
+  --bg-veil:        rgba(243, 239, 229, 0.78);
+  --bg-veil-strong: rgba(243, 239, 229, 0.85);
+  color-scheme: light;
   --mono:  'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
   --heading: var(--mono);
@@ -56,6 +63,34 @@
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'calt' 0, 'liga' 0;
 }
+
+/* ── Modo oscuro: el mismo papel, impreso en negativo ─────────────────
+   La tinta pasa a ser el soporte (fondo cálido casi negro) y el papel la
+   tinta. Los sellos, hairlines y stamps se invierten vía tokens; el rojo
+   sello y el verde de status suben de luminosidad para mantener AA. */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg:          #181511;
+  --bg-1:        #201c16;
+  --bg-2:        #2a251c;
+  --bg-deep:     #241f18;
+  --ink:         #ece7d9;
+  --ink-2:       #d9d3c2;
+  --ink-dim:     #b9b19c;
+  --ink-mute:    #9b937e; /* AA ≥4.5:1 sobre --bg y --bg-1 */
+  --hairline:    #474130;
+  --rule:        #ece7d9;
+  --accent:      #e0565c; /* sello-red +luminosidad para AA sobre fondo oscuro */
+  --accent-2:    #ece7d9;
+  --status-open: #46b96e;
+  --status-away: #e0565c;
+  --danger:      #e0565c;
+  --warn:        #d39a45;
+  --footer-bg:   #100e0b;
+  --bg-veil:        rgba(24, 21, 17, 0.78);
+  --bg-veil-strong: rgba(24, 21, 17, 0.85);
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 .skip-link {
   position: absolute;
@@ -103,8 +138,8 @@ button:active:not(:disabled) { transform: scale(0.98); }
   z-index: var(--z-page);
 }
 /* Particles body treatments */
-body[data-particles="on"] .page { background: rgba(243,239,229,0.78); backdrop-filter: blur(0.5px); }
+body[data-particles="on"] .page { background: var(--bg-veil); backdrop-filter: blur(0.5px); }
 body[data-particles="on"] .section { background: transparent; }
 body[data-particles="on"] .regbar,
-body[data-particles="on"] .topnav { background: rgba(243,239,229,0.85); backdrop-filter: blur(2px); }
-body[data-particles="on"] .footer { background: var(--ink); }
+body[data-particles="on"] .topnav { background: var(--bg-veil-strong); backdrop-filter: blur(2px); }
+body[data-particles="on"] .footer { background: var(--footer-bg); }

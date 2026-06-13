@@ -49,6 +49,16 @@ export function ParticlesBackground() {
     let rafId = 0;
     let particles: Particle[] = [];
 
+    // Color de tinta del tema activo; se refresca cuando cambia data-theme.
+    let inkColor = 'rgb(22,20,18)';
+    const readInk = () => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+      if (v) inkColor = v;
+    };
+    readInk();
+    const themeObserver = new MutationObserver(readInk);
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
     const mouse = { x: -9999, y: -9999, nx: 0, ny: 0 };
     const cam = { x: 0, y: 0 };
 
@@ -165,7 +175,7 @@ export function ParticlesBackground() {
       };
 
       // Draw connections — use globalAlpha to avoid per-connection string allocation
-      ctx.strokeStyle = 'rgb(22,20,18)';
+      ctx.strokeStyle = inkColor;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         if (p.L === 0) continue;
@@ -196,7 +206,7 @@ export function ParticlesBackground() {
       }
 
       // Draw dots back-to-front (particles already sorted by depth in buildParticles)
-      ctx.fillStyle = 'rgb(22,20,18)';
+      ctx.fillStyle = inkColor;
       for (const p of particles) {
         const s = scaleFor(p);
         const drawX = p.x + layerOx[p.L];
@@ -220,6 +230,7 @@ export function ParticlesBackground() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      themeObserver.disconnect();
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseleave', onMouseLeave);
       window.removeEventListener('resize', resize);

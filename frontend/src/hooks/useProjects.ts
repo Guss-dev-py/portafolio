@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project, ProjectInput } from '../types';
-import { getProjects, createProject, updateProject, deleteProject } from '../api/projects';
+import { getProjects, createProject, updateProject, deleteProject, reorderProjects } from '../api/projects';
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -40,5 +40,18 @@ export function useProjects() {
     setProjects((prev) => prev.filter((p) => p.id !== id));
   };
 
-  return { projects, loading, error, refetch, addProject, editProject, removeProject };
+  // Reordena de forma optimista y revierte si la API falla.
+  const reorder = async (ids: string[]) => {
+    const prev = projects;
+    const byId = new Map(prev.map((p) => [p.id, p]));
+    setProjects(ids.map((id) => byId.get(id)).filter((p): p is Project => !!p));
+    try {
+      await reorderProjects(ids);
+    } catch (e) {
+      setProjects(prev);
+      throw e;
+    }
+  };
+
+  return { projects, loading, error, refetch, addProject, editProject, removeProject, reorder };
 }

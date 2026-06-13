@@ -32,9 +32,12 @@ services:
       RESEND_API_KEY: "${RESEND_API_KEY}"
       RECIPIENT_EMAIL: "${RECIPIENT_EMAIL}"
       MIGRATIONS_DIR: /app/database/migrations
+      UPLOADS_DIR: /app/uploads
     volumes:
       # El backend aplica las migraciones pendientes al arrancar (runMigrations)
       - ./database/migrations:/app/database/migrations:ro
+      # Imágenes subidas desde el admin: persisten entre rebuilds del contenedor
+      - uploads:/app/uploads
     restart: unless-stopped
     depends_on:
       postgres:
@@ -60,3 +63,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

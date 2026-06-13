@@ -1,7 +1,7 @@
 /* ─── FOOTER ─────────────────────────────────────────────────────────── */
 .footer {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--footer-bg);
+  color: var(--footer-ink);
   font-family: var(--mono);
 }
 
@@ -28,7 +28,7 @@
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 0.92;
-  color: var(--bg);
+  color: var(--footer-ink);
 }
 
 .brandSub {
@@ -39,7 +39,7 @@
   letter-spacing: -0.04em;
   line-height: 1.0;
   text-transform: uppercase;
-  color: var(--bg);
+  color: var(--footer-ink);
 }
 
 .tagline {
@@ -85,7 +85,7 @@
 .navList a,
 .navList button {
   display: block;
-  color: var(--bg);
+  color: var(--footer-ink);
   text-decoration: none;
   font-size: 12.5px;
   background: none;
@@ -106,7 +106,7 @@
 }
 
 .copyBtn {
-  color: var(--bg);
+  color: var(--footer-ink);
   background: none;
   border: none;
   padding: 0;

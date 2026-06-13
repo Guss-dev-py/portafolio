@@ -6,7 +6,8 @@ export const projectSchema = z.object({
   technologies: z.array(z.string().min(1)).min(1),
   url:          z.string().url(),
   repoUrl:      z.string().url().or(z.literal('')).default(''),
-  imageUrl:     z.string().url().or(z.literal('')),
+  // URL absoluta o path relativo de una imagen subida (/api/uploads/...)
+  imageUrl:     z.string().url().or(z.string().regex(/^\/api\/uploads\/[\w.-]+$/)).or(z.literal('')),
   imageAlt:     z.string().max(200),
 });
 

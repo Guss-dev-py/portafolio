@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Project, ProjectInput } from '../../types';
 import { useAdminContext } from './adminContext';
+import { uploadImage } from '../../api/projects';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import { useToast } from '../../components/Toast/toastContext';
 import { relDateDays } from '../../utils/date';
@@ -25,7 +26,7 @@ const emptyForm = (): ProjectInput => ({
 
 export default function ProjectsPage() {
   const { searchRef, setOpenCreateHandler, projectsApi } = useAdminContext();
-  const { projects, loading, error, addProject, editProject, removeProject } = projectsApi;
+  const { projects, loading, error, addProject, editProject, removeProject, reorder } = projectsApi;
   const { toast } = useToast();
 
   const [showForm, setShowForm] = useState(false);
@@ -35,11 +36,13 @@ export default function ProjectsPage() {
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'name'>('updated');
+  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'name' | 'manual'>('updated');
   const [filterTech, setFilterTech] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Project | null>(null);
   const localSearchRef = useRef<HTMLInputElement | null>(null);
+  const dragIndexRef = useRef<number | null>(null);
 
   // sync external ref once on mount (refs don't change identity)
   useEffect(() => {
@@ -121,6 +124,22 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { url } = await uploadImage(file);
+      setFormData(prev => ({ ...prev, imageUrl: url }));
+      toast({ title: 'Imagen subida', msg: file.name, variant: 'ok' });
+    } catch {
+      toast({ title: 'Error', msg: 'No se pudo subir la imagen', variant: 'danger' });
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const handleDeleteConfirm = async () => {
     if (!confirmDelete) return;
     try {
@@ -157,19 +176,43 @@ export default function ProjectsPage() {
     return { techCount, lastUpdate: relDateDays(latest.updatedAt) };
   }, [projects]);
 
-  const filtered = useMemo(() => projects
-    .filter(p => {
-      const q = search.toLowerCase();
-      return !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
-    })
-    .filter(p => !filterTech || p.technologies.includes(filterTech))
-    .sort((a, b) => {
+  const filtered = useMemo(() => {
+    const matching = projects
+      .filter(p => {
+        const q = search.toLowerCase();
+        return !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
+      })
+      .filter(p => !filterTech || p.technologies.includes(filterTech));
+    // En modo manual se respeta el orden del array (= position en DB)
+    if (sortBy === 'manual') return matching;
+    return matching.sort((a, b) => {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       if (sortBy === 'created') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    }),
-    [projects, search, filterTech, sortBy],
-  );
+    });
+  }, [projects, search, filterTech, sortBy]);
+
+  // Arrastrar solo tiene sentido viendo la lista completa en orden manual
+  const canDrag = sortBy === 'manual' && !search && !filterTech;
+
+  const handleDragStart = (index: number) => {
+    dragIndexRef.current = index;
+  };
+
+  const handleDrop = async (targetIndex: number) => {
+    const from = dragIndexRef.current;
+    dragIndexRef.current = null;
+    if (from === null || from === targetIndex) return;
+    const ids = projects.map(p => p.id);
+    const [moved] = ids.splice(from, 1);
+    ids.splice(targetIndex, 0, moved);
+    try {
+      await reorder(ids);
+      toast({ title: 'Orden actualizado', msg: 'El portfolio público refleja el nuevo orden', variant: 'ok' });
+    } catch {
+      toast({ title: 'Error', msg: 'No se pudo guardar el nuevo orden', variant: 'danger' });
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -292,6 +335,20 @@ export default function ProjectsPage() {
               </div>
 
               <div className={styles.field}>
+                <label htmlFor="proj-imageFile">
+                  SUBIR IMAGEN <span className={styles.fieldHint}>(PNG/JPG/WEBP/GIF, máx 5MB)</span>
+                </label>
+                <input
+                  id="proj-imageFile"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                />
+                {uploading && <span className={styles.fieldHint}>Subiendo...</span>}
+              </div>
+
+              <div className={styles.field}>
                 <label htmlFor="proj-imageAlt">ALT TEXTO</label>
                 <input
                   id="proj-imageAlt"
@@ -338,6 +395,11 @@ export default function ProjectsPage() {
             className={`${styles.filterBtn} ${sortBy === 'name' ? styles.filterActive : ''}`}
             onClick={() => setSortBy('name')}
           >A→Z</button>
+          <button
+            className={`${styles.filterBtn} ${sortBy === 'manual' ? styles.filterActive : ''}`}
+            onClick={() => setSortBy('manual')}
+            title="Orden manual: arrastrá las filas para reordenar el portfolio público"
+          >Orden</button>
         </div>
         <select
           className={styles.techFilter}
@@ -371,8 +433,15 @@ export default function ProjectsPage() {
             )}
 
             {filtered.map((p, i) => (
-              <div key={p.id} className={styles.tableRow}>
-                <span className={styles.rowIndex}>{String(i + 1).padStart(2, '0')}</span>
+              <div
+                key={p.id}
+                className={`${styles.tableRow} ${canDrag ? styles.draggableRow : ''}`}
+                draggable={canDrag}
+                onDragStart={canDrag ? () => handleDragStart(i) : undefined}
+                onDragOver={canDrag ? (e) => e.preventDefault() : undefined}
+                onDrop={canDrag ? () => handleDrop(i) : undefined}
+              >
+                <span className={styles.rowIndex}>{canDrag ? '⠿' : String(i + 1).padStart(2, '0')}</span>
                 <div className={styles.rowName}>
                   <div className={styles.rowThumb} aria-hidden="true" />
                   <span className={styles.rowNameText}>{p.name}</span>

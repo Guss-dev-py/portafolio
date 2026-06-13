@@ -63,6 +63,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
         addProject: vi.fn(),
         editProject: vi.fn(),
         removeProject: vi.fn(),
+        reorder: vi.fn(),
       });
 
       const { container } = render(<ProjectsSection />);
@@ -83,6 +84,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
         addProject: vi.fn(),
         editProject: vi.fn(),
         removeProject: vi.fn(),
+        reorder: vi.fn(),
       });
 
       const { container } = render(<ProjectsSection />);
@@ -102,6 +104,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);
@@ -118,6 +121,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);
@@ -134,6 +138,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);
@@ -156,6 +161,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);
@@ -176,6 +182,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);
@@ -204,6 +211,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
@@ -226,6 +234,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);
@@ -241,6 +250,7 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       addProject: vi.fn(),
       editProject: vi.fn(),
       removeProject: vi.fn(),
+      reorder: vi.fn(),
     });
 
     const { container } = render(<ProjectsSection />);

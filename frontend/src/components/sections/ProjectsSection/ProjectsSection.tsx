@@ -5,6 +5,7 @@ import { useInView } from '../../../motion/hooks/useInView';
 import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import { fadeUp, staggerContainer } from '../../../motion/variants';
 import { duration, ease, stagger, offset } from '../../../motion/tokens';
+import { resolveAssetUrl } from '../../../api/client';
 import type { Project } from '../../../types';
 import styles from './ProjectsSection.module.css';
 
@@ -41,7 +42,7 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
       </span>
       <div className={styles.rowName}>
         {p.imageUrl && (
-          <img src={p.imageUrl} alt={p.imageAlt || p.name} className={styles.rowThumb} />
+          <img src={resolveAssetUrl(p.imageUrl)} alt={p.imageAlt || p.name} className={styles.rowThumb} />
         )}
         <div>
           <span className={styles.projName}>
