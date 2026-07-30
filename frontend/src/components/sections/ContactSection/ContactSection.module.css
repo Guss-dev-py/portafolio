@@ -292,13 +292,16 @@
   margin: 0 -20px;
 }
 
+/* El `opacity: 0.6` bajaba `--ink-mute` a un efectivo #a09a8b y el contraste
+   contra la tarjeta quedaba en 2,24:1 — axe lo marcó como la única violación de
+   contraste del sitio público. `--ink-mute` sin veladura da 4,50:1 sobre
+   `--bg-1`, que es justo el mínimo AA para texto chico. */
 .enterHint {
   font-family: var(--mono);
   font-size: var(--fs-11);
   color: var(--ink-mute);
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
-  opacity: 0.6;
 }
 
 .submitBtn {

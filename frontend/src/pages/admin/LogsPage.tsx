@@ -34,7 +34,16 @@ export default function LogsPage() {
   }, []);
 
   return (
-    <div className={styles.page}>
+    // `.page` es el contenedor con scroll y esta pantalla es la única del admin
+    // que no tiene ni un control adentro: sin foco propio, un usuario de teclado
+    // no puede desplazarla (WCAG 2.1.1). Las demás páginas se recorren con sus
+    // botones y no necesitan la parada extra.
+    <div
+      className={styles.page}
+      tabIndex={0}
+      role="region"
+      aria-label="Registro de actividad"
+    >
       <div className={styles.pageHeader}>
         <div className={styles.crumbs}>admin / logs</div>
         <h1 className={styles.pageTitle}>Logs</h1>

@@ -102,15 +102,17 @@ export function NavigationBar() {
   return (
     <>
       <nav className={`${styles.topnav} topnav`} aria-label="Navegación principal">
-        <div
+        {/* Era un <div role="button" tabIndex={0}> que sólo escuchaba Enter:
+            con la barra espaciadora no pasaba nada, y un botón tiene que
+            responder a las dos (WCAG 2.1.1). Un <button> real lo resuelve sin
+            manejo manual de teclado y trae el rol y el estado gratis. */}
+        <button
+          type="button"
           className={styles.brand}
           onClick={() => scrollToSection('inicio')}
-          role="button"
-          tabIndex={0}
-          onKeyDown={e => e.key === 'Enter' && scrollToSection('inicio')}
         >
           FREIRE<span className={styles.dot}>.</span>AF
-        </div>
+        </button>
 
         <div className={styles.navLinks}>
           {NAV_LINKS.map(({ id, num, label }) => (

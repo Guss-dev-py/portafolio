@@ -14,10 +14,17 @@
   font-family: var(--mono);
 }
 
+/* Es un <button> real (ver el comentario en el TSX). Se le saca el chrome del
+   navegador para que siga leyéndose como el wordmark de la barra. */
 .brand {
+  font-family: inherit;
   font-weight: 800;
   font-size: var(--fs-13);
   letter-spacing: var(--ls-wide);
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
   user-select: none;
 }

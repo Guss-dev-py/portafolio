@@ -23,21 +23,14 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
   const hiddenCount = p.technologies.length - VISIBLE_TECHS;
   const visibleTechs = techsExpanded ? p.technologies : p.technologies.slice(0, VISIBLE_TECHS);
 
-  const openRepo = (e: React.SyntheticEvent) => {
-    // El "Ver repo" vive dentro del <a> de la fila: hay que frenar la navegación al sitio.
-    e.preventDefault();
-    e.stopPropagation();
-    window.open(p.repoUrl, '_blank', 'noopener,noreferrer');
-  };
-
   return (
-    <motion.a
-      href={p.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={styles.indexRow}
-      variants={fadeUp}
-    >
+    // La fila era un <a> con un <button> y un <span role="link"> adentro:
+    // interactivos anidados dentro de un link, que es HTML inválido y deja a un
+    // lector de pantalla sin saber qué está activando. Ahora la fila es un
+    // contenedor y el link real es el nombre del proyecto, estirado por CSS
+    // para cubrirla entera (`.rowLink::after`). La fila entera sigue siendo
+    // clickeable y las acciones propias viven por encima del área estirada.
+    <motion.div className={styles.indexRow} variants={fadeUp}>
       <span className={styles.rowNum}>
         {String(index + 1).padStart(2, '0')}
       </span>
@@ -59,7 +52,14 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
         )}
         <div>
           <span className={styles.projName}>
-            {p.name}<span className={styles.ext}> .proj</span>
+            <a
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.rowLink}
+            >
+              {p.name}
+            </a><span className={styles.ext}> .proj</span>
           </span>
           <span className={styles.projDesc}>{p.description}</span>
         </div>
@@ -89,13 +89,7 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
             type="button"
             className={styles.techMore}
             onMouseEnter={() => setTechsExpanded(true)}
-            onClick={(e) => {
-              // Vive dentro del <a> de la fila: sin esto, tocarlo navega al sitio
-              // en vez de revelar las tecnologías.
-              e.preventDefault();
-              e.stopPropagation();
-              setTechsExpanded(true);
-            }}
+            onClick={() => setTechsExpanded(true)}
             aria-expanded={techsExpanded}
             aria-label={`Mostrar ${hiddenCount} tecnología${hiddenCount === 1 ? '' : 's'} más`}
           >
@@ -106,19 +100,18 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
       <div className={styles.rowYear}>
         <span>{relYear(p.createdAt)}</span>
         {p.repoUrl && (
-          <span
-            role="link"
-            tabIndex={0}
+          <a
+            href={p.repoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className={styles.verRepo}
-            onClick={openRepo}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') openRepo(e); }}
             aria-label={`Ver repositorio de ${p.name} (abre en nueva pestaña)`}
           >
             Ver repo →
-          </span>
+          </a>
         )}
       </div>
-    </motion.a>
+    </motion.div>
   );
 }
 
@@ -216,7 +209,12 @@ export function ProjectsSection() {
       )}
 
       <div className={styles.listFooter}>
-        <span>─── FIN DEL LISTADO · {projects.length} REGISTRO(S) ───</span>
+        {/* Decía "REGISTRO(S)". El plural con paréntesis es de formulario de
+            papel, no de una pieza editorial que cuida la tipografía. */}
+        <span>
+          ─── FIN DEL LISTADO · {projects.length}{' '}
+          {projects.length === 1 ? 'REGISTRO' : 'REGISTROS'} ───
+        </span>
         <a
           href="https://github.com/Guss-dev-py"
           target="_blank"

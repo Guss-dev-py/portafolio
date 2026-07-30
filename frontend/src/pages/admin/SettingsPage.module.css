@@ -94,6 +94,12 @@
   background: var(--bg-2);
 }
 
+/* La tarjeta activa cambia su fondo a --bg-2 y ahí --ink-mute cae a 3,87:1
+   (4,08:1 en hacker). --ink-dim está un escalón más arriba: 6,48:1. */
+.optionCardActive .optionDesc {
+  color: var(--ink-dim);
+}
+
 .optionTop {
   display: flex;
   align-items: center;
@@ -121,7 +127,7 @@
 
 .activeBadge {
   font-size: var(--fs-10);
-  color: var(--accent);
+  color: var(--accent-text);
   letter-spacing: var(--ls-wider);
 }
 

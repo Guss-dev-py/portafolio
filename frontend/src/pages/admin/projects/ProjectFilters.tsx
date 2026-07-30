@@ -40,8 +40,12 @@ export function ProjectFilters() {
           >{label}</button>
         ))}
       </div>
+      {/* Sin nombre accesible, un lector de pantalla lo anunciaba como
+          "cuadro combinado" a secas. El texto de la opción por defecto no
+          cuenta como label (WCAG 4.1.2). */}
       <select
         className={styles.techFilter}
+        aria-label="Filtrar proyectos por tecnología"
         value={filterTech}
         onChange={e => setFilterTech(e.target.value)}
       >

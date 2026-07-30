@@ -18,6 +18,7 @@ Los ADR 0001–0006 se escribieron **retroactivamente** el 2026-07-29 (Fase 0 de
 | [0008](0008-estado-de-pagina-por-contexto.md) | Estado de página en un provider por contexto, no en props | aceptada |
 | [0009](0009-code-splitting-en-el-limite-del-admin.md) | El code splitting corta en el límite del admin | aceptada |
 | [0010](0010-app-shell-para-crawlers-sin-javascript.md) | Un app shell en el HTML para los crawlers que no ejecutan JavaScript | aceptada, con revisión declarada |
+| [0011](0011-targets-tactiles-en-una-tabla-densa.md) | Los targets crecen sin aflojar la densidad de la tabla | aceptada, con revisión declarada |
 
 ## Cómo agregar uno
 

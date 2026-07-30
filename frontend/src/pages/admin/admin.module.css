@@ -107,9 +107,14 @@
   background: var(--ink);
 }
 
+/* Medía 14×14 y el mínimo de WCAG 2.5.8 es 24×24. El tamaño estaba puesto por
+   CSS, así que la excepción de "control del navegador" no aplicaba.
+   Un checkbox nativo no puede separar su caja visual de su caja de toque sin
+   reimplementarlo con `appearance: none`, así que crece el control. En una fila
+   de 66px de alto no aprieta nada. Ver ADR 0011. */
 .rowCheck {
-  width: 14px;
-  height: 14px;
+  width: 24px;
+  height: 24px;
   accent-color: var(--ink);
   cursor: pointer;
 }
@@ -442,6 +447,10 @@
   color: var(--ink-mute);
 }
 
+/* Sin `outline: none`: la regla global `:focus-visible` de index.css pinta el
+   anillo. El cambio de `border-color` que había en `:focus` es un indicador
+   débil —1px de hairline a tinta— y el formulario público ya había tomado esta
+   misma decisión. Con `outline: none` el foco de teclado quedaba sin marcar. */
 .field input,
 .field textarea {
   padding: 8px 10px;
@@ -450,7 +459,6 @@
   color: var(--ink);
   font-size: var(--fs-13);
   font-family: var(--mono);
-  outline: none;
   resize: vertical;
   transition: border-color var(--t-base);
   border-radius: 0;
@@ -525,6 +533,8 @@
 
 .searchWrap:focus-within {
   border-color: var(--ink);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .searchGlyph {
@@ -538,6 +548,8 @@
   align-self: stretch;
 }
 
+/* El anillo se pinta sobre el wrapper, no sobre el input: el input no tiene
+   borde propio y el outline quedaría flotando adentro de la caja de búsqueda. */
 .searchInput {
   flex: 1;
   padding: 7px 10px;
@@ -588,6 +600,8 @@
   color: var(--bg);
 }
 
+/* Este era el peor de los tres: `outline: none` sin ningún reemplazo en
+   `:focus`. Al tabular hasta el filtro, el foco desaparecía de la pantalla. */
 .techFilter {
   border: 1px solid var(--hairline);
   background: var(--bg);
@@ -595,7 +609,6 @@
   font-family: var(--mono);
   font-size: var(--fs-11);
   padding: 7px 10px;
-  outline: none;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
   border-radius: 0;
@@ -988,7 +1001,13 @@
    El asa (⠿) es el único punto de agarre: la fila entera tiene botones
    Editar y Eliminar, y hacerla arrastrable completa hacía que cualquier
    click accidental iniciara un gesto. */
+/* Era 48×20. Es el control donde la precisión más importa —es el que se
+   arrastra— y era el más chico de la tabla. El glifo no cambia de tamaño: sólo
+   se centra dentro de una caja que llega al mínimo. Ver ADR 0011. */
 .dragHandle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   background: none;
   border: none;
   cursor: grab;
@@ -1007,4 +1026,30 @@
   background: var(--bg-1);
   box-shadow: var(--shadow-stamp);
   position: relative;
+}
+
+/* ── Punteros gruesos: el dedo no tiene la precisión del mouse ──────────
+   El sitio público ya resolvió esto así en el bloque FIX (44×44 en
+   `pointer: coarse`, densidad alta en desktop). El admin nunca lo había
+   recibido. La retícula de escritorio no se toca: la regla sólo entra donde
+   el dispositivo declara un puntero grueso. Ver ADR 0011. */
+@media (pointer: coarse) {
+  .rowCheck {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dragHandle {
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .filterBtn,
+  .btnEdit,
+  .btnDanger,
+  .btnDangerSm,
+  .techFilter {
+    min-height: 44px;
+  }
 }

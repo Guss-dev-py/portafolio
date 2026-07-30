@@ -73,8 +73,12 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
     }
   );
 
+  // La fila era un <a> con un <button> y un <span role="link"> adentro.
+  // Interactivos anidados dentro de un link son HTML inválido y dejan al lector
+  // de pantalla sin saber qué se está activando. Ahora la fila es un contenedor
+  // y el link real es el nombre, estirado por CSS para cubrirla (Fase 5).
   it.each(PROJECT_COUNTS)(
-    'every row is an anchor element when N=%i',
+    'ningún interactivo queda anidado dentro de otro cuando N=%i',
     (n) => {
       mockedUseProjects.mockReturnValue({
         projects: makeProjects(n),
@@ -88,9 +92,13 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       });
 
       const { container } = render(<ProjectsSection />);
-      const rows = container.querySelectorAll('[class*="indexRow"]');
-      rows.forEach((row) => {
-        expect(row.tagName.toLowerCase()).toBe('a');
+      const INTERACTIVO = 'a[href], button, [role="link"], [role="button"], [tabindex]';
+
+      container.querySelectorAll('[class*="indexRow"]').forEach((row) => {
+        expect(row.tagName.toLowerCase()).not.toBe('a');
+        row.querySelectorAll(INTERACTIVO).forEach((el) => {
+          expect(el.querySelector(INTERACTIVO)).toBeNull();
+        });
       });
     }
   );
@@ -167,7 +175,11 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
     const { container } = render(<ProjectsSection />);
     const rows = Array.from(container.querySelectorAll('[class*="indexRow"]'));
     rows.forEach((row, i) => {
-      expect(row.getAttribute('href')).toBe(projects[i].url);
+      // El link vive en el nombre del proyecto y se estira sobre la fila.
+      const link = row.querySelector('[class*="rowLink"]')!;
+      expect(link.getAttribute('href')).toBe(projects[i].url);
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toContain('noopener');
     });
   });
 
@@ -201,7 +213,11 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
     expect(container.querySelector('[class*="techMore"]')).not.toBeNull();
   });
 
-  it('"Ver repo" opens the repository in a new tab without navigating the row', () => {
+  // Era un <span role="link"> que llamaba a window.open desde un onClick con
+  // preventDefault, porque vivía dentro del <a> de la fila. Ahora que la fila
+  // no es un link, es un <a> de verdad: navegación nativa, menú contextual,
+  // "abrir en pestaña nueva" y anuncio correcto como link.
+  it('"Ver repo" es un link real al repositorio, en pestaña nueva', () => {
     const projects = makeProjects(1);
     mockedUseProjects.mockReturnValue({
       projects,
@@ -213,14 +229,15 @@ describe('Property 8 — All projects render as index rows in ProjectsSection', 
       removeProject: vi.fn(),
       reorder: vi.fn(),
     });
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
     const { container } = render(<ProjectsSection />);
     const verRepo = container.querySelector('[class*="verRepo"]')!;
-    fireEvent.click(verRepo);
 
-    expect(openSpy).toHaveBeenCalledWith(projects[0].repoUrl, '_blank', 'noopener,noreferrer');
-    openSpy.mockRestore();
+    expect(verRepo.tagName.toLowerCase()).toBe('a');
+    expect(verRepo.getAttribute('href')).toBe(projects[0].repoUrl);
+    expect(verRepo.getAttribute('target')).toBe('_blank');
+    expect(verRepo.getAttribute('rel')).toContain('noopener');
+    expect(verRepo.getAttribute('aria-label')).toContain(projects[0].name);
   });
 
   it('"Ver repo" is not rendered when the project has no repoUrl', () => {

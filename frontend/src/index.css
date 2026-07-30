@@ -15,6 +15,11 @@
   --rule:        #161412;
   --accent:      #c1272d;
   --accent-2:    #161412;
+  /* Variante para TEXTO, misma idea que `--status-open-text`. El sello rojo da
+     4,02:1 sobre `--bg-2` y no alcanza para texto de 10-11px (glifo del ítem
+     activo del menú, badge de "activo" en Ajustes). Este llega a 5,01:1 sobre
+     `--bg-2` y sube en los fondos más claros. */
+  --accent-text: #a81f24;
   --status-open: #1b8a3e;
   /* Variante para TEXTO: el verde de indicador da 3.05:1 sobre --bg-2 y alcanza
      para un punto de estado (elemento gráfico, umbral 3:1), pero no para texto
@@ -45,6 +50,11 @@
   --statusbar-bg:  var(--ink);
   --statusbar-fg:  rgba(243, 239, 229, 0.7);
   --statusbar-sep: rgba(243, 239, 229, 0.3);
+  /* La barra de estado del admin es una losa de tinta en los tres temas, así
+     que el verde de "conectado" siempre va sobre fondo oscuro. `--status-open`
+     del tema claro está pensado para fondos claros y ahí da 4,16:1. Este es el
+     verde claro, 7,37:1 sobre la losa. */
+  --statusbar-ok:  #46b96e;
   /* Veladuras sobre las partículas (mismo tono que --bg, con alpha) */
   --bg-veil:        rgba(243, 239, 229, 0.78);
   --bg-veil-strong: rgba(243, 239, 229, 0.85);
@@ -108,6 +118,7 @@
   --rule:        #ece7d9;
   --accent:      #e0565c; /* sello-red +luminosidad para AA sobre fondo oscuro */
   --accent-2:    #ece7d9;
+  --accent-text: #e8767b; /* 5,30:1 sobre --bg-2 oscuro; el --accent da 4,10 */
   --status-open: #46b96e;
   --status-open-text: #46b96e; /* 6.11:1 sobre --bg-2 oscuro: sirve como texto */
   --status-away: #e0565c;
@@ -115,6 +126,7 @@
   --warn:        #d39a45;
   --footer-bg:   #100e0b;
   --statusbar-bg: #100e0b;
+  --statusbar-ok: #46b96e;
   --bg-veil:        rgba(24, 21, 17, 0.78);
   --bg-veil-strong: rgba(24, 21, 17, 0.85);
 }
@@ -137,6 +149,7 @@
   --rule:        #41f07e;
   --accent:      #ff5c57; /* alertas: rojo terminal, 6.6:1 */
   --accent-2:    #41f07e;
+  --accent-text: #ff5c57; /* acá el propio accent ya da 5,57:1 sobre --bg-2 */
   --status-open: #41f07e;
   --status-open-text: #41f07e;
   --status-away: #ff5c57;
@@ -145,6 +158,7 @@
   --statusbar-bg:  #0b130c;
   --statusbar-fg:  #2fb35c;
   --statusbar-sep: #1d4a29;
+  --statusbar-ok:  #41f07e; /* 12,57:1 sobre la losa del hacker */
 }
 
 /* Brillo de fósforo y scanlines CRT (estáticos: no molestan la lectura) */

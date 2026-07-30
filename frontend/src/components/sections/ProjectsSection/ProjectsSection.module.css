@@ -98,6 +98,7 @@
 }
 
 .indexRow {
+  position: relative;
   display: grid;
   grid-template-columns: 80px 1fr 280px 100px;
   align-items: center;
@@ -107,6 +108,30 @@
   color: var(--ink);
   transition: background var(--t-base);
   gap: 0;
+}
+
+/* Stretched link. El link real es el nombre del proyecto; su ::after cubre la
+   fila entera para que se siga pudiendo hacer clic en cualquier parte. Antes la
+   fila era un <a> con un <button> y un <span role="link"> adentro: interactivos
+   anidados dentro de un link. Con esto el árbol de accesibilidad queda con tres
+   controles hermanos y nombres propios, en vez de uno que contiene a los otros. */
+.rowLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rowLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Las acciones de la fila van por encima del área estirada del link. */
+.techMore,
+.verRepo {
+  position: relative;
+  z-index: 2;
 }
 
 .indexRow > * {
@@ -214,7 +239,15 @@
 /* Era un <span> con `onMouseEnter`: inalcanzable por teclado y por touch.
    Ahora es un <button> real; se resetea el chrome para que siga leyéndose
    como parte de la tira de chips. */
+/* Medía 21,6 × 19 px y el mínimo de WCAG 2.5.8 (AA, nuevo en 2.2) es 24 × 24.
+   Se agranda el área de toque sin agrandar el texto: el `+N` sigue leyéndose
+   igual dentro de la tira de chips. */
 .techMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
   font-family: var(--mono);
   font-size: var(--fs-10);
   color: var(--ink-mute);

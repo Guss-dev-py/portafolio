@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { apiClient } from '../../../api/client';
 import { describeSubmitError } from './submitError';
@@ -48,10 +48,38 @@ export function ContactSection() {
 
   const set = (k: keyof FormData, v: string) => setForm(f => ({ ...f, [k]: v }));
 
+  const formRef = useRef<HTMLFormElement>(null);
+
+  /**
+   * Enter en el textarea inserta un salto de línea, no envía. El atajo real
+   * para enviar sin sacar las manos del teclado es Ctrl/⌘ + Enter, y es lo que
+   * anuncia la pista de abajo. Antes decía "enter para enviar", que era falso
+   * justo en el campo donde el visitante pasa más tiempo.
+   */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate(form);
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      // Sin esto, un usuario de lector de pantalla apretaba Enviar y no pasaba
+      // nada audible: los mensajes aparecían en pantalla y el foco se quedaba
+      // en el botón. Mover el foco al primer campo inválido hace que se lea su
+      // label, su estado y el error asociado por `aria-describedby`.
+      const firstInvalid = (['name', 'email', 'message'] as const).find(k => errs[k]);
+      if (firstInvalid) {
+        formRef.current
+          ?.querySelector<HTMLElement>(`#c-${firstInvalid === 'message' ? 'msg' : firstInvalid}`)
+          ?.focus();
+      }
+      return;
+    }
     setErrors({});
     setSubmitErr(null);
     setSending(true);
@@ -133,17 +161,35 @@ export function ContactSection() {
           </div>
 
           {success ? (
-            <div className={styles.successBlock}>
-              <pre className={styles.ascii}>{`  ╔══════════════╗\n  ║   ✓ ENVIADO  ║\n  ╚══════════════╝`}</pre>
+            // Al enviar, el formulario entero se reemplaza por este bloque: el
+            // botón que tenía el foco deja de existir y el foco se cae al body.
+            // Un usuario de lector de pantalla no se enteraba de que el envío
+            // había salido bien. `role="status"` lo anuncia y `tabIndex={-1}`
+            // permite traer el foco acá sin agregar una parada de tabulación.
+            <div
+              className={styles.successBlock}
+              role="status"
+              tabIndex={-1}
+              ref={el => el?.focus()}
+            >
+              {/* El cajón de guiones se lee carácter por carácter. Es
+                  decoración: el texto de abajo ya dice lo mismo. */}
+              <pre className={styles.ascii} aria-hidden="true">{`  ╔══════════════╗\n  ║   ✓ ENVIADO  ║\n  ╚══════════════╝`}</pre>
               <p className={styles.successMsg}>
-                Gracias {form.name || 'amigo'}. Te escribo a {form.email || 'tu email'}.
+                Mensaje enviado. Gracias {form.name || 'amigo'}. Te escribo a {form.email || 'tu email'}.
               </p>
               <button type="button" className={styles.resetBtn} onClick={reset}>
                 Enviar otro
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} noValidate className={styles.form}>
+            <form
+              ref={formRef}
+              onSubmit={handleSubmit}
+              onKeyDown={handleKeyDown}
+              noValidate
+              className={styles.form}
+            >
               {submitErr && (
                 <div className={styles.formAlert} role="alert">
                   <p className={styles.formAlertMsg}>{submitErr}</p>
@@ -166,6 +212,7 @@ export function ContactSection() {
                   <input
                     id="c-name"
                     type="text"
+                    autoComplete="name"
                     placeholder="Tu nombre"
                     value={form.name}
                     onChange={e => set('name', e.target.value)}
@@ -173,13 +220,14 @@ export function ContactSection() {
                     aria-invalid={!!errors.name}
                     aria-describedby={errors.name ? 'c-name-err' : undefined}
                   />
-                  {errors.name && <span id="c-name-err" className={styles.fieldErr}>{errors.name}</span>}
+                  {errors.name && <span id="c-name-err" role="alert" className={styles.fieldErr}>{errors.name}</span>}
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="c-email">EMAIL</label>
                   <input
                     id="c-email"
                     type="email"
+                    autoComplete="email"
                     placeholder="tu@correo.com"
                     value={form.email}
                     onChange={e => set('email', e.target.value)}
@@ -187,7 +235,7 @@ export function ContactSection() {
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? 'c-email-err' : undefined}
                   />
-                  {errors.email && <span id="c-email-err" className={styles.fieldErr}>{errors.email}</span>}
+                  {errors.email && <span id="c-email-err" role="alert" className={styles.fieldErr}>{errors.email}</span>}
                 </div>
               </div>
 
@@ -203,9 +251,11 @@ export function ContactSection() {
                   aria-invalid={!!errors.message}
                   aria-describedby={errors.message ? 'c-msg-err' : undefined}
                 />
-                {errors.message && <span id="c-msg-err" className={styles.fieldErr}>{errors.message}</span>}
+                {errors.message && <span id="c-msg-err" role="alert" className={styles.fieldErr}>{errors.message}</span>}
                 <div className={styles.fieldMeta}>
-                  <span className={styles.hint}>mínimo 12 caracteres · markdown ok</span>
+                  {/* Decía "markdown ok" y el mensaje se envía y se muestra como
+                      texto plano: no hay render de markdown en ningún lado. */}
+                  <span className={styles.hint}>mínimo 12 caracteres · texto plano</span>
                   <span className={styles.charCount}>{form.message.length} chars</span>
                 </div>
               </div>
@@ -213,7 +263,7 @@ export function ContactSection() {
               <div className={styles.formDivider} />
 
               <div className={styles.formActions}>
-                <span className={styles.enterHint}>↵ enter para enviar</span>
+                <span className={styles.enterHint}>ctrl + ↵ para enviar</span>
                 <button type="submit" className={styles.submitBtn} disabled={sending} aria-busy={sending}>
                   {sending ? 'Enviando...' : 'Enviar mensaje →'}
                 </button>

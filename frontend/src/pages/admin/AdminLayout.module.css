@@ -32,8 +32,12 @@
   flex: 1;
 }
 
+/* Medía 23px de alto: pasaba el mínimo de WCAG 2.5.8 sólo por la excepción de
+   separación. Un píxel más y cumple por tamaño, sin excepciones que dependan
+   de dónde caigan los vecinos. */
 .themeToggle {
   flex-shrink: 0;
+  min-height: 24px;
   display: inline-flex;
   align-items: baseline;
   background: none;
@@ -225,8 +229,10 @@
   font-weight: 600;
 }
 
+/* El ítem activo pinta su fondo de --bg-2, y ahí el --accent pleno queda en
+   4,02:1 para un glifo de 11px. --accent-text es la variante calibrada. */
 .navLink.active .glyph {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .disabled {
@@ -352,8 +358,10 @@
   white-space: nowrap;
 }
 
+/* La statusbar es una losa oscura en los tres temas: el verde tiene que estar
+   calibrado contra ella, no contra el fondo del tema. */
 .statusConn {
-  color: var(--status-open);
+  color: var(--statusbar-ok);
   font-weight: 600;
 }
 

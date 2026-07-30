@@ -44,7 +44,10 @@ test.describe('Flujo admin completo', () => {
     await row.getByRole('button', { name: 'Eliminar' }).click();
     // Confirmación del diálogo
     await page.getByRole('dialog').getByRole('button', { name: 'Eliminar' }).click();
-    await expect(page.getByText(projectName)).not.toBeVisible();
+    // Sin acotar a la tabla, el nombre matchea también en el diálogo que se está
+    // yendo (animación de salida, Fase 2) y en el toast de confirmación, y
+    // Playwright corta por strict mode. Lo que importa es que la fila no esté.
+    await expect(page.locator('[class*="tableRow"]', { hasText: projectName })).toHaveCount(0);
 
     // Ya no aparece en el público
     await page.goto('/');
