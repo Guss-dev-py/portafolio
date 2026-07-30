@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Portfolio one-page: la raíz es la única página de contenido. Las secciones
+  (#sobre, #proyectos, #contacto) son anclas del mismo documento y NO van como
+  URLs propias — serían duplicados del canonical.
+
+  /admin/* queda afuera a propósito: es una herramienta privada, y además está
+  con Disallow en robots.txt y con X-Robots-Tag: noindex en Nginx.
+
+  Sin <priority> ni <changefreq>: Google los ignora desde hace años.
+  Los <lastmod> son fechas reales de modificación, no la fecha de generación.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://freire.ucielbustamante.com/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://freire.ucielbustamante.com/cv.pdf</loc>
+    <lastmod>2026-06-12</lastmod>
+  </url>
+</urlset>

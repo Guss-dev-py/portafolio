@@ -1,6 +1,7 @@
 import { useState, type RefObject } from 'react';
 import { motion } from 'framer-motion';
 import { useProjects } from '../../../hooks/useProjects';
+import { useProjectsJsonLd } from '../../../hooks/useProjectsJsonLd';
 import { useInView } from '../../../motion/hooks/useInView';
 import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import { fadeUp, staggerContainer } from '../../../motion/variants';
@@ -42,7 +43,19 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
       </span>
       <div className={styles.rowName}>
         {p.imageUrl && (
-          <img src={resolveAssetUrl(p.imageUrl)} alt={p.imageAlt || p.name} className={styles.rowThumb} />
+          // La sección está debajo del fold, así que la miniatura se difiere;
+          // `decoding="async"` evita que el decodificado bloquee el hilo
+          // principal. width/height explícitos aunque el CSS ya fija 60×60:
+          // si el CSS tarda, el navegador igual reserva la caja.
+          <img
+            src={resolveAssetUrl(p.imageUrl)}
+            alt={p.imageAlt || p.name}
+            className={styles.rowThumb}
+            width={60}
+            height={60}
+            loading="lazy"
+            decoding="async"
+          />
         )}
         <div>
           <span className={styles.projName}>
@@ -111,6 +124,9 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
 
 export function ProjectsSection() {
   const { projects, loading, error, refetch } = useProjects();
+  // El structured data de proyectos se emite desde acá porque acá están los
+  // datos vivos. Ver el docblock de useProjectsJsonLd.
+  useProjectsJsonLd(projects);
   const reduced = useReducedMotion();
   const { ref, isInView } = useInView();
   const animate = reduced || isInView ? 'visible' : 'hidden';

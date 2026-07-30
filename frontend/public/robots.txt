@@ -1,0 +1,66 @@
+# robots.txt — freire.ucielbustamante.com
+# Portfolio one-page. Todo el contenido indexable vive en la raíz.
+
+User-agent: *
+Allow: /
+
+# El panel de administración no es contenido. Además del Disallow, Nginx manda
+# X-Robots-Tag: noindex en /admin — el Disallow evita el crawleo, el header
+# evita la indexación si la URL llega por otra vía (un link externo).
+Disallow: /admin
+Disallow: /admin/
+
+# La API devuelve JSON: no aporta nada a un índice de búsqueda y genera bloat.
+Disallow: /api/
+
+# Excepción deliberada: las miniaturas de los proyectos se sirven desde acá
+# (/api/uploads/*.webp). Bloquearlas las saca de la búsqueda de imágenes.
+# Una regla más específica gana sobre el Disallow de arriba.
+Allow: /api/uploads/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Crawlers de IA — se permiten a propósito.
+#
+# Decisión de exposición, no técnica (punto abierto §7.7 del plan de mejoras).
+# El objetivo del sitio es que a Augusto lo encuentren para trabajar: que un
+# recruiter le pregunte a ChatGPT o Perplexity y obtenga su stack real es
+# exactamente para lo que existe la página. El `User-agent: *` de arriba ya los
+# habilitaría; se listan explícitos para que la decisión quede escrita y no se
+# pierda si alguien agrega un bloqueo general más adelante.
+#
+# OpenAI y Anthropic tienen un bot POR FUNCIÓN, no uno por empresa. Permitir
+# sólo el de entrenamiento y no el de búsqueda es el error más fácil de cometer:
+#  · GPTBot        → entrenamiento de OpenAI.
+#  · OAI-SearchBot → índice de búsqueda de OpenAI. Es el que decide si el sitio
+#                    puede aparecer como resultado.
+#  · ChatGPT-User  → navegación en vivo. Es el que produce las citas.
+#  · ClaudeBot / anthropic-ai → funciones web y entrenamiento de Anthropic.
+#  · Google-Extended → SOLO entrenamiento de Gemini. Bloquearlo NO afecta a
+#    Google Search ni a los AI Overviews (esos usan Googlebot).
+# ─────────────────────────────────────────────────────────────────────────────
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://freire.ucielbustamante.com/sitemap.xml

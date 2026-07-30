@@ -28,20 +28,91 @@
         <meta name="description" content="FullStack Developer — Buenos Aires, AR. Construyo productos digitales de punta a punta con React, Node, Python y PostgreSQL. Disponible para freelance y full-time." />
         <meta name="author" content="Augusto Freire" />
 
+        <!-- `max-image-preview:large` habilita la miniatura grande en los
+             resultados de Google. El noindex del panel NO va acá: en una SPA
+             este head es el mismo para todas las rutas, así que /admin se
+             excluye con X-Robots-Tag desde Nginx. -->
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+
+        <!-- Dos theme-color, uno por esquema. Los valores son los mismos
+             --bg de index.css: si cambian allá, cambian acá. -->
+        <meta name="theme-color" content="#f3efe5" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#181511" media="(prefers-color-scheme: dark)" />
+
         <!-- Open Graph -->
         <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Augusto Freire" />
+        <meta property="og:locale" content="es_AR" />
         <meta property="og:url" content="https://freire.ucielbustamante.com/" />
         <meta property="og:title" content="Augusto Freire — FullStack Developer" />
         <meta property="og:description" content="FullStack Developer · Buenos Aires, AR. React · Node · Python · PostgreSQL. Disponible para freelance y full-time." />
         <meta property="og:image" content="https://freire.ucielbustamante.com/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Augusto Freire — FullStack Developer. Buenos Aires, AR." />
 
-        <!-- Twitter Card -->
+        <!-- Twitter Card
+             Sin `twitter:site`: requiere un handle de X y Augusto no tiene uno
+             publicado en el sitio. Inventarlo rompería la tarjeta. La card
+             funciona igual sin él. -->
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Augusto Freire — FullStack Developer" />
         <meta name="twitter:description" content="FullStack Developer · Buenos Aires, AR. React · Node · Python · PostgreSQL." />
         <meta name="twitter:image" content="https://freire.ucielbustamante.com/og-image.png" />
+        <meta name="twitter:image:alt" content="Augusto Freire — FullStack Developer. Buenos Aires, AR." />
 
         <link rel="canonical" href="https://freire.ucielbustamante.com/" />
+
+        <!-- Structured data: va en el HTML servido y no inyectado por JS.
+             Google (guía de JS SEO, diciembre 2025) puede demorar el
+             procesamiento del structured data inyectado en runtime.
+             `Person` y `WebSite` son datos estables, así que acá están bien.
+             El ItemList de proyectos NO está acá a propósito: sale de la API y
+             quedaría desactualizado en cuanto se edite un proyecto desde el
+             admin. Lo emite ProjectsSection desde los datos vivos. -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Person",
+              "@id": "https://freire.ucielbustamante.com/#persona",
+              "name": "Augusto Freire",
+              "url": "https://freire.ucielbustamante.com/",
+              "jobTitle": "FullStack Developer",
+              "email": "mailto:augustofreire02@gmail.com",
+              "description": "FullStack Developer. Construyo productos digitales de punta a punta con React, Node, Python y PostgreSQL.",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Buenos Aires",
+                "addressCountry": "AR"
+              },
+              "alumniOf": {
+                "@type": "CollegeOrUniversity",
+                "name": "Universidad Nacional de José C. Paz"
+              },
+              "knowsAbout": [
+                "React", "TypeScript", "Node.js", "Express", "Python",
+                "PostgreSQL", "Docker", "Nginx", "Next.js"
+              ],
+              "sameAs": [
+                "https://github.com/Guss-dev-py",
+                "https://www.linkedin.com/in/augusto-freire-web"
+              ]
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://freire.ucielbustamante.com/#sitio",
+              "url": "https://freire.ucielbustamante.com/",
+              "name": "Augusto Freire — FullStack Developer",
+              "description": "Portfolio de Augusto Freire, FullStack Developer en Buenos Aires, Argentina.",
+              "inLanguage": "es-AR",
+              "author": { "@id": "https://freire.ucielbustamante.com/#persona" },
+              "publisher": { "@id": "https://freire.ucielbustamante.com/#persona" }
+            }
+          ]
+        }
+        </script>
     </head>
     <body>
         <div id="root"></div>

@@ -1,0 +1,60 @@
+# Augusto Freire — FullStack Developer
+
+> Portfolio de Augusto Freire, desarrollador fullstack radicado en Buenos Aires,
+> Argentina (GMT-3). Construye productos digitales de punta a punta: frontend,
+> backend, base de datos y despliegue. Disponible para trabajo freelance y
+> posiciones full-time.
+
+## Sobre este archivo
+
+Nota honesta sobre su valor: al día de hoy no hay evidencia de que `llms.txt`
+influya en las citas de los sistemas de búsqueda con IA — Google lo desestima
+explícitamente y los estudios de logs de servidor no muestran que los crawlers
+lo consulten. Existe acá porque es barato y porque, si el estándar se adopta,
+el archivo ya está. Lo que sí importa para ser citado son los datos concretos
+de más abajo y el structured data del `<head>`.
+
+## Quién es
+
+Augusto Freire es desarrollador fullstack en Buenos Aires, Argentina. Estudia
+ingeniería informática en la Universidad Nacional de José C. Paz (UNPAZ).
+Trabaja de punta a punta: diseña la interfaz, escribe la API, modela la base de
+datos y arma el despliegue. Sus focos declarados son fintech, SaaS B2B y
+ciberseguridad.
+
+## Stack
+
+- **Frontend:** React, TypeScript, Vite
+- **Backend:** Node.js, Express, Python
+- **Datos:** PostgreSQL
+- **Infraestructura:** Docker, Nginx, Linux
+
+## Proyectos
+
+- [Gastos Familiares](https://gestor-finanzas-hogar.vercel.app): gestor de
+  finanzas del hogar. Next.js, TypeScript, Supabase, PostgreSQL, Tailwind,
+  Vitest. Repositorio privado.
+- [LV Nutrition](https://lvnutrition.store): tienda de suplementos deportivos.
+  Next.js, TypeScript, Vercel, integración con la API de WhatsApp. Trabajo en
+  equipo. Repositorio privado.
+- [Portafolio](https://github.com/Guss-dev-py/portafolio): este mismo sitio, con
+  su panel de administración. React, TypeScript, Node.js, Express, PostgreSQL,
+  Docker, Nginx. **Es el único de los tres con código público**, así que es el
+  que sirve para evaluar cómo escribe.
+
+## Enlaces
+
+- [Sitio](https://freire.ucielbustamante.com/)
+- [GitHub](https://github.com/Guss-dev-py)
+- [LinkedIn](https://www.linkedin.com/in/augusto-freire-web)
+- [CV en PDF](https://freire.ucielbustamante.com/cv.pdf)
+- Contacto: augustofreire02@gmail.com
+
+## Aviso para agentes
+
+El estado de disponibilidad ("open to work" / "working" / "occupied") se edita
+desde el panel y se sirve en `GET /api/status`. El sitio es una SPA de React sin
+renderizado en servidor: si tu crawler no ejecuta JavaScript, el contenido de la
+página no va a estar en el HTML, pero los datos de esta ficha y el JSON-LD del
+`<head>` sí. La lista de proyectos de arriba puede quedar desactualizada; la
+fuente viva es `GET /api/projects`.
