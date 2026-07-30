@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { verifyToken } from '../middleware/auth';
 import { audit } from '../utils/audit';
+import { toFileSlug } from '../utils/slug';
 
 const router = Router();
 
@@ -47,12 +48,29 @@ router.post('/', verifyToken, (req: Request, res: Response, next: NextFunction):
       return;
     }
     try {
-      const filename = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.webp`;
+      // El nombre del archivo es un factor de ranking en búsqueda de imágenes,
+      // sólo por debajo del `alt`. Antes era `<timestamp>-<random>.webp`, que no
+      // dice nada. Ahora sale del nombre del proyecto, pasado por una lista
+      // blanca (ver `toFileSlug`). El sufijo aleatorio se queda: garantiza que
+      // dos subidas con el mismo nombre no se pisen, y que nadie pueda
+      // sobrescribir la imagen de otro proyecto adivinando su nombre.
+      const slug = toFileSlug((req.body as Record<string, unknown> | undefined)?.name);
+      const filename = `${slug}-${crypto.randomBytes(6).toString('hex')}.webp`;
+
+      // Segunda barrera. El slug ya hace imposible un `..` o una barra, pero
+      // esto verifica el resultado en vez de confiar en el razonamiento: si el
+      // destino no queda directamente adentro de UPLOADS_DIR, no se escribe.
+      const target = path.join(UPLOADS_DIR, filename);
+      if (path.dirname(path.resolve(target)) !== path.resolve(UPLOADS_DIR)) {
+        res.status(400).json({ error: 'Nombre de archivo inválido' });
+        return;
+      }
+
       await sharp(req.file.buffer)
         // resize solo si excede el límite; nunca agranda (withoutEnlargement)
         .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
         .webp({ quality: 82 })
-        .toFile(path.join(UPLOADS_DIR, filename));
+        .toFile(target);
 
       audit('image_uploaded', 'upload', filename, req.file.originalname);
       res.status(201).json({ url: `/api/uploads/${filename}` });

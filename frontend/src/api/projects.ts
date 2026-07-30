@@ -17,9 +17,17 @@ export const reorderProjects = (ids: string[]) =>
   apiClient<void>('/api/projects/reorder', { method: 'PUT', body: JSON.stringify({ ids }) });
 
 // FormData: no va por apiClient porque éste fuerza Content-Type application/json.
-export const uploadImage = async (file: File): Promise<{ url: string }> => {
+/**
+ * @param projectName se usa en el backend para derivar el nombre del archivo.
+ *   El nombre de archivo es factor de ranking en búsqueda de imágenes: sin
+ *   esto, la subida termina como `imagen-<random>.webp`.
+ */
+export const uploadImage = async (file: File, projectName?: string): Promise<{ url: string }> => {
   const token = localStorage.getItem('token');
   const formData = new FormData();
+  // El campo de texto va primero: multer lo expone en req.body a medida que
+  // parsea, y así está disponible sin depender del orden de las partes.
+  if (projectName) formData.append('name', projectName);
   formData.append('image', file);
   const response = await fetch(buildUrl('/api/uploads'), {
     method: 'POST',

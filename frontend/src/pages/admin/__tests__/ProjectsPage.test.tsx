@@ -239,7 +239,24 @@ describe('ProjectsPage', () => {
       await waitFor(() =>
         expect(screen.getByLabelText('URL IMAGEN')).toHaveValue('/api/uploads/abc123.png'),
       );
-      expect(uploadImage).toHaveBeenCalledExactlyOnceWith(file);
+      // El nombre vacío (form recién abierto) igual viaja: el backend cae a su
+      // fallback. Lo que importa es que el nombre se propaga cuando existe.
+      expect(uploadImage).toHaveBeenCalledExactlyOnceWith(file, '');
+    });
+
+    it('el nombre del proyecto viaja con la subida para nombrar el archivo', async () => {
+      vi.mocked(uploadImage).mockResolvedValueOnce({ url: '/api/uploads/gastos-familiares-ab12cd34ef56.webp' });
+      renderPage(makeProjectsApi([]));
+
+      fireEvent.click(screen.getByRole('button', { name: '+ Nuevo proyecto [n]' }));
+      fireEvent.change(screen.getByLabelText('NOMBRE *'), { target: { value: 'Gastos Familiares' } });
+
+      const file = new File(['png-bytes'], 'foto.png', { type: 'image/png' });
+      fireEvent.change(screen.getByLabelText(/SUBIR IMAGEN/), { target: { files: [file] } });
+
+      await waitFor(() =>
+        expect(uploadImage).toHaveBeenCalledExactlyOnceWith(file, 'Gastos Familiares'),
+      );
     });
 
     it('si la subida falla se muestra un toast de error y el campo no cambia', async () => {

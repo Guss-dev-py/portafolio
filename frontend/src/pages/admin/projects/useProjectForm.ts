@@ -106,7 +106,9 @@ export function useProjectForm({ addProject, editProject }: Options) {
     if (!file) return;
     setUploading(true);
     try {
-      const { url } = await uploadImage(file);
+      // El nombre que ya tipeó el admin viaja con la subida para que el archivo
+      // quede con un nombre descriptivo y no `imagen-<random>.webp`.
+      const { url } = await uploadImage(file, data.name);
       setData(prev => ({ ...prev, imageUrl: url }));
       toast({ title: 'Imagen subida', msg: file.name, variant: 'ok' });
     } catch {
@@ -115,7 +117,9 @@ export function useProjectForm({ addProject, editProject }: Options) {
       setUploading(false);
       e.target.value = '';
     }
-  }, [toast]);
+    // `data.name` y no `data`: la dependencia primitiva evita recrear el
+    // callback en cada tecla de cualquier otro campo del formulario.
+  }, [toast, data.name]);
 
   return {
     open, editing, data, errors, submitting, uploading, confirmDiscard,
