@@ -36,11 +36,6 @@ function escapeHtml(value: string): string {
 export function renderAppShell(): string {
   const fullName = `${profile.name} ${profile.lastName}`;
 
-  const bio = profile.biography
-    .split('\n\n')
-    .map((p) => `<p>${escapeHtml(p.trim())}</p>`)
-    .join('');
-
   const stack = skillGroups
     .map(
       (group) =>
@@ -57,22 +52,23 @@ export function renderAppShell(): string {
   // `data-app-shell` es el gancho de estilo (ver `index.css`). Se le da forma
   // en vez de esconderlo: entre el primer pintado y el montaje de React esto
   // se ve, y tiene que leerse como la página cargando, no como un glitch.
+  //
+  // Va deliberadamente corto. Medido en la Fase 6.2: la versión larga —con la
+  // bio completa, objetivos y sectores— costaba ~540 ms de LCP y 3-4 puntos de
+  // Lighthouse móvil, porque el navegador pinta todo esto y después React lo
+  // borra y repinta. Lo que un crawler sin JS necesita de verdad es quién es,
+  // qué maneja y cómo contactarlo; la bio larga vive en `/llms.txt`, que esos
+  // mismos crawlers leen sin costo de pintado.
   return [
     '<div data-app-shell>',
     `<h1>${escapeHtml(fullName)}</h1>`,
     `<p>${escapeHtml(profile.role)}</p>`,
     `<p>${escapeHtml(profile.intro)}</p>`,
-    '<h2>Sobre mí</h2>',
-    bio,
-    '<h2>Objetivos</h2>',
-    `<p>${escapeHtml(profile.goals)}</p>`,
-    `<p>Sectores de interés: ${escapeHtml(profile.aspirationSector)}</p>`,
     '<h2>Stack</h2>',
     `<ul>${stack}</ul>`,
-    '<h2>Proyectos</h2>',
-    // El listado vive en la base y se renderiza con JS. Sin este puntero, un
-    // crawler sin JS no tiene forma de saber que existe.
-    '<p>El índice de proyectos se carga desde la API. La versión en texto plano está en <a href="/llms.txt">/llms.txt</a>.</p>',
+    // El listado de proyectos y la biografía completa viven en la base o en el
+    // JSX. Sin este puntero, un crawler sin JS no tiene forma de saber que hay más.
+    '<p>Biografía completa e índice de proyectos en <a href="/llms.txt">/llms.txt</a>.</p>',
     '<h2>Contacto</h2>',
     `<ul>${contacto}</ul>`,
     '</div>',

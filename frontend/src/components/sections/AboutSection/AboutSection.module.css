@@ -69,11 +69,6 @@
   font-weight: 700;
 }
 
-.bioPara em {
-  font-style: italic;
-  color: var(--ink);
-}
-
 /* Meta col */
 .metaCol {
   display: flex;

@@ -17,13 +17,30 @@ function visibleText(html: string): string {
 }
 
 describe('renderAppShell', () => {
-  it('trae el nombre, el rol y la bio del perfil', () => {
+  it('trae la identidad: nombre, rol e intro', () => {
     const text = visibleText(renderAppShell());
 
     expect(text).toContain(`${profile.name} ${profile.lastName}`);
     expect(text).toContain(profile.role);
     expect(text).toContain(profile.intro);
-    expect(text).toContain(profile.goals);
+  });
+
+  // Medido en la Fase 6.2: la versión larga costaba ~540 ms de LCP porque el
+  // navegador la pinta y después React la borra y repinta. La bio completa vive
+  // en /llms.txt, que los mismos crawlers leen sin costo de pintado.
+  it('NO trae la bio larga ni los objetivos: es deliberadamente mínimo', () => {
+    const text = visibleText(renderAppShell());
+
+    // Literales y no campos de `profile`: esos tres campos se borraron en la
+    // auditoría de 6.6 justamente por no tener consumidor. El test protege el
+    // tamaño del shell, así que tiene que sobrevivir a que la copy se mueva.
+    expect(text).not.toMatch(/objetivo profesional/i);
+    expect(text).not.toMatch(/Sectores de inter/i);
+    expect(text).not.toMatch(/primeros ejercicios en Python/i);
+  });
+
+  it('apunta a /llms.txt para lo que no está acá', () => {
+    expect(visibleText(renderAppShell())).toMatch(/Biograf.a completa e .ndice de proyectos/);
   });
 
   it('lista todas las tecnologías de skillGroups', () => {
@@ -54,10 +71,13 @@ describe('renderAppShell', () => {
     expect(renderAppShell()).not.toMatch(/<script/i);
   });
 
-  it('deja bastante más texto que el <body> vacío que había antes', () => {
-    // El HTML servido tenía 0 caracteres de texto en el body. El número exacto
-    // no importa; que el orden de magnitud sea otro, sí.
-    expect(visibleText(renderAppShell()).length).toBeGreaterThan(800);
+  it('deja texto real donde antes había cero, sin volver a inflarse', () => {
+    // El <body> servido tenía 0 caracteres. El piso protege el propósito; el
+    // techo protege el LCP: si alguien vuelve a meter la bio larga acá, este
+    // test lo frena antes de que se note en Lighthouse.
+    const largo = visibleText(renderAppShell()).length;
+    expect(largo).toBeGreaterThan(250);
+    expect(largo).toBeLessThan(700);
   });
 });
 

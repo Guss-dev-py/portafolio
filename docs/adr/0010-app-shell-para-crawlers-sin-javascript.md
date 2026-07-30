@@ -30,7 +30,7 @@ Las fuerzas en juego:
 
 Funciona porque `main.tsx` monta con `createRoot()`, no con `hydrateRoot()`: React **vacía el contenedor** en el primer render. No hay mismatch de hidratación posible y ningún visitante termina con el shell en pantalla.
 
-Resultado medido: **0 → 1.452 caracteres** de texto en el `<body>` servido.
+Resultado medido: **0 → 462 caracteres** de texto en el `<body>` servido. (Fueron 1.452 en la primera versión; ver el recorte en Consecuencias.)
 
 ## Fundamento
 
@@ -43,14 +43,26 @@ Resultado medido: **0 → 1.452 caracteres** de texto en el `<body>` servido.
 
 **Positivas**
 
-- Los crawlers sin JS leen nombre, rol, bio, objetivos, stack completo y los tres enlaces de contacto.
+- Los crawlers sin JS leen nombre, rol, intro, stack completo, los tres enlaces de contacto y un puntero a `/llms.txt` para la biografía y el índice de proyectos.
 - Un visitante con la red lenta y JavaScript todavía sin ejecutar ve **contenido legible** en vez de una pantalla en blanco. Es progressive enhancement real, no un efecto colateral.
 - El `<h1>` existe en el HTML servido. Antes no había ninguno.
 
 **Negativas**
 
 - **El shell se ve durante la carga.** Medido: ~100 ms en un equipo rápido, ~1,1 s con el CPU a 8×. Por eso está estilado y no oculto. En un equipo muy lento hay un cambio visible de la versión en texto a la versión completa.
-- **La copy tiene dos fuentes.** El shell sale de `data/profile.ts`; `AboutSection` tiene sus párrafos escritos en el JSX. Hoy dicen casi lo mismo, pero pueden divergir. Unificarlos es una tarea aparte: los párrafos del JSX llevan `<strong>` y `<em>` que un string plano no expresa.
+- 🔴 **Cuesta LCP, y no es poco.** Medido en la Fase 6.2 con Lighthouse 13.4.1, 3 corridas por configuración contra el stack Docker:
+
+  | Configuración | Performance móvil | LCP |
+  |---|---|---|
+  | Sin app shell | 91–93 | ~2.507 ms |
+  | Shell completo (1.452 caracteres) | 88–89 | ~3.047 ms |
+  | **Shell recortado (462 caracteres)** | **88–91** | **~2.951 ms** |
+
+  El mecanismo: el navegador pinta el shell, React vacía el contenedor y repinta, y se registra un candidato de LCP más tardío. **Recortar el contenido recuperó sólo ~100 ms de los ~540**: el costo es que el shell exista, no su tamaño. Los ~450 ms restantes son intrínsecos al enfoque.
+
+  Se recortó igual —el shell quedó en identidad, stack, contacto y un puntero a `/llms.txt`— porque el contenido enfocado es lo que un crawler sin JS necesita, y la bio larga ya vive en `llms.txt`. `vite/__tests__/appShell.test.ts` tiene ahora un **techo** de longitud, no sólo un piso: si alguien vuelve a inflarlo, el test lo frena antes de que aparezca en Lighthouse.
+- ⚠️ **Lighthouse no premia esta decisión.** La categoría `agentic-browsing` da **100 con y sin** app shell, porque Lighthouse ejecuta JavaScript y mide el DOM ya renderizado. El beneficio del shell —crawlers que *no* ejecutan JS— es invisible para la herramienta, mientras que su costo sí se ve. Cualquiera que mire sólo el informe de Lighthouse va a concluir que el shell no sirve para nada; esta nota existe para que eso no pase.
+- **`profile.biography`, `profile.goals` y `profile.aspirationSector` quedaron sin ningún consumidor** al recortar el shell. `profile.ts` no tiene importadores React —su único importador era `vite/appShell.ts`— así que esos tres campos son hoy datos muertos. Anotado en la auditoría de 6.6.
 - **El flash es siempre en tema claro.** `useTheme` escribe `data-theme` desde JavaScript, así que un visitante con tema oscuro ve el shell en papel. Ya pasaba antes con la pantalla en blanco; el shell lo vuelve visible.
 - **El índice de proyectos sigue sin ser legible sin JS.** Es el límite aceptado de esta decisión.
 

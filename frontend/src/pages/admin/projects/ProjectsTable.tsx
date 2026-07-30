@@ -61,8 +61,11 @@ export function ProjectsTable() {
         ))}
       </div>
 
+      {/* Mismo pie que el listado público: el plural con paréntesis quedó
+          arreglado allá y acá no, que es peor que no haberlo tocado. */}
       <div className={styles.tableFooter}>
-        ─── FIN DEL LISTADO · {filtered.length} REGISTRO(S) ───
+        ─── FIN DEL LISTADO · {filtered.length}{' '}
+        {filtered.length === 1 ? 'REGISTRO' : 'REGISTROS'} ───
       </div>
     </>
   );

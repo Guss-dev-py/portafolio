@@ -87,7 +87,14 @@ describe('ProjectsPage', () => {
         // La primera fila es el encabezado de la tabla
         const rows = container.querySelectorAll('[class*="tableRow"]');
         expect(rows.length).toBe(n + 1);
-        expect(screen.getByText(`─── FIN DEL LISTADO · ${n} REGISTRO(S) ───`)).toBeInTheDocument();
+        // El pie pluraliza de verdad: "1 REGISTRO" / "N REGISTROS".
+        const plural = n === 1 ? 'REGISTRO' : 'REGISTROS';
+        expect(
+          screen.getByText((_, el) =>
+            el?.textContent?.replace(/\s+/g, ' ').trim() ===
+            `─── FIN DEL LISTADO · ${n} ${plural} ───`
+          )
+        ).toBeInTheDocument();
         unmount();
       }),
       { numRuns: 15 },
