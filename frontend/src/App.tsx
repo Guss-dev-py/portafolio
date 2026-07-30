@@ -12,6 +12,7 @@ import { ToastProvider } from "./components/Toast/Toast";
 import { WorkStatusProvider } from "./hooks/WorkStatusProvider";
 import { BackToTop } from "./components/BackToTop/BackToTop";
 import { AuthGuard } from "./pages/admin/AuthGuard";
+import { retryImport } from "./utils/retryImport";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -36,9 +37,11 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 }
 
 const ParticlesBackground = lazy(() =>
-  import("./components/ParticlesBackground/ParticlesBackground").then((m) => ({
-    default: m.ParticlesBackground,
-  })),
+  retryImport(() =>
+    import("./components/ParticlesBackground/ParticlesBackground").then((m) => ({
+      default: m.ParticlesBackground,
+    })),
+  ),
 );
 
 /**
@@ -48,17 +51,20 @@ const ParticlesBackground = lazy(() =>
  * nunca va a ver. `AuthGuard` queda eager a propósito — son 20 líneas que sólo
  * leen el token y deciden el redirect, y meterlo en un chunk agregaría un
  * roundtrip antes de poder rechazar a un visitante sin sesión.
+ *
+ * Todos van envueltos en `retryImport`: un corte de red momentáneo bajando un
+ * chunk hacía caer la app entera en el ErrorBoundary global.
  */
 const LoginPage = lazy(() =>
-  import("./pages/admin/LoginPage").then((m) => ({ default: m.LoginPage })),
+  retryImport(() => import("./pages/admin/LoginPage").then((m) => ({ default: m.LoginPage }))),
 );
 const AdminLayout = lazy(() =>
-  import("./pages/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })),
+  retryImport(() => import("./pages/admin/AdminLayout").then((m) => ({ default: m.AdminLayout }))),
 );
-const ProjectsPage = lazy(() => import("./pages/admin/ProjectsPage"));
-const MessagesPage = lazy(() => import("./pages/admin/MessagesPage"));
-const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
-const LogsPage = lazy(() => import("./pages/admin/LogsPage"));
+const ProjectsPage = lazy(() => retryImport(() => import("./pages/admin/ProjectsPage")));
+const MessagesPage = lazy(() => retryImport(() => import("./pages/admin/MessagesPage")));
+const SettingsPage = lazy(() => retryImport(() => import("./pages/admin/SettingsPage")));
+const LogsPage = lazy(() => retryImport(() => import("./pages/admin/LogsPage")));
 
 /**
  * Fallback de los chunks del admin. Sin CSS modules del admin a propósito: ese
