@@ -56,6 +56,19 @@ const DELAY_MAP: Record<string, number> = {
   blank: 80,
 };
 
+/**
+ * Tiempos del typewriter, uno por línea. Se derivan una vez del script porque
+ * la secuencia de tipos —y con ella el largo y los tiempos— es idéntica en los
+ * tres estados de trabajo: lo único que cambia es el TEXTO de la línea de
+ * status. Agendar la animación desde acá y no desde el script vivo es lo que
+ * permite que cambiar el estado desde el admin actualice esa línea en el lugar
+ * en vez de re-tipear la terminal entera.
+ *
+ * Se deriva de `buildScript` en lugar de escribirse a mano para que no puedan
+ * quedar desincronizados.
+ */
+const LINE_DELAYS: number[] = buildScript('open').map(l => DELAY_MAP[l.type] ?? 90);
+
 function useTimestamp() {
   const [ts, setTs] = useState(() => {
     const now = new Date();
@@ -75,7 +88,7 @@ export function HeroSection() {
   const reduced = useReducedMotion();
   const [workStatus, setWorkStatus] = useState<WorkStatus>('open');
   const script = buildScript(workStatus);
-  const [visibleCount, setVisibleCount] = useState(reduced ? script.length : 0);
+  const [visibleCount, setVisibleCount] = useState(reduced ? LINE_DELAYS.length : 0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timestamp = useTimestamp();
 
@@ -91,7 +104,7 @@ export function HeroSection() {
     // Los seteos de estado van siempre dentro de timers (nunca síncronos en
     // el cuerpo del effect) para no disparar renders en cascada.
     if (reduced) {
-      timerRef.current = setTimeout(() => setVisibleCount(script.length), 0);
+      timerRef.current = setTimeout(() => setVisibleCount(LINE_DELAYS.length), 0);
       return () => {
         if (timerRef.current) clearTimeout(timerRef.current);
       };
@@ -99,12 +112,10 @@ export function HeroSection() {
 
     let current = 0;
     const showNext = () => {
-      if (current >= script.length) return;
+      if (current >= LINE_DELAYS.length) return;
       current++;
       setVisibleCount(current);
-      const line = script[current - 1];
-      const delay = DELAY_MAP[line.type] ?? 90;
-      timerRef.current = setTimeout(showNext, delay);
+      timerRef.current = setTimeout(showNext, LINE_DELAYS[current - 1]);
     };
     timerRef.current = setTimeout(() => {
       setVisibleCount(0);
@@ -113,8 +124,9 @@ export function HeroSection() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, workStatus]);
+    // Ya no depende de `workStatus`: sólo del modo de movimiento reducido. El
+    // `eslint-disable` que había acá tapaba justamente eso.
+  }, [reduced]);
 
   const lines = script.slice(0, visibleCount);
 

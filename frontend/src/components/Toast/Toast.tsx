@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toast }}>
+    <ToastContext value={{ toast }}>
       {children}
       {/* El stack queda montado siempre: si desapareciera junto con el último
           toast, AnimatePresence no tendría dónde animar la salida. */}
@@ -70,6 +70,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           ))}
         </AnimatePresence>
       </div>
-    </ToastContext.Provider>
+    </ToastContext>
   );
 }

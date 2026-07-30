@@ -141,7 +141,7 @@ export function AdminLayout() {
   const routeLabel = location.pathname.replace('/admin', '') || '/';
 
   return (
-    <AdminContext.Provider value={{ searchRef, requestOpenCreate, setOpenCreateHandler, projectsApi, messagesApi }}>
+    <AdminContext value={{ searchRef, requestOpenCreate, setOpenCreateHandler, projectsApi, messagesApi }}>
       <div className={styles.layout}>
         <div className={styles.menubar}>
           <button
@@ -281,6 +281,6 @@ export function AdminLayout() {
           <span>UPTIME: {formatUptime(now.getTime() - startTime)}</span>
         </div>
       </div>
-    </AdminContext.Provider>
+    </AdminContext>
   );
 }

@@ -1,6 +1,6 @@
 // Contexto y hook en archivo propio: si conviven con el componente,
 // react-refresh no puede hacer fast-refresh del módulo.
-import { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 
 export interface ToastInput {
   title: string;
@@ -15,5 +15,5 @@ interface ToastContextValue {
 export const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
 
 export function useToast() {
-  return useContext(ToastContext);
+  return use(ToastContext);
 }

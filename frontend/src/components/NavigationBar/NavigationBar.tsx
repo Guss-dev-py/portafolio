@@ -20,6 +20,16 @@ function getActiveSection(): string {
   return 'inicio';
 }
 
+/**
+ * El login del admin vive en su propio chunk. Se lo pide al pasar el mouse o al
+ * enfocar el link, así el click no paga la descarga. Mismo especificador que el
+ * `lazy()` de `App.tsx`: Vite lo resuelve al mismo módulo, así que es el mismo
+ * chunk y no una segunda copia.
+ */
+function preloadLogin() {
+  void import('../../pages/admin/LoginPage');
+}
+
 export function NavigationBar() {
   const [active, setActive] = useState('inicio');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -116,7 +126,12 @@ export function NavigationBar() {
         </div>
 
         <div className={styles.topRight}>
-          <a href="/admin/login" className={styles.handle}>Guss-dev-py</a>
+          <a
+            href="/admin/login"
+            className={styles.handle}
+            onMouseEnter={preloadLogin}
+            onFocus={preloadLogin}
+          >Guss-dev-py</a>
           <button
             type="button"
             className={styles.themeBtn}

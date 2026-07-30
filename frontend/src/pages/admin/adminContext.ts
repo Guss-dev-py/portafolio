@@ -1,6 +1,6 @@
 // Contexto y hook en archivo propio: si conviven con el componente,
 // react-refresh no puede hacer fast-refresh del módulo.
-import { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 import type { RefObject } from 'react';
 import { useProjects } from '../../hooks/useProjects';
 import { useMessages } from '../../hooks/useMessages';
@@ -19,7 +19,7 @@ export interface AdminContextValue {
 export const AdminContext = createContext<AdminContextValue | null>(null);
 
 export function useAdminContext(): AdminContextValue {
-  const ctx = useContext(AdminContext);
+  const ctx = use(AdminContext);
   if (!ctx) throw new Error('useAdminContext debe usarse dentro de AdminLayout');
   return ctx;
 }
