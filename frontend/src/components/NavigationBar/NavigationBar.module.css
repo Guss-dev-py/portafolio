@@ -227,3 +227,61 @@
     display: flex;
   }
 }
+
+/* ─── TARGETS TÁCTILES ────────────────────────────────────────────────
+   Se extiende el área táctil con un pseudo-elemento en vez de agrandar
+   la caja: la barra conserva su densidad tipográfica y el hit area llega
+   a 44px. Solo en punteros gruesos. */
+@media (pointer: coarse) {
+  .brand,
+  .themeBtn,
+  .cvBtn,
+  .hamburger {
+    position: relative;
+  }
+
+  /* Anchos ya suficientes: solo hace falta alto. */
+  .brand::after,
+  .cvBtn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+  }
+
+  /* Cuadrados chicos: se extienden en los dos ejes. */
+  .themeBtn::after,
+  .hamburger::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ─── FEEDBACK DE PRESS ───────────────────────────────────────────────
+   Se dispara en pointer-down (`:active`), no al soltar: esperar el click
+   para dar feedback se siente muerto. Los <button> ya lo heredan de
+   index.css; estos son los <a> y los divs con rol de botón. */
+.cvBtn,
+.brand {
+  transition: transform var(--t-press), color var(--t-base);
+}
+
+.cvBtn:active,
+.brand:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cvBtn,
+  .brand { transition: none; }
+  .cvBtn:active,
+  .brand:active { transform: none; }
+}

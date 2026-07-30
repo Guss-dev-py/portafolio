@@ -61,7 +61,7 @@
 
 .colTitle {
   font-size: 10.5px;
-  color: rgba(243, 239, 229, 0.4);
+  color: var(--footer-ink-mid);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   margin: 0 0 16px;
@@ -70,7 +70,7 @@
 
 .sym {
   /* renders as plain dim text matching the column header tone */
-  color: rgba(243, 239, 229, 0.4);
+  color: var(--footer-ink-mid);
   letter-spacing: 0;
   font-style: normal;
 }
@@ -126,7 +126,7 @@
 
 .linkNum {
   font-size: 10px;
-  color: rgba(243, 239, 229, 0.28);
+  color: var(--footer-ink-mute);
   margin-right: 5px;
   font-variant-numeric: tabular-nums;
 }
@@ -138,7 +138,7 @@
   align-items: center;
   padding: 13px 48px;
   font-size: 10px;
-  color: rgba(243, 239, 229, 0.3);
+  color: var(--footer-ink-mute);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -191,5 +191,24 @@
 
   .bottom {
     padding: 12px 20px;
+  }
+}
+
+/* ─── TARGETS TÁCTILES ────────────────────────────────────────────────
+   En táctil los links del footer medían 348×12,5 px: 28% del mínimo de
+   44×44. En desktop con puntero fino se mantiene la densidad tipográfica:
+   ahí SC 2.5.8 se cumple por separación (14px de gap + 12,5px de alto
+   dejan 26,5px centro a centro, sobre el umbral de 24). */
+@media (pointer: coarse) {
+  .navList a,
+  .navList button,
+  .copyBtn {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .navList {
+    gap: 0;
   }
 }

@@ -56,7 +56,7 @@
 
 .termSession {
   font-size: var(--fs-10);
-  color: var(--status-open);
+  color: var(--status-open-text);
   letter-spacing: var(--ls-wider);
   text-transform: uppercase;
 }
@@ -84,7 +84,7 @@
 }
 
 .prompt {
-  color: var(--status-open);
+  color: var(--status-open-text);
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -92,6 +92,42 @@
 .cmd {
   color: var(--ink);
   font-weight: 600;
+}
+
+/* Único elemento interactivo del hero. Se lee como el resto de los comandos:
+   el subrayado punteado insinúa que se puede accionar sin romper la terminal. */
+.cmdLink {
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cmdLink:hover {
+    color: var(--accent);
+    text-decoration-style: solid;
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* En táctil el hit area llega a 44px sin alterar el interlineado de la terminal */
+@media (pointer: coarse) {
+  .cmdLink {
+    position: relative;
+  }
+  .cmdLink::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+  }
 }
 
 .out {
@@ -119,13 +155,24 @@
   to { visibility: hidden; }
 }
 
+/* Era la única animación del sitio que seguía corriendo con reduced-motion
+   activo, y encima con iteraciones infinitas. El bloque queda visible y
+   estático: conserva la presencia de "terminal viva" sin movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}
+
 .termFooter {
   display: flex;
   justify-content: space-between;
   padding: 8px 14px;
   border-top: 1px solid var(--hairline);
   font-size: var(--fs-10);
-  color: var(--ink-mute);
+  /* --ink-mute está calibrado contra --bg y --bg-1; sobre --bg-2 (el fondo de
+     esta barra) daba 3.87:1. --ink-dim llega a 6.48:1 sin perder el tono tenue. */
+  color: var(--ink-dim);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   background: var(--bg-2);
@@ -272,4 +319,19 @@
   .nameLine2 {
     font-size: clamp(40px, 12vw, 80px);
   }
+}
+
+/* El único elemento interactivo del hero también responde al press */
+.cmdLink {
+  transition: color var(--t-base), transform var(--t-press);
+}
+
+.cmdLink:active {
+  transform: scale(0.98);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmdLink { transition: none; }
+  .cmdLink:active { transform: none; }
 }

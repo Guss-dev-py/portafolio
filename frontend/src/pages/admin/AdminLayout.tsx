@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { scrimFade } from '../../motion/variants';
 import { useMessages } from '../../hooks/useMessages';
 import { useProjects } from '../../hooks/useProjects';
 import { apiClient } from '../../api/client';
@@ -160,9 +162,21 @@ export function AdminLayout() {
         </div>
 
         <div className={styles.workspace}>
-          {sidebarOpen && (
-            <div className={styles.sideBackdrop} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
-          )}
+          {/* El aside ya transiciona por CSS; lo que faltaba era que el scrim
+              se desvaneciera en vez de desaparecer de golpe. */}
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.div
+                className={styles.sideBackdrop}
+                onClick={() => setSidebarOpen(false)}
+                aria-hidden="true"
+                variants={scrimFade}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              />
+            )}
+          </AnimatePresence>
           <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
             <div className={styles.sideHead}>
               <p className={styles.sideEyebrow}>SESIÓN ACTIVA</p>
@@ -249,6 +263,7 @@ export function AdminLayout() {
             <Outlet />
           </main>
 
+          {/* Sin AnimatePresence: la paleta no anima (ver CommandPalette.tsx) */}
           {paletteOpen && <CommandPalette open onClose={() => setPaletteOpen(false)} />}
         </div>
 

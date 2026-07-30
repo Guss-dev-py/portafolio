@@ -41,6 +41,7 @@ backend/dist
 .claude/
 .github/
 .impeccable/
+.baseline/
 
 # Variables de entorno — NUNCA commitear
 .env
@@ -58,4 +59,3 @@ infra/.env
 
 # CV personal — contiene datos de contacto privados
 CV_Augusto_Freire_ATS.md
-CV_Augusto_Freire.pdf

@@ -72,13 +72,22 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
           </motion.span>
         ))}
         {!techsExpanded && hiddenCount > 0 && (
-          <span
+          <button
+            type="button"
             className={styles.techMore}
             onMouseEnter={() => setTechsExpanded(true)}
-            aria-label={`Mostrar ${hiddenCount} tecnología(s) más`}
+            onClick={(e) => {
+              // Vive dentro del <a> de la fila: sin esto, tocarlo navega al sitio
+              // en vez de revelar las tecnologías.
+              e.preventDefault();
+              e.stopPropagation();
+              setTechsExpanded(true);
+            }}
+            aria-expanded={techsExpanded}
+            aria-label={`Mostrar ${hiddenCount} tecnología${hiddenCount === 1 ? '' : 's'} más`}
           >
             +{hiddenCount}
-          </span>
+          </button>
         )}
       </div>
       <div className={styles.rowYear}>

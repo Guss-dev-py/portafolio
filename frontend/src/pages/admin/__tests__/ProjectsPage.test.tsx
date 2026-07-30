@@ -256,50 +256,63 @@ describe('ProjectsPage', () => {
   });
 
   describe('reordenamiento manual (drag and drop)', () => {
-    function getDataRows(container: HTMLElement): HTMLElement[] {
-      // La primera fila es el encabezado
-      return Array.from(container.querySelectorAll<HTMLElement>('[class*="tableRow"]')).slice(1);
+    // El asa de arrastre reemplaza al `draggable` de HTML5: ahora el gesto vive
+    // en Pointer Events y el asa es además el punto de entrada por teclado.
+    function getHandles(): HTMLElement[] {
+      return screen.queryAllByRole('button', { name: /^Reordenar / });
     }
 
-    it('en modo Orden las filas son arrastrables; en otros modos no', () => {
+    it('en modo Orden aparece un asa por fila; en otros modos no', () => {
       const projects = [makeProject(1), makeProject(2)];
-      const { container } = renderPage(makeProjectsApi(projects));
+      renderPage(makeProjectsApi(projects));
 
-      expect(getDataRows(container).every(r => r.draggable)).toBe(false);
+      expect(getHandles()).toHaveLength(0);
 
       fireEvent.click(screen.getByRole('button', { name: 'Orden' }));
 
-      expect(getDataRows(container).every(r => r.draggable)).toBe(true);
+      expect(getHandles()).toHaveLength(2);
     });
 
-    it('soltar una fila sobre otra llama a reorder con el nuevo orden de ids', async () => {
+    it('bajar una fila con el teclado llama a reorder con el nuevo orden de ids', async () => {
       const projects = [makeProject(1), makeProject(2), makeProject(3)];
       const api = makeProjectsApi(projects);
-      const { container } = renderPage(api);
+      renderPage(api);
 
       fireEvent.click(screen.getByRole('button', { name: 'Orden' }));
-      const rows = getDataRows(container);
 
-      // Arrastrar la primera fila y soltarla sobre la segunda
-      fireEvent.dragStart(rows[0]);
-      fireEvent.dragOver(rows[1]);
-      fireEvent.drop(rows[1]);
+      // ArrowDown sobre el asa de la primera fila: la baja un lugar
+      fireEvent.keyDown(getHandles()[0], { key: 'ArrowDown' });
 
       const reorderMock = (api as unknown as { reorder: ReturnType<typeof vi.fn> }).reorder;
       await waitFor(() => expect(reorderMock).toHaveBeenCalledOnce());
       expect(reorderMock).toHaveBeenCalledWith([projects[1].id, projects[0].id, projects[2].id]);
     });
 
+    it('no se puede mover la primera fila más arriba ni la última más abajo', () => {
+      const projects = [makeProject(1), makeProject(2)];
+      const api = makeProjectsApi(projects);
+      renderPage(api);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Orden' }));
+      const handles = getHandles();
+
+      fireEvent.keyDown(handles[0], { key: 'ArrowUp' });
+      fireEvent.keyDown(handles[1], { key: 'ArrowDown' });
+
+      const reorderMock = (api as unknown as { reorder: ReturnType<typeof vi.fn> }).reorder;
+      expect(reorderMock).not.toHaveBeenCalled();
+    });
+
     it('con búsqueda activa el arrastre queda deshabilitado', () => {
       const projects = [makeProject(1), makeProject(2)];
-      const { container } = renderPage(makeProjectsApi(projects));
+      renderPage(makeProjectsApi(projects));
 
       fireEvent.click(screen.getByRole('button', { name: 'Orden' }));
       fireEvent.change(screen.getByPlaceholderText('buscar proyecto...'), {
         target: { value: 'Proyecto' },
       });
 
-      expect(getDataRows(container).every(r => r.draggable)).toBe(false);
+      expect(getHandles()).toHaveLength(0);
     });
   });
 });

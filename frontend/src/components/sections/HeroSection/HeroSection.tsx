@@ -7,6 +7,8 @@ import styles from './HeroSection.module.css';
 interface ScriptLine {
   type: 'cmd' | 'out' | 'out_h' | 'blank';
   text?: string;
+  /** Ancla a la que navega la línea. Convierte el comando en un link real. */
+  href?: string;
 }
 
 const STATUS_LINE: Record<WorkStatus, string> = {
@@ -43,7 +45,7 @@ function buildScript(status: WorkStatus): ScriptLine[] {
     { type: 'out',   text: '> estudios:  ing. informática · UNPAZ' },
     { type: 'out',   text: '> focos:     fintech · saas b2b · ciberseguridad' },
     { type: 'blank' },
-    { type: 'cmd',   text: 'contact --form' },
+    { type: 'cmd',   text: 'contact --form', href: '#contacto' },
   ];
 }
 
@@ -135,7 +137,11 @@ export function HeroSection() {
               return (
                 <div key={`${line.type}-${i}`} className={`${styles.termLine} ${styles[line.type]}`}>
                   {line.type === 'cmd' && <span className={styles.prompt}>$ </span>}
-                  <span>{line.text}</span>
+                  {/* El hero no tenía ningún elemento interactivo: el comando final
+                      es un link real al formulario, no texto que lo aparenta. */}
+                  {line.href
+                    ? <a href={line.href} className={styles.cmdLink}>{line.text}</a>
+                    : <span>{line.text}</span>}
                 </div>
               );
             })}

@@ -11,11 +11,29 @@ const LAYERS = [
 ];
 
 const CONN_DIST = 165;
+const CONN_DIST2 = CONN_DIST * CONN_DIST;
 const CONN_ALPHA = 0.18;
 const MOUSE_REPEL = 230;
+const MOUSE_REPEL2 = MOUSE_REPEL * MOUSE_REPEL;
 const MOUSE_REPEL_BASE = 6.0;
 const POP_RADIUS = 140;
+const POP_RADIUS2 = POP_RADIUS * POP_RADIUS;
 const DENSITY = 0.9;
+const DOT_ALPHA_MAX = 0.85;
+
+// ── Presupuesto de dibujo ────────────────────────────────────────
+// El costo de este canvas no está en la aritmética sino en la cantidad de draw
+// calls: hacía un beginPath()+stroke() por línea y un beginPath()+fill() por
+// partícula, miles por frame. Agrupando por nivel de alpha se dibuja todo en
+// unos pocos paths. Medido: +46% de fps. Detalle en docs/PARTICULAS-BENCHMARK.md
+const LINE_LEVELS = 6;
+const DOT_LEVELS = 8;
+/** Lado de celda del grid espacial. Igual a CONN_DIST: así una partícula sólo
+ *  puede conectar con las de su celda y las 8 vecinas. */
+const CELL = CONN_DIST;
+/** Media vecindad (dx,dy aplanados). Recorrer sólo 4 de las 8 celdas vecinas
+ *  alcanza: el par (A,B) se evalúa desde A, y el simétrico nunca se repite. */
+const NEIGHBOURS = [1, 0, 0, 1, 1, 1, 1, -1];
 
 interface Particle {
   x: number; y: number;
@@ -48,6 +66,13 @@ export function ParticlesBackground() {
     let H = window.innerHeight;
     let rafId = 0;
     let particles: Particle[] = [];
+    /** Subconjunto que participa de las conexiones (todo menos la capa 0). */
+    let connectable: Particle[] = [];
+    /** Grid espacial reutilizado entre frames: clave de celda → índices. */
+    const cells = new Map<number, number[]>();
+    /** Buffers de dibujo, reusados para no asignar arrays en cada frame. */
+    const lineBuf: number[][] = Array.from({ length: LINE_LEVELS }, () => []);
+    const dotBuf: number[][] = Array.from({ length: DOT_LEVELS }, () => []);
 
     // Color de tinta del tema activo; se refresca cuando cambia data-theme.
     let inkColor = 'rgb(22,20,18)';
@@ -65,9 +90,12 @@ export function ParticlesBackground() {
     const resize = () => {
       W = window.innerWidth;
       H = window.innerHeight;
-      // Escalar por devicePixelRatio (cap 2): sin esto el canvas se ve
-      // borroso en pantallas retina. El resto del código sigue en px CSS.
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // DPR fijo en 1, a propósito. Con cap 2, en una pantalla retina el canvas
+      // pasaba de 1,3 a 5,2 megapíxeles — 4× más píxeles que pintar por frame —
+      // y el fill rate se convertía en el techo de todo: 9 fps contra 39.
+      // Esto es un fondo difuso con alphas de 0.08 a 0.52, no texto: la nitidez
+      // extra no se percibe y cuesta cuatro veces el trabajo.
+      const dpr = 1;
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       canvas.style.width = `${W}px`;
@@ -105,6 +133,9 @@ export function ParticlesBackground() {
       }
       // depth never changes — sort once so draw loop reuses the order
       particles.sort((a, b) => a.depth - b.depth);
+      // La capa 0 nunca se conecta: manteniéndola fuera de este array, el
+      // recorrido de conexiones no la visita.
+      connectable = particles.filter(p => p.L !== 0);
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -141,8 +172,9 @@ export function ParticlesBackground() {
 
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < MOUSE_REPEL && dist > 0.01) {
+        const d2 = dx * dx + dy * dy;
+        if (d2 < MOUSE_REPEL2 && d2 > 0.0001) {
+          const dist = Math.sqrt(d2);
           const t = 1 - dist / MOUSE_REPEL;
           const force = t * t * MOUSE_REPEL_BASE * (0.4 + p.depth * 1.4);
           p.evx += (dx / dist) * force * 0.038;
@@ -161,61 +193,100 @@ export function ParticlesBackground() {
         if (p.y > H) p.y = 0;
       }
 
-      const scaleFor = (p: Particle) => {
-        let s = 1;
-        s += Math.sin(now * 0.001 * p.zSpeed * 1000 + p.zPhase) * 0.10 * p.depth;
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < POP_RADIUS) {
-          const t2 = 1 - dist / POP_RADIUS;
-          s += t2 * t2 * 0.7 * p.depth;
-        }
-        return s;
-      };
+      // ── Conexiones ────────────────────────────────────────────────
+      // Grid espacial: cada partícula sólo se compara con su celda y 4 vecinas
+      // (media vecindad, para no evaluar cada par dos veces). Recorta ~85% de
+      // las comparaciones. Los pares se acumulan por nivel de alpha y se
+      // dibujan con un stroke() por nivel — eso es lo que realmente ahorra.
+      for (let n = 0; n < LINE_LEVELS; n++) lineBuf[n].length = 0;
+      cells.clear();
+      for (let i = 0; i < connectable.length; i++) {
+        const p = connectable[i];
+        const cx = ((p.x + layerOx[p.L]) / CELL) | 0;
+        const cy = ((p.y + layerOy[p.L]) / CELL) | 0;
+        const key = cx * 100000 + cy;
+        const bucket = cells.get(key);
+        if (bucket) bucket.push(i);
+        else cells.set(key, [i]);
+      }
 
-      // Draw connections — use globalAlpha to avoid per-connection string allocation
-      ctx.strokeStyle = inkColor;
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        if (p.L === 0) continue;
+      const pushLine = (p: Particle, q: Particle) => {
+        if (Math.abs(p.L - q.L) > 1) return;
         const px = p.x + layerOx[p.L];
         const py = p.y + layerOy[p.L];
+        const qx = q.x + layerOx[q.L];
+        const qy = q.y + layerOy[q.L];
+        const dx = px - qx;
+        const dy = py - qy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > CONN_DIST2) return;
+        const t = 1 - Math.sqrt(d2) / CONN_DIST;
+        const depthAvg = (p.depth + q.depth) * 0.5;
+        const alpha = t * t * CONN_ALPHA * (0.5 + depthAvg * 0.8);
+        const level = Math.min(LINE_LEVELS - 1, ((alpha / CONN_ALPHA) * LINE_LEVELS) | 0);
+        lineBuf[level].push(px, py, qx, qy);
+      };
 
-        for (let j = i + 1; j < particles.length; j++) {
-          const q = particles[j];
-          if (Math.abs(p.L - q.L) > 1) continue;
-          const qx = q.x + layerOx[q.L];
-          const qy = q.y + layerOy[q.L];
-
-          const dx = px - qx;
-          const dy = py - qy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist > CONN_DIST) continue;
-
-          const t = 1 - dist / CONN_DIST;
-          const depthAvg = (p.depth + q.depth) * 0.5;
-
-          ctx.globalAlpha = t * t * CONN_ALPHA * (0.5 + depthAvg * 0.8);
-          ctx.lineWidth = 0.6 + depthAvg * 0.8;
-          ctx.beginPath();
-          ctx.moveTo(px, py);
-          ctx.lineTo(qx, qy);
-          ctx.stroke();
+      for (const [key, idxs] of cells) {
+        const cx = Math.floor(key / 100000);
+        const cy = key - cx * 100000;
+        for (let a = 0; a < idxs.length; a++) {
+          const p = connectable[idxs[a]];
+          for (let b = a + 1; b < idxs.length; b++) pushLine(p, connectable[idxs[b]]);
+          for (let k = 0; k < NEIGHBOURS.length; k += 2) {
+            const arr = cells.get((cx + NEIGHBOURS[k]) * 100000 + (cy + NEIGHBOURS[k + 1]));
+            if (!arr) continue;
+            for (const bi of arr) pushLine(p, connectable[bi]);
+          }
         }
       }
 
-      // Draw dots back-to-front (particles already sorted by depth in buildParticles)
-      ctx.fillStyle = inkColor;
-      for (const p of particles) {
-        const s = scaleFor(p);
-        const drawX = p.x + layerOx[p.L];
-        const drawY = p.y + layerOy[p.L];
-        const radius = p.r * s;
-
-        ctx.globalAlpha = Math.min(0.85, p.a * (0.85 + (s - 1) * 0.8));
+      ctx.strokeStyle = inkColor;
+      for (let n = 0; n < LINE_LEVELS; n++) {
+        const arr = lineBuf[n];
+        if (arr.length === 0) continue;
+        const mid = (n + 0.5) / LINE_LEVELS;
+        ctx.globalAlpha = CONN_ALPHA * mid;
+        ctx.lineWidth = 0.6 + mid * 0.8;
         ctx.beginPath();
-        ctx.arc(drawX, drawY, radius, 0, Math.PI * 2);
+        for (let k = 0; k < arr.length; k += 4) {
+          ctx.moveTo(arr[k], arr[k + 1]);
+          ctx.lineTo(arr[k + 2], arr[k + 3]);
+        }
+        ctx.stroke();
+      }
+
+      // ── Puntos ────────────────────────────────────────────────────
+      // Mismo criterio: agrupados por alpha, un fill() por nivel. Se conserva
+      // el orden por profundidad porque los niveles van de tenue a opaco, que
+      // coincide con lejano a cercano.
+      for (let n = 0; n < DOT_LEVELS; n++) dotBuf[n].length = 0;
+      for (const p of particles) {
+        let s = 1 + Math.sin(now * 0.001 * p.zSpeed * 1000 + p.zPhase) * 0.10 * p.depth;
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < POP_RADIUS2) {
+          const t2 = 1 - Math.sqrt(d2) / POP_RADIUS;
+          s += t2 * t2 * 0.7 * p.depth;
+        }
+        const alpha = Math.min(DOT_ALPHA_MAX, p.a * (0.85 + (s - 1) * 0.8));
+        const level = Math.min(DOT_LEVELS - 1, ((alpha / DOT_ALPHA_MAX) * DOT_LEVELS) | 0);
+        dotBuf[level].push(p.x + layerOx[p.L], p.y + layerOy[p.L], p.r * s);
+      }
+
+      ctx.fillStyle = inkColor;
+      for (let n = 0; n < DOT_LEVELS; n++) {
+        const arr = dotBuf[n];
+        if (arr.length === 0) continue;
+        ctx.globalAlpha = DOT_ALPHA_MAX * ((n + 0.5) / DOT_LEVELS);
+        ctx.beginPath();
+        for (let k = 0; k < arr.length; k += 3) {
+          // moveTo antes de arc: sin esto, arc() traza una línea desde el punto
+          // anterior y todos los círculos del nivel quedan encadenados.
+          ctx.moveTo(arr[k] + arr[k + 2], arr[k + 1]);
+          ctx.arc(arr[k], arr[k + 1], arr[k + 2], 0, Math.PI * 2);
+        }
         ctx.fill();
       }
       ctx.globalAlpha = 1;

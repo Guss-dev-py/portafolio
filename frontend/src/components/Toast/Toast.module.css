@@ -20,12 +20,11 @@
   font-family: var(--mono);
   min-width: 260px;
   max-width: 340px;
-  animation: slideIn 120ms ease;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(16px); }
-  to { opacity: 1; transform: translateX(0); }
+  /* El toast sí recibe clicks aunque el stack tenga pointer-events: none */
+  pointer-events: auto;
+  /* La entrada y la salida las maneja framer-motion (variants.toastSlide).
+     Antes había acá un `animation: slideIn 120ms ease` — con la curva `ease`,
+     la más débil de CSS, y sin salida: el toast desaparecía de golpe. */
 }
 
 .ok {
@@ -44,7 +43,7 @@
 }
 
 .ok .glyph {
-  color: var(--status-open);
+  color: var(--status-open-text);
 }
 
 .danger .glyph {

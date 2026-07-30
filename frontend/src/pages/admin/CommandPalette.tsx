@@ -102,6 +102,9 @@ export function CommandPalette({ open, onClose }: Props) {
     }
   };
 
+  // Sin animación, a propósito: `Ctrl+K` es una acción de 100+ usos por día y a
+  // esa frecuencia cualquier transición se convierte en una espera. Aparece y
+  // desaparece instantánea. (Estándar de frecuencia de `review-animations`.)
   return (
     <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true" aria-label="Paleta de comandos">
       <div className={styles.palette} onClick={e => e.stopPropagation()}>

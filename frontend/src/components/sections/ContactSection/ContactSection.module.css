@@ -204,6 +204,8 @@
 .field input,
 .field textarea {
   padding: 10px 12px;
+  /* 39px medidos: 5px cortos del mínimo táctil */
+  min-height: 44px;
   border: 1px solid var(--hairline);
   background: var(--bg);
   color: var(--ink);
@@ -214,10 +216,20 @@
   transition: border-color var(--t-base);
 }
 
+/* Sin `outline: none`: la regla global `:focus-visible` de index.css pinta el
+   anillo para teclado. El borde oscuro queda como feedback también al click,
+   donde `:focus-visible` no aplica. */
 .field input:focus,
 .field textarea:focus {
-  outline: none;
   border-color: var(--ink);
+}
+
+/* Sin esto el navegador usa su gris propio (#757575 = 4.01:1 sobre el papel).
+   `opacity: 1` porque Firefox atenúa el placeholder por defecto. */
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
 }
 
 /* Textarea del mensaje — .field .x para ganar a `.field textarea` sin !important */
@@ -322,6 +334,33 @@
   font-family: var(--mono);
   font-size: var(--fs-12);
   color: var(--danger);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.formAlertMsg {
+  line-height: var(--lh-base);
+}
+
+/* Canal alternativo dentro del propio error: si el envío falla, la salida está
+   ahí y no 400px a la izquierda. */
+.formAlertMail {
+  color: var(--danger);
+  font-family: var(--mono);
+  font-size: var(--fs-11);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .formAlertMail:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 
 /* Success */
@@ -337,7 +376,7 @@
 .ascii {
   font-family: var(--mono);
   font-size: var(--fs-12);
-  color: var(--status-open);
+  color: var(--status-open-text);
   margin: 0;
   line-height: 1.5;
 }
@@ -397,4 +436,23 @@
   .lead {
     font-size: var(--fs-28);
   }
+}
+
+/* Feedback de press en los canales de contacto (los <a> de LinkedIn/GitHub;
+   el de email ya es <button> y lo hereda de index.css). */
+.caLink:active {
+  background: var(--bg-2);
+}
+
+.formAlertMail {
+  transition: transform var(--t-press);
+}
+
+.formAlertMail:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formAlertMail { transition: none; }
+  .formAlertMail:active { transform: none; }
 }

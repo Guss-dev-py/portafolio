@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ToastContext } from './toastContext';
 import type { ToastInput } from './toastContext';
+import { toastSlide, fadeOnly } from '../../motion/variants';
+import { useReducedMotion } from '../../motion/hooks/useReducedMotion';
 import styles from './Toast.module.css';
 
 interface Toast {
@@ -13,6 +16,7 @@ interface Toast {
 
 function ToastItem({ item, onRemove }: { item: Toast; onRemove: (id: string) => void }) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     timerRef.current = setTimeout(() => onRemove(item.id), 3200);
@@ -22,13 +26,20 @@ function ToastItem({ item, onRemove }: { item: Toast; onRemove: (id: string) => 
   }, [item.id, onRemove]);
 
   return (
-    <div className={`${styles.toast} ${item.variant === 'danger' ? styles.danger : styles.ok}`}>
+    <motion.div
+      className={`${styles.toast} ${item.variant === 'danger' ? styles.danger : styles.ok}`}
+      variants={reduced ? fadeOnly : toastSlide}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      layout={!reduced}
+    >
       <span className={styles.glyph}>{item.variant === 'danger' ? '!' : '✓'}</span>
       <div className={styles.body}>
         <strong className={styles.title}>{item.title}</strong>
         {item.msg && <span className={styles.msg}>{item.msg}</span>}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -50,13 +61,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {toasts.length > 0 && (
-        <div className={styles.stack} role="status" aria-live="polite" aria-label="Notificaciones">
+      {/* El stack queda montado siempre: si desapareciera junto con el último
+          toast, AnimatePresence no tendría dónde animar la salida. */}
+      <div className={styles.stack} role="status" aria-live="polite" aria-label="Notificaciones">
+        <AnimatePresence initial={false}>
           {toasts.map(t => (
             <ToastItem key={t.id} item={t} onRemove={remove} />
           ))}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
     </ToastContext.Provider>
   );
 }

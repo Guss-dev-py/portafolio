@@ -4,6 +4,7 @@ import { useAdminContext } from './adminContext';
 import { uploadImage } from '../../api/projects';
 import { resolveAssetUrl } from '../../api/client';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { useReorderDrag } from '../../motion/hooks/useReorderDrag';
 import { AdminTableSkeleton } from './AdminTableSkeleton';
 import { useToast } from '../../components/Toast/toastContext';
 import { relDateDays } from '../../utils/date';
@@ -45,7 +46,6 @@ export default function ProjectsPage() {
   const [confirmDelete, setConfirmDelete] = useState<Project | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const localSearchRef = useRef<HTMLInputElement | null>(null);
-  const dragIndexRef = useRef<number | null>(null);
   // Snapshot del form al abrirlo, para detectar cambios sin guardar al cancelar
   const initialFormRef = useRef<string>('');
 
@@ -213,24 +213,23 @@ export default function ProjectsPage() {
   // Arrastrar solo tiene sentido viendo la lista completa en orden manual
   const canDrag = sortBy === 'manual' && !search && !filterTech;
 
-  const handleDragStart = (index: number) => {
-    dragIndexRef.current = index;
-  };
-
-  const handleDrop = async (targetIndex: number) => {
-    const from = dragIndexRef.current;
-    dragIndexRef.current = null;
-    if (from === null || from === targetIndex) return;
+  const handleReorder = useCallback(async (from: number, to: number) => {
     const ids = projects.map(p => p.id);
     const [moved] = ids.splice(from, 1);
-    ids.splice(targetIndex, 0, moved);
+    ids.splice(to, 0, moved);
     try {
       await reorder(ids);
       toast({ title: 'Orden actualizado', msg: 'El portfolio público refleja el nuevo orden', variant: 'ok' });
     } catch {
       toast({ title: 'Error', msg: 'No se pudo guardar el nuevo orden', variant: 'danger' });
     }
-  };
+  }, [projects, reorder, toast]);
+
+  const { registerRow, onPointerDown, onKeyDown, draggingIndex } = useReorderDrag({
+    count: filtered.length,
+    enabled: canDrag,
+    onCommit: handleReorder,
+  });
 
   return (
     <div className={styles.page}>
@@ -482,13 +481,22 @@ export default function ProjectsPage() {
             {filtered.map((p, i) => (
               <div
                 key={p.id}
-                className={`${styles.tableRow} ${canDrag ? styles.draggableRow : ''}`}
-                draggable={canDrag}
-                onDragStart={canDrag ? () => handleDragStart(i) : undefined}
-                onDragOver={canDrag ? (e) => e.preventDefault() : undefined}
-                onDrop={canDrag ? () => handleDrop(i) : undefined}
+                ref={el => registerRow(i, el)}
+                className={`${styles.tableRow} ${canDrag ? styles.draggableRow : ''} ${draggingIndex === i ? styles.rowDragging : ''}`}
               >
-                <span className={styles.rowIndex}>{canDrag ? '⠿' : String(i + 1).padStart(2, '0')}</span>
+                {canDrag ? (
+                  <button
+                    type="button"
+                    className={`${styles.rowIndex} ${styles.dragHandle}`}
+                    onPointerDown={onPointerDown(i)}
+                    onKeyDown={onKeyDown(i)}
+                    aria-label={`Reordenar ${p.name}: arrastrar, o flechas arriba y abajo`}
+                  >
+                    ⠿
+                  </button>
+                ) : (
+                  <span className={styles.rowIndex}>{String(i + 1).padStart(2, '0')}</span>
+                )}
                 <div className={styles.rowName}>
                   <div className={styles.rowThumb} aria-hidden="true" />
                   <span className={styles.rowNameText}>{p.name}</span>

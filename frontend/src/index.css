@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+/* Las webfonts se cargan con <link rel="preconnect"> + <link rel="stylesheet">
+   en index.html. Con @import acá, el navegador tenía que descargar y parsear
+   este CSS antes de descubrirlas: cuatro saltos en la cadena crítica. */
 
 :root {
   --bg:          #f3efe5;
@@ -14,6 +16,10 @@
   --accent:      #c1272d;
   --accent-2:    #161412;
   --status-open: #1b8a3e;
+  /* Variante para TEXTO: el verde de indicador da 3.05:1 sobre --bg-2 y alcanza
+     para un punto de estado (elemento gráfico, umbral 3:1), pero no para texto
+     de 10-12px. Este llega a 4.74:1 sobre --bg-2 y sube en los fondos claros. */
+  --status-open-text: #15682e;
   --status-away: #c1272d;
   --danger:      #c1272d;
   --warn:        #a55a00;
@@ -22,6 +28,13 @@
   /* El footer es una losa de tinta en ambos temas: tokens propios, no invertibles */
   --footer-bg:   var(--ink);
   --footer-ink:  #f3efe5;
+  /* Escalones tenues del footer. Válidos en los dos temas porque --footer-ink es
+     fijo y --footer-bg es oscuro en ambos. La alpha mínima para AA es 0.482. */
+  --footer-ink-mid:  rgba(243, 239, 229, 0.65); /* 7.2:1 — títulos de columna */
+  --footer-ink-mute: rgba(243, 239, 229, 0.55); /* 5.5:1 — numeración y copyright */
+  /* Placeholder de inputs: sin token propio los navegadores aplican su gris
+     (#757575 = 4.01:1 sobre el papel). --ink-mute ya está calibrado por tema. */
+  --placeholder: var(--ink-mute);
   /* Statusbar del admin: losa de tinta con texto papel en el tema base */
   --statusbar-bg:  var(--ink);
   --statusbar-fg:  rgba(243, 239, 229, 0.7);
@@ -49,6 +62,9 @@
   --shadow-stamp-lg: 8px 8px 0 var(--rule);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --t-fast: 80ms linear; --t-base: 120ms var(--ease-out); --t-slow: 200ms var(--ease-out);
+  /* Feedback de press: la tabla de duración pide 100-160ms con ease-out.
+     --t-fast (80ms linear) quedaba corto y con la curva equivocada. */
+  --t-press: 140ms var(--ease-out);
   --z-canvas: 0; --z-page: 2; --z-nav: 50; --z-dialog: 9000; --z-toast: 9100;
   /* Backward-compat aliases for old modules */
   --text:        var(--ink);
@@ -87,6 +103,7 @@
   --accent:      #e0565c; /* sello-red +luminosidad para AA sobre fondo oscuro */
   --accent-2:    #ece7d9;
   --status-open: #46b96e;
+  --status-open-text: #46b96e; /* 6.11:1 sobre --bg-2 oscuro: sirve como texto */
   --status-away: #e0565c;
   --danger:      #e0565c;
   --warn:        #d39a45;
@@ -115,6 +132,7 @@
   --accent:      #ff5c57; /* alertas: rojo terminal, 6.6:1 */
   --accent-2:    #41f07e;
   --status-open: #41f07e;
+  --status-open-text: #41f07e;
   --status-away: #ff5c57;
   --danger:      #ff5c57;
   --warn:        #ffb000;
@@ -153,6 +171,10 @@
   font-size: var(--fs-12);
   padding: 8px 16px;
   text-decoration: none;
+  /* Aparece solo con teclado, pero un target de 34px sigue siendo chico */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .skip-link:focus {
   left: 8px;
@@ -189,7 +211,13 @@ button:active:not(:disabled) { transform: scale(0.98); }
   z-index: var(--z-page);
 }
 /* Particles body treatments */
-body[data-particles="on"] .page { background: var(--bg-veil); backdrop-filter: blur(0.5px); }
+/* Sin `backdrop-filter` acá, y es la optimización más grande de todas.
+   `.page` envuelve TODA la página: un backdrop-filter sobre esa superficie, con
+   el canvas animándose debajo, obliga al navegador a recomponer todo con blur en
+   cada frame. Medido: 17 fps con el filtro, 43 sin él — y era un blur de 0.5px
+   que no se percibe. La veladura semitransparente de --bg-veil ya atenúa las
+   partículas, que es lo que el efecto buscaba. Ver docs/PARTICULAS-BENCHMARK.md */
+body[data-particles="on"] .page { background: var(--bg-veil); }
 body[data-particles="on"] .section { background: transparent; }
 body[data-particles="on"] .regbar,
 body[data-particles="on"] .topnav { background: var(--bg-veil-strong); backdrop-filter: blur(2px); }

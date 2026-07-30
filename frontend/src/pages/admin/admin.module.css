@@ -242,12 +242,10 @@
   .skelBar { animation: none; }
 }
 
+/* El cursor `grab` vive ahora en el asa, no en la fila: la fila dejó de ser
+   arrastrable completa, y marcarla como tal prometía algo que no pasa. */
 .draggableRow {
-  cursor: grab;
-}
-
-.draggableRow:active {
-  cursor: grabbing;
+  cursor: default;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────── */
@@ -984,4 +982,29 @@
   }
   .msgEmail,
   .msgDate { display: none; }
+}
+
+/* ─── REORDENAMIENTO POR ARRASTRE ─────────────────────────────────────
+   El asa (⠿) es el único punto de agarre: la fila entera tiene botones
+   Editar y Eliminar, y hacerla arrastrable completa hacía que cualquier
+   click accidental iniciara un gesto. */
+.dragHandle {
+  background: none;
+  border: none;
+  cursor: grab;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  touch-action: none; /* sin esto el navegador se queda el gesto para scrollear */
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+/* La fila que se está arrastrando se despega del papel */
+.rowDragging {
+  background: var(--bg-1);
+  box-shadow: var(--shadow-stamp);
+  position: relative;
 }

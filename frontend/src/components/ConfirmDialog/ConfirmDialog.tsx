@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { scrimFade, dialogPop, fadeOnly } from '../../motion/variants';
+import { useReducedMotion } from '../../motion/hooks/useReducedMotion';
 import styles from './ConfirmDialog.module.css';
 
 interface Props {
@@ -14,6 +17,7 @@ interface Props {
 export function ConfirmDialog({ open, title, body, confirmLabel = 'Confirmar', onConfirm, onCancel }: Props) {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const reduced = useReducedMotion();
 
   // aria-modal exige foco adentro: entrar al abrir, atrapar Tab entre los dos
   // botones y devolver el foco a quien lo tenía al cerrar.
@@ -39,24 +43,42 @@ export function ConfirmDialog({ open, title, body, confirmLabel = 'Confirmar', o
     };
   }, [open, onCancel]);
 
-  if (!open) return null;
-
   return (
-    <div className={styles.backdrop} onClick={onCancel} role="dialog" aria-modal="true" aria-label={title}>
-      <div className={styles.dialog} onClick={e => e.stopPropagation()}>
-        <div className={styles.header}>
-          !!! {title}
-        </div>
-        <div className={styles.body}>{body}</div>
-        <div className={styles.footer}>
-          <button ref={cancelRef} type="button" className={styles.cancelBtn} onClick={onCancel}>
-            Cancelar
-          </button>
-          <button ref={confirmRef} type="button" className={styles.confirmBtn} onClick={onConfirm}>
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className={styles.backdrop}
+          onClick={onCancel}
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+          variants={scrimFade}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
+          {/* El diálogo escala aparte del scrim: si escalaran juntos, el
+              oscurecido del fondo se movería con él. */}
+          <motion.div
+            className={styles.dialog}
+            onClick={e => e.stopPropagation()}
+            variants={reduced ? fadeOnly : dialogPop}
+          >
+            <div className={styles.header}>
+              !!! {title}
+            </div>
+            <div className={styles.body}>{body}</div>
+            <div className={styles.footer}>
+              <button ref={cancelRef} type="button" className={styles.cancelBtn} onClick={onCancel}>
+                Cancelar
+              </button>
+              <button ref={confirmRef} type="button" className={styles.confirmBtn} onClick={onConfirm}>
+                {confirmLabel}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

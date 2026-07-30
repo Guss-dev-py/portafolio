@@ -70,7 +70,7 @@ node -e "const b=require('bcrypt');b.hash('TU_PASSWORD',12).then(console.log)"
 cd ..
 # Pegarlo en ADMIN_PASSWORD_HASH escapando cada $ como $$ → $$2b$$12$$...
 
-docker compose up -d --build
+cd infra && docker compose up -d --build
 ```
 
 - Portfolio: `http://localhost:8080`

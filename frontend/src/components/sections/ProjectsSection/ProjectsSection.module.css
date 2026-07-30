@@ -211,11 +211,18 @@
   transition: background var(--t-base), color var(--t-base);
 }
 
+/* Era un <span> con `onMouseEnter`: inalcanzable por teclado y por touch.
+   Ahora es un <button> real; se resetea el chrome para que siga leyéndose
+   como parte de la tira de chips. */
 .techMore {
   font-family: var(--mono);
   font-size: var(--fs-10);
   color: var(--ink-mute);
-  cursor: default;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  letter-spacing: var(--ls-wide);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -249,6 +256,14 @@
 
 .verRepo:hover {
   text-decoration: underline;
+}
+
+/* Un elemento focusable no puede estar invisible: con `opacity: 0` el anillo de
+   foco se pintaba sobre la nada y el usuario de teclado veía desaparecer el
+   foco. Se revela al enfocarlo o al enfocar cualquier cosa de la fila. */
+.verRepo:focus-visible,
+.indexRow:focus-within .verRepo {
+  opacity: 1;
 }
 
 /* Footer */
@@ -325,8 +340,13 @@
   .indexHeader span:nth-child(3) {
     display: none;
   }
+  /* Los chips eran `display: none` acá: el stack del proyecto —la señal más
+     escaneable para un recruiter técnico— desaparecía justo en el dispositivo
+     donde ocurren la mayoría de las primeras visitas. Ahora bajan a una fila
+     propia en vez de eliminarse. */
   .rowTech {
-    display: none;
+    grid-column: 2 / -1;
+    margin-top: 10px;
   }
 }
 
@@ -391,4 +411,24 @@
     background: var(--ink);
     color: var(--bg);
   }
+}
+
+/* Áreas táctiles: medidas 69,6×16,5 (verRepo), 99×33 (githubLink),
+   110×32 (retryBtn) y 334×41 (fallback a GitHub del estado de error). */
+@media (pointer: coarse) {
+  .verRepo,
+  .githubLink,
+  .retryBtn,
+  .emptyHint a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* Press en los links de acción de la sección */
+.githubLink:active,
+.verRepo:active {
+  color: var(--accent);
+  text-decoration-thickness: 2px;
 }

@@ -4,6 +4,26 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Tipografía: antes se cargaba con @import dentro de index.css, lo que
+             encadenaba HTML → CSS → googleapis → gstatic antes de tener la fuente.
+             Como <link> en el head, el navegador la descubre en el primer parseo. -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <!-- JetBrains Mono es la identidad: se espera con `swap`. -->
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
+        />
+        <!-- Newsreader (prosa) va con `optional`: si no llega a tiempo el navegador
+             se queda en la serif del sistema y NO reemplaza a mitad de camino. Su
+             swap causaba el 79% del CLS móvil (el lede del hero ganaba 2 líneas y
+             empujaba 34px). En la visita siguiente ya está cacheada. -->
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=optional"
+        />
+
         <title>Augusto Freire — FullStack Developer</title>
         <meta name="description" content="FullStack Developer — Buenos Aires, AR. Construyo productos digitales de punta a punta con React, Node, Python y PostgreSQL. Disponible para freelance y full-time." />
         <meta name="author" content="Augusto Freire" />

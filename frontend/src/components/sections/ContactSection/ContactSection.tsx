@@ -2,11 +2,14 @@ import type { RefObject } from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { apiClient } from '../../../api/client';
+import { describeSubmitError } from './submitError';
 import { useToast } from '../../Toast/toastContext';
 import { useInView } from '../../../motion/hooks/useInView';
 import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import { fadeUp, slideInLeft } from '../../../motion/variants';
 import styles from './ContactSection.module.css';
+
+const CONTACT_EMAIL = 'augustofreire02@gmail.com';
 
 interface FormData {
   name: string;
@@ -58,8 +61,8 @@ export function ContactSection() {
         body: JSON.stringify(form),
       });
       setSuccess(true);
-    } catch {
-      setSubmitErr('No se pudo enviar. Intentá de nuevo.');
+    } catch (err) {
+      setSubmitErr(describeSubmitError(err));
     } finally {
       setSending(false);
     }
@@ -142,7 +145,19 @@ export function ContactSection() {
           ) : (
             <form onSubmit={handleSubmit} noValidate className={styles.form}>
               {submitErr && (
-                <div className={styles.formAlert} role="alert">{submitErr}</div>
+                <div className={styles.formAlert} role="alert">
+                  <p className={styles.formAlertMsg}>{submitErr}</p>
+                  {/* Salida alternativa: el mensaje ya escrito viaja en el mailto,
+                      así no hay que volver a tipearlo si el envío falla. */}
+                  <a
+                    className={styles.formAlertMail}
+                    href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+                      `Contacto desde el portfolio${form.name ? ` — ${form.name}` : ''}`
+                    )}&body=${encodeURIComponent(form.message)}`}
+                  >
+                    ↪ Escribirme por email ({CONTACT_EMAIL})
+                  </a>
+                </div>
               )}
 
               <div className={styles.row2}>
