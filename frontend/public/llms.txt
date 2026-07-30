@@ -16,11 +16,12 @@ de más abajo y el structured data del `<head>`.
 
 ## Quién es
 
-Augusto Freire es desarrollador fullstack en Buenos Aires, Argentina. Estudia
-ingeniería informática en la Universidad Nacional de José C. Paz (UNPAZ).
+Augusto Freire es desarrollador fullstack en Buenos Aires, Argentina. Cursa el
+segundo año de ingeniería informática en la Universidad Nacional de José C. Paz
+(UNPAZ), donde ingresó en el top 16% del Ciclo de Inicio Universitario (2026).
 Trabaja de punta a punta: diseña la interfaz, escribe la API, modela la base de
-datos y arma el despliegue. Sus focos declarados son fintech, SaaS B2B y
-ciberseguridad.
+datos y arma el despliegue. Sus focos declarados son el desarrollo backend y de
+APIs, fintech, SaaS B2B y ciberseguridad.
 
 ## Stack
 

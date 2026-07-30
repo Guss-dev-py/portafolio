@@ -133,6 +133,61 @@
   padding-top: 4px;
 }
 
+/* ── Bloque de educación ──────────────────────────────────────
+   Traduce la jerarquía de una tarjeta de credenciales al lenguaje del sitio:
+   losa de tinta arriba, hairline como separador, y los dos registros
+   tipográficos haciendo el contraste. Nada de card blanca con sombra: el
+   principio 3 del producto pide que todo elemento nuevo hable en mono,
+   hairlines y sellos, no en el dialecto genérico de SaaS. */
+.eduMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+}
+
+/* Título del registro: mono, como el nombre de un proyecto en el índice. */
+.eduDegree {
+  font-family: var(--mono);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: var(--lh-snug);
+  color: var(--ink);
+}
+
+/* La institución sostiene, no compite: serif, un escalón más abajo. */
+.eduOrg {
+  font-family: var(--serif);
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  color: var(--ink-dim);
+}
+
+/* El logro se separa con su propio fondo, como un sello al pie del registro.
+   --ink-dim sobre --bg-2 da 6,48:1; --ink-mute ahí caería a 3,87:1. */
+.eduHighlight {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--hairline);
+  background: var(--bg-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-base);
+}
+
+/* Flex item propio: las líneas siguientes alinean con el texto y no debajo
+   de la marca, sin recurrir a sangría negativa. */
+.eduDot {
+  flex-shrink: 0;
+  color: var(--status-open-text);
+}
+
+.eduHighlight strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .srV {
   display: flex;
   flex-wrap: wrap;

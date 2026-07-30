@@ -51,15 +51,30 @@ export function AboutSection() {
           initial="hidden"
           animate={animate}
         >
+          {/* Reemplaza al bloque de "objetivos": el objetivo profesional ya lo
+              dice el último párrafo de la bio, así que el recuadro repetía. La
+              formación es dato duro y no estaba en ningún lado más que una
+              línea del hero. Se usa la misma retícula clave/valor que el bloque
+              de stack para no inventar vocabulario nuevo. */}
           <motion.div className={styles.metaBlock} variants={slideInLeft}>
             <div className={styles.mbHead}>
-              <span><span className={styles.sym}>//</span> objetivos</span>
-              <span>2026 →</span>
+              <span><span className={styles.sym}>//</span> educación</span>
+              <span>en curso</span>
             </div>
             <div className={styles.mbBody}>
-              <span className={styles.mbBodyText}>
-                Continuar creciendo como desarrollador, especializarme en ciberseguridad y participar en proyectos de gran escala dentro de una empresa donde pueda asumir desafíos cada vez más complejos.
-              </span>
+              {/* Jerarquía, no grilla: la carrera manda, la institución la
+                  sostiene. Los dos registros del sitio hacen el contraste —
+                  mono para el título del registro, serif para la prosa. */}
+              <div className={styles.eduMain}>
+                <span className={styles.eduDegree}>Ingeniería Informática</span>
+                <span className={styles.eduOrg}>Universidad Nacional de José C. Paz (UNPAZ)</span>
+              </div>
+              <div className={styles.eduHighlight}>
+                <span className={styles.eduDot} aria-hidden="true">●</span>
+                <span>
+                  Ingreso destacado — <strong>Top 16%</strong> del Ciclo de Inicio Universitario (2026)
+                </span>
+              </div>
             </div>
           </motion.div>
 
@@ -94,7 +109,7 @@ export function AboutSection() {
             </div>
             <div className={styles.mbBody}>
               <span className={styles.mbBodyText}>
-                Tecnología financiera (FinTech), productos SaaS B2B y Ciberseguridad (Secure APIs, Cloud Security, Pentesting).
+                Desarrollo backend y APIs, tecnología financiera (FinTech), productos SaaS B2B y Ciberseguridad (Secure APIs, Cloud Security, Pentesting).
               </span>
             </div>
           </motion.div>
