@@ -94,9 +94,14 @@
   background: var(--bg-2);
 }
 
-/* La tarjeta activa cambia su fondo a --bg-2 y ahí --ink-mute cae a 3,87:1
-   (4,08:1 en hacker). --ink-dim está un escalón más arriba: 6,48:1. */
-.optionCardActive .optionDesc {
+/* Cualquier tarjeta con fondo --bg-2 necesita el escalón de tinta más alto:
+   ahí --ink-mute cae a 3,87:1 (4,08:1 en hacker) y --ink-dim da 6,48:1.
+   El hover entra en la misma regla que la tarjeta activa porque **pinta el
+   mismo fondo**. En la Fase 5 sólo se arregló el estado activo; el de hover lo
+   encontró el test de axe en navegador real, con el mouse parado encima de una
+   tarjeta — un escaneo estático nunca lo ve. */
+.optionCardActive .optionDesc,
+.optionCard:hover:not(:disabled) .optionDesc {
   color: var(--ink-dim);
 }
 
