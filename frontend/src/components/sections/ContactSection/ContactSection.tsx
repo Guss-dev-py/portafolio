@@ -115,7 +115,7 @@ export function ContactSection() {
         {/* Left */}
         <motion.div className={styles.leftCol} variants={slideInLeft} initial="hidden" animate={animate}>
           <p className={styles.lead}>
-            ¿Tenés un proyecto en mente o querés <em className={styles.leadAccent}>charlar de código</em>? Mandame un mensaje: te responde un humano.
+            ¿Tenés un proyecto en mente? <em className={styles.leadAccent}>¡Escribime!</em>
           </p>
 
           <div className={styles.caLinks}>

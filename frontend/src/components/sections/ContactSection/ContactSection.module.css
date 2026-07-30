@@ -64,7 +64,14 @@
   color: var(--accent);
 }
 
+/* El llamado a la acción baja a su propio renglón y pesa más que la pregunta.
+   `display: block` da el salto sin meter un <br> en el JSX, y el tamaño va en
+   `em` para que siga atado al de `.lead` si alguna vez cambia. */
 .leadAccent {
+  display: block;
+  margin-top: 0.12em;
+  font-size: 1.35em;
+  line-height: 1.15;
   color: var(--accent);
 }
 

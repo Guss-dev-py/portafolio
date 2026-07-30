@@ -34,13 +34,13 @@ export function AboutSection() {
           animate={animate}
         >
           <motion.p className={styles.bioPara} variants={fadeUp}>
-            ¡Hola! Soy <strong>apasionado y entusiasta</strong> en todo lo que hago. Siempre estoy buscando nuevos desafíos y herramientas para perfeccionarme en mi carrera profesional y proyectos personales.
+            Mi interés por la programación nació con mis primeros ejercicios en Python. Lo que comenzó como curiosidad rápidamente se convirtió en el deseo de comprender cómo se construyen las herramientas digitales que utilizamos todos los días. Descubrir que podía transformar una idea en un programa, una aplicación web o un sistema completo fue lo que me impulsó a seguir aprendiendo y a interesarme también por áreas como la ciberseguridad.
           </motion.p>
           <motion.p className={styles.bioPara} variants={fadeUp}>
-            Me destaco por mi capacidad de adaptación, resolución de problemas y trabajo bajo presión. Tengo experiencia manejando situaciones complejas con clientes y operando con precisión en <em>contextos dinámicos</em>.
+            Actualmente curso el segundo año de <strong>Ingeniería Informática en la UNPAZ</strong> y desarrollo proyectos full stack, tiendas de comercio electrónico y sistemas adaptados a necesidades específicas. Trabajo con tecnologías como React, TypeScript, Node.js, Express, Python y PostgreSQL, complementándolas con herramientas de infraestructura como Docker, Nginx y Linux. Lo que más disfruto del desarrollo es aplicar la creatividad dentro de un proceso técnico para convertir una necesidad abstracta en una solución real, funcional y útil para quien la utiliza.
           </motion.p>
           <motion.p className={styles.bioPara} variants={fadeUp}>
-            Actualmente curso <strong>Ingeniería Informática en UNPAZ</strong>, incorporando un enfoque analítico y facilidad para el uso de sistemas. Busco desarrollarme en entornos donde pueda aprender, asumir responsabilidades y seguir construyendo experiencia profesional.
+            Fuera de la tecnología, disfruto de la pesca, el trekking, la música, tocar la guitarra y compartir un mate. También intento mantener un equilibrio entre la universidad, mis proyectos, el gimnasio y el tiempo con amigos. Mi objetivo profesional es continuar creciendo como desarrollador, especializarme en <strong>ciberseguridad</strong> y participar en proyectos de gran escala dentro de una empresa donde pueda asumir desafíos cada vez más complejos.
           </motion.p>
         </motion.div>
 
@@ -58,7 +58,7 @@ export function AboutSection() {
             </div>
             <div className={styles.mbBody}>
               <span className={styles.mbBodyText}>
-                Seguir creciendo como desarrollador, contribuir a proyectos de impacto real y eventualmente liderar equipos técnicos en entornos ágiles.
+                Continuar creciendo como desarrollador, especializarme en ciberseguridad y participar en proyectos de gran escala dentro de una empresa donde pueda asumir desafíos cada vez más complejos.
               </span>
             </div>
           </motion.div>
