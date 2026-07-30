@@ -13,6 +13,35 @@ test.describe('Flujo admin completo', () => {
 
   const projectName = `E2E Proyecto ${Date.now()}`;
 
+  /**
+   * El borrado vive dentro del test, así que si el test falla antes de llegar
+   * ahí el proyecto queda en la base — y esta suite corre contra el stack real,
+   * con los datos de verdad. Pasó: un fallo intermitente dejó un
+   * "E2E Proyecto …" publicado en el portfolio público hasta que lo encontró la
+   * comparación visual del cierre. Esta limpieza corre pase lo que pase.
+   */
+  test.afterAll(async ({ playwright }, testInfo) => {
+    if (!USER || !PASS) return;
+    const api = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+    try {
+      const login = await api.post('/api/auth/login', { data: { username: USER, password: PASS } });
+      if (!login.ok()) return;
+      const { token } = await login.json();
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const res = await api.get('/api/projects');
+      if (!res.ok()) return;
+      const proyectos: Array<{ id: string; name: string }> = await res.json();
+
+      for (const p of proyectos.filter((p) => p.name.startsWith('E2E Proyecto '))) {
+        await api.delete(`/api/projects/${p.id}`, { headers });
+        console.log(`[limpieza] proyecto de test eliminado: ${p.name}`);
+      }
+    } finally {
+      await api.dispose();
+    }
+  });
+
   test('login → crear proyecto → visible en público → eliminar', async ({ page }) => {
     // ── Login ──────────────────────────────────────────────────────
     await page.goto('/admin/login');
@@ -30,7 +59,10 @@ test.describe('Flujo admin completo', () => {
     await page.getByLabel('URL DEL PROYECTO *').fill('https://example.com/e2e');
     await page.getByRole('button', { name: '↵ Crear proyecto' }).click();
 
-    await expect(page.getByText(projectName)).toBeVisible();
+    // Acotado a la tabla: sin esto el nombre matchea también en el toast de
+    // "proyecto creado" y Playwright corta por strict mode. Era intermitente —
+    // dependía de si el toast ya se había ido cuando corría la aserción.
+    await expect(page.locator('[class*="tableRow"]', { hasText: projectName })).toHaveCount(1);
 
     // ── Visible en el portfolio público ────────────────────────────
     await page.goto('/');
