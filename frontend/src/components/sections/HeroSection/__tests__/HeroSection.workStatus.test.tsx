@@ -20,7 +20,17 @@ vi.mock('../../../../api/status', () => ({
 }));
 
 import { HeroSection } from '../HeroSection';
+import { WorkStatusProvider } from '../../../../hooks/WorkStatusProvider';
 import { getWorkStatus } from '../../../../api/status';
+
+/** El estado laboral llega por contexto: el hero ya no hace su propio fetch. */
+function renderHero() {
+  return render(
+    <WorkStatusProvider>
+      <HeroSection />
+    </WorkStatusProvider>
+  );
+}
 
 /** Cantidad de líneas ya tipeadas en el cuerpo de la terminal. */
 function typedLines(container: HTMLElement): number {
@@ -39,7 +49,7 @@ describe('HeroSection · work_status', () => {
 
   it('un status distinto del default no reinicia el typewriter', async () => {
     vi.mocked(getWorkStatus).mockResolvedValue({ status: 'occupied' });
-    const { container } = render(<HeroSection />);
+    const { container } = renderHero();
 
     // Dejar correr la animación un tramo
     await act(async () => { await vi.advanceTimersByTimeAsync(1200); });
@@ -56,7 +66,7 @@ describe('HeroSection · work_status', () => {
 
   it('la línea de status muestra el texto del estado recibido', async () => {
     vi.mocked(getWorkStatus).mockResolvedValue({ status: 'occupied' });
-    render(<HeroSection />);
+    renderHero();
 
     // Correr la animación hasta el final
     await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
@@ -66,7 +76,7 @@ describe('HeroSection · work_status', () => {
 
   it('con el status default el texto es el de open to work', async () => {
     vi.mocked(getWorkStatus).mockResolvedValue({ status: 'open' });
-    render(<HeroSection />);
+    renderHero();
 
     await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
 

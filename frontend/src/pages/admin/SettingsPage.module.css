@@ -109,8 +109,8 @@
 }
 
 .dotOpen     { background: var(--status-open); }
-.dotWorking  { background: #f59e0b; }
-.dotOccupied { background: var(--danger); }
+.dotWorking  { background: var(--status-working); }
+.dotOccupied { background: var(--status-occupied); }
 
 .optionLabel {
   font-size: var(--fs-14);

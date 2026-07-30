@@ -2,7 +2,7 @@
 
 Decisiones de arquitectura del portfolio, con su contexto y sus consecuencias.
 
-Los **0008 y 0009** se escribieron el 2026-07-30, junto con las decisiones que documentan (Fase 3).
+Los **0008 y 0009** se escribieron el 2026-07-30, junto con las decisiones que documentan (Fase 3). El **0010** ese mismo día, al cerrar el hallazgo de GEO que la Fase 4 había dejado abierto.
 
 Los ADR 0001–0006 se escribieron **retroactivamente** el 2026-07-29 (Fase 0 de `PLAN_MEJORAS_2026-07.md`): documentan decisiones que ya estaban tomadas y funcionando, pero que no estaban escritas en ningún lado. El riesgo que cubren es concreto — un refactor futuro puede deshacerlas por ignorancia, creyendo que corrige un descuido.
 
@@ -17,6 +17,7 @@ Los ADR 0001–0006 se escribieron **retroactivamente** el 2026-07-29 (Fase 0 de
 | [0007](0007-react-19-estable-sin-canary.md) | React 19 estable; no se adopta la View Transition API | aceptada, con condición de reevaluación |
 | [0008](0008-estado-de-pagina-por-contexto.md) | Estado de página en un provider por contexto, no en props | aceptada |
 | [0009](0009-code-splitting-en-el-limite-del-admin.md) | El code splitting corta en el límite del admin | aceptada |
+| [0010](0010-app-shell-para-crawlers-sin-javascript.md) | Un app shell en el HTML para los crawlers que no ejecutan JavaScript | aceptada, con revisión declarada |
 
 ## Cómo agregar uno
 

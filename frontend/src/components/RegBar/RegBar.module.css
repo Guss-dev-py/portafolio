@@ -27,6 +27,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  /* Ancho de la etiqueta más larga ("WORKING · CON DEMORAS", 21 caracteres a
+     11px mono + 0.14em de tracking) más el cuadro y su gap. Reservarlo evita
+     que la columna de cotizaciones salte cuando entra el estado real. Si la
+     copy de STATUS_LABEL crece, este número se recalcula. */
+  min-width: 190px;
 }
 
 .status::before {
@@ -38,6 +43,14 @@
   border: 1px solid var(--ink);
   flex-shrink: 0;
 }
+
+.status_open::before     { background: var(--status-open); }
+.status_working::before  { background: var(--status-working); }
+.status_occupied::before { background: var(--status-occupied); }
+
+/* Sin dato todavía: ni etiqueta ni cuadro de color. El cuadro verde del default
+   optimista afirmaba disponibilidad antes de que el fetch la confirmara. */
+.status_loading::before { visibility: hidden; }
 
 .rates {
   color: var(--ink-mute);

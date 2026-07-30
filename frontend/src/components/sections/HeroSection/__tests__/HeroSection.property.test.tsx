@@ -15,21 +15,31 @@ vi.mock('../../../../motion/hooks/useReducedMotion', () => ({
 }));
 
 import { HeroSection } from '../HeroSection';
+import { WorkStatusProvider } from '../../../../hooks/WorkStatusProvider';
 import { scaleIn } from '../../../../motion/variants';
+
+/** El estado laboral llega por contexto: el hero ya no hace su propio fetch. */
+function renderHero() {
+  return render(
+    <WorkStatusProvider>
+      <HeroSection />
+    </WorkStatusProvider>
+  );
+}
 
 describe('HeroSection — terminal variant', () => {
   it('renders without throwing', () => {
-    expect(() => render(<HeroSection />)).not.toThrow();
+    expect(() => renderHero()).not.toThrow();
   });
 
   it('renders the section with id="inicio"', () => {
-    const { container } = render(<HeroSection />);
+    const { container } = renderHero();
     const section = container.querySelector('#inicio');
     expect(section).toBeInTheDocument();
   });
 
   it('renders the terminal box', () => {
-    const { container } = render(<HeroSection />);
+    const { container } = renderHero();
     // The terminal body should be present
     const section = container.querySelector('section');
     expect(section).not.toBeNull();

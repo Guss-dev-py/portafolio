@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReducedMotion } from '../../../motion/hooks/useReducedMotion';
 import type { WorkStatus } from '../../../api/status';
-import { getWorkStatus } from '../../../api/status';
+import { usePublicWorkStatus } from '../../../hooks/workStatusContext';
+import { STATUS_LINE, STATUS_LABEL } from '../../../data/workStatus';
 import styles from './HeroSection.module.css';
 
 interface ScriptLine {
@@ -10,18 +11,6 @@ interface ScriptLine {
   /** Ancla a la que navega la línea. Convierte el comando en un link real. */
   href?: string;
 }
-
-const STATUS_LINE: Record<WorkStatus, string> = {
-  open:     '> open to work · freelance · full-time',
-  working:  '> working · respondiendo con demoras · GMT-3',
-  occupied: '> occupied · no disponible por ahora',
-};
-
-const STATUS_LABEL: Record<WorkStatus, string> = {
-  open:     'Open to work',
-  working:  'Working · con demoras',
-  occupied: 'Occupied',
-};
 
 function buildScript(status: WorkStatus): ScriptLine[] {
   return [
@@ -86,19 +75,11 @@ function useTimestamp() {
 
 export function HeroSection() {
   const reduced = useReducedMotion();
-  const [workStatus, setWorkStatus] = useState<WorkStatus>('open');
+  const { status: workStatus } = usePublicWorkStatus();
   const script = buildScript(workStatus);
   const [visibleCount, setVisibleCount] = useState(reduced ? LINE_DELAYS.length : 0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timestamp = useTimestamp();
-
-  useEffect(() => {
-    const controller = new AbortController();
-    getWorkStatus(controller.signal)
-      .then((r) => setWorkStatus(r.status))
-      .catch(() => {});
-    return () => controller.abort();
-  }, []);
 
   useEffect(() => {
     // Los seteos de estado van siempre dentro de timers (nunca síncronos en

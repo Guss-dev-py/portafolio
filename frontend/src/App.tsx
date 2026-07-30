@@ -9,6 +9,7 @@ import { ProjectsSection } from "./components/sections/ProjectsSection/ProjectsS
 import { ContactSection } from "./components/sections/ContactSection/ContactSection";
 import { Footer } from "./components/Footer/Footer";
 import { ToastProvider } from "./components/Toast/Toast";
+import { WorkStatusProvider } from "./hooks/WorkStatusProvider";
 import { BackToTop } from "./components/BackToTop/BackToTop";
 import { AuthGuard } from "./pages/admin/AuthGuard";
 
@@ -91,7 +92,9 @@ function lazyRoute(element: ReactNode) {
 
 function PortfolioApp() {
   return (
-    <>
+    // El masthead y el hero muestran el mismo estado laboral: un solo fetch
+    // para los dos, desde acá.
+    <WorkStatusProvider>
       <Suspense fallback={null}>
         <ParticlesBackground />
       </Suspense>
@@ -109,7 +112,7 @@ function PortfolioApp() {
         <Footer />
         <BackToTop />
       </div>
-    </>
+    </WorkStatusProvider>
   );
 }
 

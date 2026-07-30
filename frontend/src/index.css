@@ -23,6 +23,12 @@
   --status-away: #c1272d;
   --danger:      #c1272d;
   --warn:        #a55a00;
+  /* Los tres estados laborales como alias semánticos: `var()` se resuelve en el
+     elemento, así que estos siguen al tema sin redefinirse en cada bloque.
+     Antes el ámbar era `#f59e0b` hardcodeado en dos hojas — sobre papel daba
+     1,9:1 y no llegaba al 3:1 que pide un elemento gráfico. */
+  --status-working:  var(--warn);
+  --status-occupied: var(--status-away);
   --selection-bg: var(--ink);
   --selection-fg: var(--bg);
   /* El footer es una losa de tinta en ambos temas: tokens propios, no invertibles */
@@ -183,6 +189,29 @@
 *::selection { background: var(--selection-bg); color: var(--selection-fg); }
 body { margin: 0; background: var(--bg); color: var(--ink); }
 h1,h2,h3 { font-family: var(--mono); color: var(--ink); line-height: var(--lh-tight); margin: 0; text-wrap: balance; }
+
+/* Respaldo sin JavaScript (`vite/appShell.ts`).
+   Lo inyecta el build adentro de #root y React lo borra al montar, así que en
+   un navegador vive entre el primer pintado y la hidratación: ~100 ms en un
+   equipo rápido, ~1,1 s con el CPU a 8×. Medido, no estimado.
+   No se esconde con `display:none` a propósito — texto oculto sólo para
+   crawlers es la definición de cloaking. Se le da forma para que ese momento
+   se lea como la página cargando y no como un glitch: mismo papel, misma
+   tinta, prosa en serif y títulos en mono, igual que el resto del sitio. */
+[data-app-shell] {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: 64px 24px;
+  font-family: var(--serif);
+  font-size: var(--fs-16, 16px);
+  line-height: var(--lh-loose);
+  color: var(--ink-2);
+}
+[data-app-shell] h1 { font-size: clamp(28px, 6vw, 44px); letter-spacing: var(--ls-tight); }
+[data-app-shell] h2 { font-size: var(--fs-14); letter-spacing: var(--ls-wider); text-transform: uppercase; color: var(--ink-dim); margin-top: 32px; }
+[data-app-shell] p { margin: 12px 0; }
+[data-app-shell] ul { margin: 12px 0; padding-left: 20px; }
+[data-app-shell] a { color: var(--ink); }
 p { margin: 0; text-wrap: pretty; }
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

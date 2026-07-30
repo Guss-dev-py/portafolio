@@ -295,8 +295,8 @@
 }
 
 .statusDot_open     { background: var(--status-open); }
-.statusDot_working  { background: #f59e0b; }
-.statusDot_occupied { background: var(--danger); }
+.statusDot_working  { background: var(--status-working); }
+.statusDot_occupied { background: var(--status-occupied); }
 
 @media (max-width: 1000px) {
   .grid {
