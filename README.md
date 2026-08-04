@@ -55,28 +55,63 @@ Portafolio full-stack con estética editorial tipo terminal y panel de administr
 
 ### Opción A — Docker (recomendada)
 
-**Requisitos:** Docker + Node.js (solo para generar el hash del admin)
+**Requisitos:** solo Docker con el plugin `compose`. No hace falta Node en el host.
 
 ```bash
 git clone https://github.com/Guss-dev-py/portafolio.git
 cd portafolio
-
-cp .env.example .env
-# Completar los valores (ver tabla de variables)
-
-# Generar el hash bcrypt del password del admin:
-cd backend && npm install
-node -e "const b=require('bcrypt');b.hash('TU_PASSWORD',12).then(console.log)"
-cd ..
-# Pegarlo en ADMIN_PASSWORD_HASH escapando cada $ como $$ → $$2b$$12$$...
-
-cd infra && docker compose up -d --build
+./deploy.sh
 ```
+
+Eso es todo. En la primera corrida el script crea el `.env`: genera solo los
+secretos (`POSTGRES_PASSWORD`, `JWT_SECRET`) y pregunta lo mínimo que no puede
+adivinar — puerto, usuario y password del admin, y dominio. El hash bcrypt del
+password lo calcula adentro del contenedor, así que no hay que instalar Node ni
+escapar los `$` a mano.
+
+**La API key de Resend es opcional**: se omite con Enter. Sin ella el
+formulario de contacto sigue funcionando y los mensajes se leen en
+`/admin/mensajes`; lo único que no pasa es la notificación por email. Para
+activarla después, poné una `RESEND_API_KEY` real en el `.env` y volvé a correr
+`./deploy.sh`.
 
 - Portfolio: `http://localhost:8080`
 - Admin: `http://localhost:8080/admin/login`
 
-Las migraciones se aplican solas al arrancar el backend — tanto en la primera corrida como al actualizar (`git pull && docker compose up -d --build`).
+El mismo comando sirve para actualizar: `git pull && ./deploy.sh`. Es
+idempotente — si ya existe el `.env` lo respeta y no vuelve a preguntar nada.
+Las migraciones se aplican solas al arrancar el backend, tanto en la primera
+corrida como en cada update.
+
+El script termina recién cuando el health check real pasa (la API respondiendo
+contra la base, atravesando nginx). Si algo falla, imprime los logs del backend
+en vez de dejar el stack a medias en silencio.
+
+```bash
+ENV_FILE=.env.prod ./deploy.sh   # usar otro archivo de entorno
+SKIP_BUILD=1 ./deploy.sh         # levantar sin reconstruir las imágenes
+docker compose logs -f           # seguir los logs
+docker compose down              # parar todo
+```
+
+#### Usuarios de los contenedores
+
+Ningún servicio corre como root:
+
+| Servicio | Usuario | Notas |
+|---|---|---|
+| `frontend` | `nginx` (101) | Imagen `nginx-unprivileged`: el master tampoco es root. El contenedor escucha en 8080 fijo; `FRONTEND_PORT` elige el puerto del host, así que `FRONTEND_PORT=80` sigue siendo válido |
+| `backend` | `node` (1000) | |
+| `postgres` | `postgres` (70) | La imagen oficial baja sola los privilegios |
+| `db-backup` | `postgres` (70) | |
+
+Un init container (`init-perms`) corre una vez antes que el resto para normalizar
+el dueño de los volúmenes: los que se crearon cuando los servicios eran root
+quedaron `root:root` y un contenedor no-root no puede escribir ahí. En un stack
+ya normalizado es un no-op instantáneo.
+
+El backend y Postgres se publican solo en `127.0.0.1` — el tráfico público entra
+por nginx. En un VPS eso evita exponer la API sin proxy.
 
 ### Opción B — Desarrollo local
 

@@ -1,16 +1,43 @@
 services:
+  # Normaliza el dueño de los volúmenes ANTES de que arranquen los servicios que
+  # ahora corren sin root. Los volúmenes creados cuando backend y db-backup eran
+  # root quedaron root:root, y un contenedor no-root no puede escribir ahí.
+  #
+  # Es el patrón init-container: corre como root, hace una cosa, termina. En un
+  # stack ya normalizado es un no-op de milisegundos, así que puede correr en
+  # cada `up` sin costo. Es el único lugar del stack que necesita root.
+  init-perms:
+    image: alpine:3.20
+    command: >
+      sh -c "chown -R 1000:1000 /uploads && chown -R 70:70 /backups"
+    volumes:
+      - uploads:/uploads
+      - db-backups:/backups
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+
   frontend:
     build:
       context: .
       dockerfile: infra/docker/Dockerfile.frontend
       args:
         VITE_API_URL: /api
+    # El contenedor siempre escucha en 8080 (corre como uid 101, que no puede
+    # bindear puertos privilegiados). FRONTEND_PORT elige solo el puerto del
+    # host, así que FRONTEND_PORT=80 es válido: lo bindea el daemon de Docker.
     ports:
-      - "${FRONTEND_PORT:-8080}:${FRONTEND_PORT:-8080}"
+      - "${FRONTEND_PORT:-8080}:8080"
     environment:
-      FRONTEND_PORT: "${FRONTEND_PORT:-8080}"
       BACKEND_PORT: "${BACKEND_PORT:-3001}"
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      # nginx resuelve el DNS de `backend` al arrancar: si sube antes que el
+      # backend, el proxy_pass queda apuntando a nada y /api devuelve 502.
+      backend:
+        condition: service_healthy
 
   backend:
     build:
@@ -18,8 +45,11 @@ services:
       dockerfile: Dockerfile
       args:
         PORT: "${BACKEND_PORT:-3001}"
+    # Solo 127.0.0.1: el tráfico público entra por nginx (/api). Publicarlo en
+    # 0.0.0.0 expondría la API sin proxy en un VPS. Sigue accesible para los
+    # E2E y para infra/rotate-secrets.sh, que usan localhost.
     ports:
-      - "${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
+      - "127.0.0.1:${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
     environment:
       # Variables pasadas directamente para evitar interpolación de $ en bcrypt hashes
       DATABASE_URL: "${DATABASE_URL}"
@@ -39,18 +69,25 @@ services:
       # Imágenes subidas desde el admin: persisten entre rebuilds del contenedor
       - uploads:/app/uploads
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       postgres:
         condition: service_healthy
+      init-perms:
+        condition: service_completed_successfully
 
   postgres:
     image: postgres:16-alpine
+    # La imagen oficial ya baja a uid 70 sola (el entrypoint arranca root y
+    # re-ejecuta con gosu). No se le pone `user:` a mano: rompería ese
+    # entrypoint, que necesita root para el chown inicial del data dir.
     environment:
       POSTGRES_DB: portfolio
       POSTGRES_USER: portfolio_user
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./database/migrations:/docker-entrypoint-initdb.d
@@ -60,9 +97,14 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
 
   db-backup:
     image: postgres:16-alpine
+    # El `entrypoint:` de abajo saltea el entrypoint oficial, que es quien baja
+    # los privilegios. Sin este `user:` el backup correría como root.
+    user: "70:70"
     environment:
       PGHOST: postgres
       POSTGRES_USER: portfolio_user
@@ -76,9 +118,13 @@ services:
       - db-backups:/backups
     entrypoint: ["sh", "/usr/local/bin/backup.sh"]
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       postgres:
         condition: service_healthy
+      init-perms:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

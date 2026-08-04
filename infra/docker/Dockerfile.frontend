@@ -17,19 +17,31 @@ ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 # Etapa 2: servidor estático con nginx
-FROM nginx:1.27-alpine AS runner
+#
+# La imagen `unprivileged` corre el master Y los workers como uid 101. La
+# oficial arranca el master como root (solo para poder bindear puertos <1024) y
+# recién los workers bajan a 101.
+#
+# Como uid 101 no puede bindear puertos privilegiados, el contenedor escucha
+# SIEMPRE en 8080 y el puerto del host se elige aparte, en el compose
+# (FRONTEND_PORT). Eso además desacopla las dos cosas: FRONTEND_PORT=80 sigue
+# funcionando, porque quien bindea el 80 del host es el daemon de Docker.
+FROM nginxinc/nginx-unprivileged:1.27-alpine AS runner
 
 # Copiar el build del frontend
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copiar la plantilla de nginx.conf (contiene ${FRONTEND_PORT} y ${BACKEND_PORT})
+# Copiar la plantilla de nginx.conf (contiene ${BACKEND_PORT})
 COPY infra/nginx/nginx.conf /etc/nginx/templates/default.conf.template
 
-# Valores por defecto para los puertos — se sobreescriben con las variables de entorno del compose
-ENV FRONTEND_PORT=8080
+# Puerto del backend al que apunta el proxy_pass — se sobreescribe desde el compose
 ENV BACKEND_PORT=3001
 
-EXPOSE ${FRONTEND_PORT}
+EXPOSE 8080
+
+# busybox wget viene en la base alpine. `--spider` no descarga el body.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1:8080/ || exit 1
 
 # nginx-entrypoint usa /etc/nginx/templates/*.template y corre envsubst automáticamente
 # antes de iniciar nginx — comportamiento nativo de la imagen oficial nginx
