@@ -17,6 +17,11 @@
 /* Es un <button> real (ver el comentario en el TSX). Se le saca el chrome del
    navegador para que siga leyéndose como el wordmark de la barra. */
 .brand {
+  /* Sin esto el botón se estira a toda la columna 1fr del grid y el
+     `text-align: center` del UA empuja el wordmark al medio de la barra:
+     se despega de la regla izquierda que comparte con el RegBar, y deja
+     un target invisible de ~390px que scrollea al inicio desde el vacío. */
+  justify-self: start;
   font-family: inherit;
   font-weight: 800;
   font-size: var(--fs-13);
