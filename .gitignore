@@ -54,6 +54,22 @@ backend/.env.local
 backend/.env.production
 infra/.env
 
+# Data dir de un Postgres local corriendo fuera de Docker. El stack usa el
+# volumen nombrado `pgdata`, así que esto nunca es parte del proyecto: son
+# ~970 archivos que ensucian cada `git status`.
+.pgdata/
+
+# Dotfiles de shell/tooling que aparecen en la raíz del repo por el entorno
+# de desarrollo, no por el proyecto.
+.bash_profile
+.bashrc
+.zshrc
+.zprofile
+.profile
+.gitconfig
+.ripgreprc
+.mcp.json
+
 # Kiro specs
 .kiro/
 
